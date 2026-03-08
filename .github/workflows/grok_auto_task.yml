@@ -27,7 +27,7 @@ jobs:
 
       - name: Run grok_auto_task
         env:
-          GROK_COOKIES:       ${{ secrets.GROK_COOKIES }}
+          GROK_COOKIES: ${{ secrets.Super_GROK_COOKIES }}
           JIJYUN_WEBHOOK_URL: ${{ secrets.JIJYUN_WEBHOOK_URL }}
           FEISHU_WEBHOOK_URL: ${{ secrets.FEISHU_WEBHOOK_URL }}
           SF_API_KEY:         ${{ secrets.SF_API_KEY }}
