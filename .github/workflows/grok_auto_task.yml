@@ -39,7 +39,7 @@ jobs:
           SF_API_KEY:           ${{ secrets.SF_API_KEY }}
           IMGBB_API_KEY:        ${{ secrets.IMGBB_API_KEY }}
           KIMI_API_KEY:         ${{ secrets.KIMI_API_KEY }}
-          OPENROUTER_API_KEY:   ${{ secrets.OPENROUTER_API }}
+          OPENROUTER_API_KEY:   ${{ secrets.OPENROUTER_API_KEY }}
           PAT_FOR_SECRETS:      ${{ secrets.PAT_FOR_SECRETS }}
           GITHUB_REPOSITORY:    ${{ github.repository }}
           JIJYUN_WEBHOOK_URL:   ${{ secrets.JIJYUN_WEBHOOK_URL }}
