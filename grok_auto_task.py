@@ -28,9 +28,10 @@ import requests
 from playwright.sync_api import sync_playwright
 
 # ── Environment variables ────────────────────────────────────────────────────
-JIJYUN_WEBHOOK_URL = os.getenv("JIJYUN_WEBHOOK_URL", "")
-SF_API_KEY         = os.getenv("SF_API_KEY", "")
-KIMI_API_KEY       = os.getenv("KIMI_API_KEY", "")
+JIJYUN_WEBHOOK_URL  = os.getenv("JIJYUN_WEBHOOK_URL", "")
+SF_API_KEY          = os.getenv("SF_API_KEY", "")
+KIMI_API_KEY        = os.getenv("KIMI_API_KEY", "")
+OPENROUTER_API_KEY  = os.getenv("OPENROUTER_API_KEY", "")
 GROK_COOKIES_JSON  = os.getenv("SUPER_GROK_COOKIES", "")   # unified all-caps
 PAT_FOR_SECRETS    = os.getenv("PAT_FOR_SECRETS", "")
 GITHUB_REPOSITORY  = os.getenv("GITHUB_REPOSITORY", "")
@@ -626,25 +627,28 @@ def run_grok_batch(context, accounts: list, prompt_builder, label: str,
 
 
 # ════════════════════════════════════════════════════════════════════════════
-# Kimi summarisation (moonshot-v1-kimi-k2 / K2.5)
+# LLM summarisation (Claude Sonnet 4.6 via OpenRouter, fallback to Kimi)
 # ════════════════════════════════════════════════════════════════════════════
-def kimi_summarize(combined_jsonl: str, today_str: str):
+def llm_summarize(combined_jsonl: str, today_str: str):
     """
-    Send combined JSON Lines to Kimi for full analysis and daily-report generation.
+    Send combined JSON Lines to Claude via OpenRouter for full analysis and
+    daily-report generation.  Falls back to Kimi moonshot-v1-32k if OpenRouter
+    is unavailable.
     Returns (report_text, cover_title, cover_prompt, cover_insight).
     """
-    if not KIMI_API_KEY:
-        print("[Kimi] ⚠️ KIMI_API_KEY not configured", flush=True)
+    if not OPENROUTER_API_KEY and not KIMI_API_KEY:
+        print("[LLM] ⚠️ No API key configured (OPENROUTER_API_KEY / KIMI_API_KEY)", flush=True)
         return "", "", "", ""
 
-    # K2.5 supports ~256K tokens; 200K chars ≈ 150K tokens, safely within the window
+    # Claude has 1M token context – no need to truncate even large payloads.
+    # Keep a generous safety cap just in case.
     max_data_chars = 200000
     if len(combined_jsonl) > max_data_chars:
-        print(f"[Kimi] ⚠️ Data truncated from {len(combined_jsonl)} "
+        print(f"[LLM] ⚠️ Data truncated from {len(combined_jsonl)} "
               f"to {max_data_chars} chars", flush=True)
         combined_jsonl = combined_jsonl[:max_data_chars]
 
-    kimi_prompt = f"""你是硅谷AI圈资深分析师。以下是今天从X平台采集的原始JSON Lines数据：
+    prompt = f"""你是硅谷AI圈资深分析师。以下是今天从X平台采集的原始JSON Lines数据：
 
 {combined_jsonl}
 
@@ -654,28 +658,16 @@ def kimi_summarize(combined_jsonl: str, today_str: str):
 - 最终报告中所有引用的推文内容必须翻译成中文输出
 - 严禁在报告中保留任何英文原文推文（包括帖子摘要、引用内容等）
 - 翻译风格：准确、简洁、口语化
+- type="meta"的元数据行（含 total=0 的 inactive 账号）忽略，不用分析
 
-请按顺序完成以下任务：
+请完成以下任务，一步输出完整日报：
 
-## 任务1：时间过滤
-- 只保留最近48小时内的帖子（t字段的MMDD与今天日期相比）
-- 超过48小时但点赞(l字段)>10000的帖子也保留
-- type="meta"的元数据行忽略
-
-## 任务2：价值识别
-对每条保留的帖子标注价值类别：
-AI模型/产品 | 公司竞争/融资 | AI政策/国防 | 观点争论 | 技术突破 | 资本市场 | 硬件芯片 | 社会影响
-
-## 任务3：转发链分析
-如果帖子有qt字段，分析引用者对原帖的态度（支持/反对/中立/补充信息）
-
-## 任务4：互动链还原
-如果帖子有replies字段，还原完整对话链，展示观点交锋
-
-## 任务5：趋势发现
-找出3个以上账号在48小时内讨论同一主题 = 热点趋势，最多列出5个趋势
-
-## 任务6：生成日报（严格遵守以下模板格式）
+1. **时间过滤**：只保留最近48小时内的帖子（t字段MMDD与今天比较）；超过48小时但点赞>10000的帖子也保留。
+2. **价值识别**：对每条帖子标注类别：AI模型/产品 | 公司竞争/融资 | AI政策/国防 | 观点争论 | 技术突破 | 资本市场 | 硬件芯片 | 社会影响
+3. **转发链分析**：有qt字段的帖子分析引用者态度（支持/反对/中立/补充信息）
+4. **互动链还原**：有replies字段的帖子还原完整对话链，展示观点交锋
+5. **趋势发现**：找出3+账号48小时内讨论同一主题的热点趋势（最多5个）
+6. **生成日报**（严格遵守以下模板格式）：
 
 @@@START@@@
 📡 硅谷AI圈大事扫描 | {today_str}
@@ -704,85 +696,149 @@ AI模型/产品 | 公司竞争/融资 | AI政策/国防 | 观点争论 | 技术�
 （按此格式完成剩余话题，不少于10条，合理分配巨头宫斗、中文圈、开源基建、硬件与空间计算等维度分类）
 @@@END@@@
 
-## 任务7：生成封面素材（在@@@END@@@后面单独输出）
+7. **生成封面素材**（在@@@END@@@后面单独输出）：
 TITLE: <中文标题，15~30个汉字，极度抓眼球>
 PROMPT: <英文文生图提示词，American comic book style，两股势力对抗，<=150词>
 INSIGHT: <100字以内，针对今天标题所描述事实的深度解读。可包含：行业影响、投资启发、普通人日常生活启发。有相关启发就写，没有就不写>"""
 
-    try:
-        print(f"[Kimi] Calling moonshot-v1-kimi-k2 (data: {len(combined_jsonl)} chars)...",
-              flush=True)
-        resp = requests.post(
-            "https://api.moonshot.cn/v1/chat/completions",
-            headers={"Authorization": f"Bearer {KIMI_API_KEY}",
-                     "Content-Type": "application/json"},
-            json={
-                "model": "moonshot-v1-kimi-k2",
-                "messages": [{"role": "user", "content": kimi_prompt}],
-                "temperature": 0.7,
-                "max_tokens": 8000,
-            },
-            timeout=180,
-        )
-        resp.raise_for_status()
-        result = resp.json()["choices"][0]["message"]["content"].strip()
-        print(f"[Kimi] ✅ Response received ({len(result)} chars)", flush=True)
+    # ── Try OpenRouter + Claude sonnet-4.6 first ────────────────────────────
+    if OPENROUTER_API_KEY:
+        try:
+            print(f"[LLM] Calling Claude Sonnet 4.6 via OpenRouter "
+                  f"(data: {len(combined_jsonl)} chars)...", flush=True)
+            resp = requests.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                    "Content-Type": "application/json",
+                    "HTTP-Referer": "https://github.com/Prinsk1NG/X_AI_Github",
+                    "X-Title": "AI吃瓜日报",
+                },
+                json={
+                    "model": "anthropic/claude-sonnet-4-5",
+                    "messages": [{"role": "user", "content": prompt}],
+                    "temperature": 0.7,
+                    "max_tokens": 16000,
+                },
+                timeout=180,
+            )
+            resp.raise_for_status()
+            result = resp.json()["choices"][0]["message"]["content"].strip()
+            print(f"[LLM] ✅ Claude response received ({len(result)} chars)", flush=True)
+            return _parse_llm_result(result)
+        except Exception as e:
+            print(f"[LLM] ❌ OpenRouter error: {e}", flush=True)
 
-        # Extract the daily report block
-        report_text = extract_markdown_block(result) or ""
+    # ── Fallback to Kimi moonshot-v1-8k ─────────────────────────────────────
+    if KIMI_API_KEY:
+        try:
+            print(f"[LLM] Falling back to Kimi moonshot-v1-8k "
+                  f"(data: {len(combined_jsonl)} chars)...", flush=True)
+            resp = requests.post(
+                "https://api.moonshot.cn/v1/chat/completions",
+                headers={"Authorization": f"Bearer {KIMI_API_KEY}",
+                         "Content-Type": "application/json"},
+                json={
+                    "model": "moonshot-v1-32k",
+                    "messages": [{"role": "user", "content": prompt}],
+                    "temperature": 0.7,
+                    "max_tokens": 8000,
+                },
+                timeout=180,
+            )
+            resp.raise_for_status()
+            result = resp.json()["choices"][0]["message"]["content"].strip()
+            print(f"[LLM] ✅ Kimi fallback response received ({len(result)} chars)", flush=True)
+            return _parse_llm_result(result)
+        except Exception as e:
+            print(f"[LLM] ❌ Kimi fallback error: {e}", flush=True)
 
-        # Extract cover metadata (everything after @@@END@@@)
-        after_end = result[result.find("@@@END@@@") + 9:] if "@@@END@@@" in result else result
-        title_m   = re.search(r"TITLE[:：]\s*(.+)", after_end)
-        prompt_m  = re.search(r"PROMPT[:：]\s*([\s\S]+?)(?=INSIGHT[:：]|$)", after_end)
-        insight_m = re.search(r"INSIGHT[:：]\s*([\s\S]+)", after_end)
+    return "", "", "", ""
 
-        cover_title   = title_m.group(1).strip()   if title_m   else ""
-        cover_prompt  = prompt_m.group(1).strip()  if prompt_m  else ""
-        cover_insight = insight_m.group(1).strip() if insight_m else ""
 
-        return report_text, cover_title, cover_prompt, cover_insight
+def _parse_llm_result(result: str):
+    """Extract report text and cover metadata from raw LLM output."""
+    report_text = extract_markdown_block(result) or ""
 
-    except Exception as e:
-        print(f"[Kimi] ❌ Error: {e}", flush=True)
-        return "", "", "", ""
+    after_end = result[result.find("@@@END@@@") + 9:] if "@@@END@@@" in result else result
+    title_m   = re.search(r"TITLE[:：]\s*(.+)", after_end)
+    prompt_m  = re.search(r"PROMPT[:：]\s*([\s\S]+?)(?=INSIGHT[:：]|$)", after_end)
+    insight_m = re.search(r"INSIGHT[:：]\s*([\s\S]+)", after_end)
+
+    cover_title   = title_m.group(1).strip()   if title_m   else ""
+    cover_prompt  = prompt_m.group(1).strip()  if prompt_m  else ""
+    cover_insight = insight_m.group(1).strip() if insight_m else ""
+
+    return report_text, cover_title, cover_prompt, cover_insight
 
 
 # ════════════════════════════════════════════════════════════════════════════
-# Kimi fallback (TITLE / PROMPT / INSIGHT only, moonshot-v1-8k)
+# LLM fallback (TITLE / PROMPT / INSIGHT only)
+# Tries OpenRouter + Claude Sonnet 4.6, then Kimi moonshot-v1-8k as last resort.
 # ════════════════════════════════════════════════════════════════════════════
-def kimi_fallback(raw_b_text):
-    if not KIMI_API_KEY or not raw_b_text or len(raw_b_text) < 100:
+def llm_fallback(raw_b_text):
+    if not raw_b_text or len(raw_b_text) < 100:
         return "", "", ""
-    try:
-        resp = requests.post(
-            "https://api.moonshot.cn/v1/chat/completions",
-            headers={"Authorization": f"Bearer {KIMI_API_KEY}",
-                     "Content-Type": "application/json"},
-            json={
-                "model": "moonshot-v1-kimi-k2",
-                "messages": [
-                    {"role": "user", "content": (
-                        "根据以下内容生成三行结果：\n" + raw_b_text[:6000] +
-                        "\nTITLE: <标题>\nPROMPT: <英文提示词>\nINSIGHT: <100字以内解读>"
-                    )}
-                ],
-                "temperature": 0.7, "max_tokens": 1000,
-            },
-            timeout=60,
-        )
-        resp.raise_for_status()
-        result = resp.json()["choices"][0]["message"]["content"].strip()
-        title_m   = re.search(r"TITLE[:：]\s*(.+)", result)
-        prompt_m  = re.search(r"PROMPT[:：]\s*([\s\S]+?)(?=INSIGHT[:：]|$)", result)
-        insight_m = re.search(r"INSIGHT[:：]\s*([\s\S]+)", result)
+
+    fallback_prompt = (
+        "根据以下内容生成三行结果：\n" + raw_b_text[:6000] +
+        "\nTITLE: <标题>\nPROMPT: <英文提示词>\nINSIGHT: <100字以内解读>"
+    )
+
+    def _extract(text):
+        title_m   = re.search(r"TITLE[:：]\s*(.+)", text)
+        prompt_m  = re.search(r"PROMPT[:：]\s*([\s\S]+?)(?=INSIGHT[:：]|$)", text)
+        insight_m = re.search(r"INSIGHT[:：]\s*([\s\S]+)", text)
         return (
             title_m.group(1).strip()   if title_m   else "",
             prompt_m.group(1).strip()  if prompt_m  else "",
             insight_m.group(1).strip() if insight_m else "",
         )
-    except Exception:
-        return "", "", ""
+
+    # Try OpenRouter first
+    if OPENROUTER_API_KEY:
+        try:
+            resp = requests.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                    "Content-Type": "application/json",
+                    "HTTP-Referer": "https://github.com/Prinsk1NG/X_AI_Github",
+                    "X-Title": "AI吃瓜日报",
+                },
+                json={
+                    "model": "anthropic/claude-sonnet-4-5",
+                    "messages": [{"role": "user", "content": fallback_prompt}],
+                    "temperature": 0.7,
+                    "max_tokens": 2000,
+                },
+                timeout=60,
+            )
+            resp.raise_for_status()
+            return _extract(resp.json()["choices"][0]["message"]["content"].strip())
+        except Exception as e:
+            print(f"[LLM] ❌ OpenRouter fallback error: {e}", flush=True)
+
+    # Last resort: Kimi moonshot-v1-8k
+    if KIMI_API_KEY:
+        try:
+            resp = requests.post(
+                "https://api.moonshot.cn/v1/chat/completions",
+                headers={"Authorization": f"Bearer {KIMI_API_KEY}",
+                         "Content-Type": "application/json"},
+                json={
+                    "model": "moonshot-v1-8k",
+                    "messages": [{"role": "user", "content": fallback_prompt}],
+                    "temperature": 0.7, "max_tokens": 1000,
+                },
+                timeout=60,
+            )
+            resp.raise_for_status()
+            return _extract(resp.json()["choices"][0]["message"]["content"].strip())
+        except Exception:
+            pass
+
+    return "", "", ""
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -1288,30 +1344,30 @@ def main():
         flush=True,
     )
 
-    # Build JSON Lines string for Kimi
+    # Build JSON Lines string for LLM
     combined_jsonl = "\n".join(
         json.dumps(obj, ensure_ascii=False) for obj in all_post_objects
     )
 
-    # Persist Phase-1/merge data (report will be updated after Kimi)
+    # Persist Phase-1/merge data (report will be updated after LLM)
     save_daily_data(today_str, all_post_objects, meta_results, "", classification)
 
     # ════════════════════════════════════════════════════════════════════════
-    # Kimi summarisation
+    # LLM summarisation
     # ════════════════════════════════════════════════════════════════════════
     print("\n" + "=" * 50, flush=True)
-    print("🤖 Kimi: Generating daily report...", flush=True)
+    print("🤖 LLM: Generating daily report...", flush=True)
     print("=" * 50, flush=True)
 
-    report_text, cover_title, cover_prompt, cover_insight = kimi_summarize(
+    report_text, cover_title, cover_prompt, cover_insight = llm_summarize(
         combined_jsonl, today_str
     )
 
-    # Fallback if Kimi report is insufficient
+    # Fallback if LLM report is insufficient
     if not is_valid_content(report_text):
-        print("[Kimi] ⚠️ Report quality check failed, trying fallback...", flush=True)
+        print("[LLM] ⚠️ Report quality check failed, trying fallback...", flush=True)
         if not cover_title and not cover_prompt:
-            cover_title, cover_prompt, cover_insight = kimi_fallback(combined_jsonl[:6000])
+            cover_title, cover_prompt, cover_insight = llm_fallback(combined_jsonl[:6000])
         if not report_text:
             report_text = (
                 f"@@@START@@@\n"
