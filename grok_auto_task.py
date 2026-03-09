@@ -1,24 +1,78 @@
 # -*- coding: utf-8 -*-
+"""
+grok_auto_task.py  v2.0
+Architecture: Grok (pure search, per-account) + Kimi (analyse & summarise)
+
+Phase 1 – Tiered scan:
+  All 100 accounts searched individually (from:account, limit=10, mode=Latest).
+  Collect 3 newest posts + 1 metadata row per account.
+  Auto-classify accounts into S / A / B / inactive.
+
+Phase 2 – Differential collection + report:
+  S-tier (~5-8):  10 posts + x_thread_fetch for likes >5000
+  A-tier (~20-25): 5 posts, qt field for retweets
+  B-tier (rest):   reuse Phase 1 data (3 posts)
+  Kimi (moonshot-v1-32k) generates the daily report.
+  Push to Feishu + WeChat.
+"""
+
 import os
 import re
-import time
 import json
+import time
 import base64
 from datetime import datetime, timezone, timedelta
+from pathlib import Path
 
 import requests
 from playwright.sync_api import sync_playwright
 
-# ── 环境变量 ─────────────────────────────────────────────────────
+# ── Environment variables ────────────────────────────────────────────────────
 JIJYUN_WEBHOOK_URL = os.getenv("JIJYUN_WEBHOOK_URL", "")
 SF_API_KEY         = os.getenv("SF_API_KEY", "")
 KIMI_API_KEY       = os.getenv("KIMI_API_KEY", "")
-GROK_COOKIES_JSON  = os.getenv("Super_GROK_COOKIES", "")
+GROK_COOKIES_JSON  = os.getenv("SUPER_GROK_COOKIES", "")   # unified all-caps
 PAT_FOR_SECRETS    = os.getenv("PAT_FOR_SECRETS", "")
 GITHUB_REPOSITORY  = os.getenv("GITHUB_REPOSITORY", "")
 
+# ── Global timeout tracking ──────────────────────────────────────────────────
+_START_TIME      = time.time()
+PHASE1_DEADLINE  = 14 * 60   # 14 min → trigger degradation (skip remaining batches)
+GLOBAL_DEADLINE  = 18 * 60   # 18 min → stop Grok, hand off to Kimi
 
-# ── 飞书多 Webhook ────────────────────────────────────────────────
+# ── 100 accounts – ordered high-value first so degradation truncates B-tier ──
+ALL_ACCOUNTS = [
+    # ── Tier-1 giants (likely S / A after classification) ──────────────────
+    "elonmusk", "sama", "karpathy", "demishassabis", "darioamodei",
+    "OpenAI", "AnthropicAI", "GoogleDeepMind", "xAI", "AIatMeta",
+    "GoogleAI", "MSFTResearch", "IlyaSutskever", "gregbrockman",
+    "GaryMarcus", "rowancheung", "clmcleod", "bindureddy",
+    # ── Chinese KOL / VC / Media (likely A / B) ────────────────────────────
+    "dotey", "oran_ge", "vista8", "imxiaohu", "Sxsyer",
+    "K_O_D_A_D_A", "tualatrix", "linyunqiu", "garywong", "web3buidl",
+    "AI_Era", "AIGC_News", "jiangjiang", "hw_star", "mranti", "nishuang",
+    "a16z", "ycombinator", "lightspeedvp", "sequoia", "foundersfund",
+    "eladgil", "pmarca", "bchesky", "chamath", "paulg",
+    "TheInformation", "TechCrunch", "verge", "WIRED", "Scobleizer", "bentossell",
+    # ── Open source + infrastructure ──────────────────────────────────────
+    "HuggingFace", "MistralAI", "Perplexity_AI", "GroqInc", "Cohere",
+    "TogetherCompute", "runwayml", "Midjourney", "StabilityAI", "Scale_AI",
+    "CerebrasSystems", "tenstorrent", "weights_biases", "langchainai", "llama_index",
+    "supabase", "vllm_project", "huggingface_hub",
+    # ── Hardware / spatial computing ──────────────────────────────────────
+    "nvidia", "AMD", "Intel", "SKhynix", "tsmc",
+    "magicleap", "NathieVR", "PalmerLuckey", "ID_AA_Carmack", "boz",
+    "rabovitz", "htcvive", "XREAL_Global", "RayBan", "MetaQuestVR", "PatrickMoorhead",
+    # ── Researchers / niche – placed last for graceful degradation ─────────
+    "jeffdean", "chrmanning", "hardmaru", "goodfellow_ian", "feifeili",
+    "_akhaliq", "promptengineer", "AI_News_Tech", "siliconvalley", "aithread",
+    "aibreakdown", "aiexplained", "aipubcast", "lexfridman", "hubermanlab", "swyx",
+]
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# Feishu multi-webhook
+# ════════════════════════════════════════════════════════════════════════════
 def get_feishu_webhooks() -> list:
     urls = []
     for suffix in ["", "_1", "_2", "_3"]:
@@ -28,7 +82,9 @@ def get_feishu_webhooks() -> list:
     return urls
 
 
-# ── 日期工具 ─────────────────────────────────────────────────────
+# ════════════════════════════════════════════════════════════════════════════
+# Date utilities
+# ════════════════════════════════════════════════════════════════════════════
 def get_dates() -> tuple:
     tz = timezone(timedelta(hours=8))
     today = datetime.now(tz)
@@ -36,35 +92,35 @@ def get_dates() -> tuple:
     return today.strftime("%Y-%m-%d"), yesterday.strftime("%Y-%m-%d")
 
 
-# ════════════════════════════════════════════════════════════════
-# Session 管理：加载 + 自动续期
-# ════════════════════════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════════════════
+# Session management: load + auto-renew
+# ════════════════════════════════════════════════════════════════════════════
 def prepare_session_file() -> bool:
     """
-    把 Super_GROK_COOKIES 写到本地 session_state.json。
-    返回 True  = Playwright storage state 格式（续期后）
-    返回 False = 原始 Cookie-Editor 数组格式（首次手动导入）
+    Write SUPER_GROK_COOKIES to local session_state.json.
+    Returns True  = Playwright storage-state format (post-renewal)
+    Returns False = raw Cookie-Editor array (first-time manual import)
     """
     if not GROK_COOKIES_JSON:
-        print("[Session] ⚠️ Super_GROK_COOKIES 未配置", flush=True)
+        print("[Session] ⚠️ SUPER_GROK_COOKIES not configured", flush=True)
         return False
     try:
         data = json.loads(GROK_COOKIES_JSON)
         if isinstance(data, dict) and "cookies" in data:
             with open("session_state.json", "w", encoding="utf-8") as f:
                 json.dump(data, f)
-            print("[Session] ✅ 检测到 Playwright storage state 格式（续期后）", flush=True)
+            print("[Session] ✅ Playwright storage-state format (renewed)", flush=True)
             return True
         else:
-            print(f"[Session] ✅ 检测到 Cookie-Editor 数组格式（{len(data)} 条）", flush=True)
+            print(f"[Session] ✅ Cookie-Editor array format ({len(data)} entries)", flush=True)
             return False
     except Exception as e:
-        print(f"[Session] ❌ 解析失败：{e}", flush=True)
+        print(f"[Session] ❌ Parse failed: {e}", flush=True)
         return False
 
 
 def load_raw_cookies(context):
-    """Cookie-Editor 数组 → 注入 Playwright context（首次使用）"""
+    """Cookie-Editor array → inject into Playwright context (first-time use)."""
     try:
         cookies = json.loads(GROK_COOKIES_JSON)
         formatted = []
@@ -82,26 +138,26 @@ def load_raw_cookies(context):
                 cookie["sameSite"] = ss
             formatted.append(cookie)
         context.add_cookies(formatted)
-        print(f"[Session] ✅ 注入 {len(formatted)} 条 Cookie", flush=True)
+        print(f"[Session] ✅ Injected {len(formatted)} cookies", flush=True)
     except Exception as e:
-        print(f"[Session] ❌ Cookie 注入失败：{e}", flush=True)
+        print(f"[Session] ❌ Cookie injection failed: {e}", flush=True)
 
 
 def save_and_renew_session(context):
     """
-    终极续期方案：
-    1. 保存当前 Playwright storage state 到本地
-    2. 通过 GitHub API 加密后写回 Super_GROK_COOKIES Secret
+    Save current Playwright storage-state locally, then write back to
+    the SUPER_GROK_COOKIES GitHub secret via API (session renewal).
     """
     try:
         context.storage_state(path="session_state.json")
-        print("[Session] ✅ storage state 已保存到本地", flush=True)
+        print("[Session] ✅ Storage state saved locally", flush=True)
     except Exception as e:
-        print(f"[Session] ❌ 保存 storage state 失败：{e}", flush=True)
+        print(f"[Session] ❌ Save storage state failed: {e}", flush=True)
         return
 
     if not PAT_FOR_SECRETS or not GITHUB_REPOSITORY:
-        print("[Session] ⚠️ PAT_FOR_SECRETS 或 GITHUB_REPOSITORY 未配置，跳过自动续期", flush=True)
+        print("[Session] ⚠️ PAT_FOR_SECRETS or GITHUB_REPOSITORY not configured, skip renewal",
+              flush=True)
         return
 
     try:
@@ -115,7 +171,6 @@ def save_and_renew_session(context):
             "Accept": "application/vnd.github.v3+json",
         }
 
-        # 获取仓库公钥
         key_resp = requests.get(
             f"https://api.github.com/repos/{GITHUB_REPOSITORY}/actions/secrets/public-key",
             headers=headers, timeout=30,
@@ -123,25 +178,23 @@ def save_and_renew_session(context):
         key_resp.raise_for_status()
         key_data = key_resp.json()
 
-        # libsodium 加密
         pub_key = nacl_public.PublicKey(key_data["key"].encode(), encoding.Base64Encoder())
         sealed  = nacl_public.SealedBox(pub_key).encrypt(state_str.encode())
         enc_b64 = base64.b64encode(sealed).decode()
 
-        # 写回 Secret
         put_resp = requests.put(
-            f"https://api.github.com/repos/{GITHUB_REPOSITORY}/actions/secrets/Super_GROK_COOKIES",
+            f"https://api.github.com/repos/{GITHUB_REPOSITORY}/actions/secrets/SUPER_GROK_COOKIES",
             headers=headers,
             json={"encrypted_value": enc_b64, "key_id": key_data["key_id"]},
             timeout=30,
         )
         put_resp.raise_for_status()
-        print("[Session] ✅ GitHub Secret Super_GROK_COOKIES 已自动续期", flush=True)
+        print("[Session] ✅ GitHub Secret SUPER_GROK_COOKIES auto-renewed", flush=True)
 
     except ImportError:
-        print("[Session] ⚠️ PyNaCl 未安装，续期跳过", flush=True)
+        print("[Session] ⚠️ PyNaCl not installed, skip renewal", flush=True)
     except Exception as e:
-        print(f"[Session] ❌ Secret 续期失败：{e}", flush=True)
+        print(f"[Session] ❌ Secret renewal failed: {e}", flush=True)
 
 
 def check_cookie_expiry():
@@ -156,26 +209,25 @@ def check_cookie_expiry():
                 exp = datetime.fromtimestamp(c["expirationDate"], tz=timezone.utc)
                 days_left = (exp - datetime.now(timezone.utc)).days
                 if days_left <= 5:
-                    msg = f"⚠️ Grok Cookie 还有 {days_left} 天过期，请及时更新 Super_GROK_COOKIES！"
+                    msg = (f"⚠️ Grok Cookie expires in {days_left} days, "
+                           f"please update SUPER_GROK_COOKIES!")
                     print(f"[Cookie] {msg}", flush=True)
                     for url in get_feishu_webhooks():
                         try:
-                            requests.post(
-                                url,
-                                json={"msg_type": "text", "content": {"text": msg}},
-                                timeout=15,
-                            )
+                            requests.post(url,
+                                          json={"msg_type": "text", "content": {"text": msg}},
+                                          timeout=15)
                         except Exception:
                             pass
     except Exception:
         pass
 
 
-# ════════════════════════════════════════════════════════════════
-# 模型选择：开启 Grok 4.20 Beta Toggle
-# ════════════════════════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════════════════
+# Model selection: enable Grok 4.20 Beta Toggle
+# ════════════════════════════════════════════════════════════════════════════
 def enable_grok4_beta(page):
-    print("\n[模型] 开启 Grok 4.20 测试版 Toggle...", flush=True)
+    print("\n[Model] Enabling Grok 4.20 Beta Toggle...", flush=True)
     try:
         model_btn = page.wait_for_selector(
             "button:has-text('快速模式'), button:has-text('Fast'), "
@@ -197,21 +249,21 @@ def enable_grok4_beta(page):
         }""")
         if not is_on:
             toggle.click()
-            print("[模型] ✅ Toggle 已开启", flush=True)
+            print("[Model] ✅ Toggle enabled", flush=True)
             time.sleep(1)
         else:
-            print("[模型] ✅ 已是开启状态", flush=True)
+            print("[Model] ✅ Already enabled", flush=True)
         page.keyboard.press("Escape")
         time.sleep(0.5)
     except Exception as e:
-        print(f"[模型] ⚠️ 失败，继续使用当前模型：{e}", flush=True)
+        print(f"[Model] ⚠️ Failed, using current model: {e}", flush=True)
 
 
-# ════════════════════════════════════════════════════════════════
-# 发送提示词
-# ════════════════════════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════════════════
+# Send prompt
+# ════════════════════════════════════════════════════════════════════════════
 def send_prompt(page, prompt_text, label, screenshot_prefix):
-    print(f"\n[{label}] 填入提示词（共 {len(prompt_text)} 字符）...", flush=True)
+    print(f"\n[{label}] Filling prompt ({len(prompt_text)} chars)...", flush=True)
     page.wait_for_selector("div[contenteditable='true'], textarea", timeout=30000)
 
     ok = page.evaluate("""(text) => {
@@ -256,7 +308,7 @@ def send_prompt(page, prompt_text, label, screenshot_prefix):
         send_btn.click()
         clicked = True
     except Exception as e:
-        print(f"[{label}] ⚠️ 常规点击失败（{e}），尝试 JS 点击...", flush=True)
+        print(f"[{label}] ⚠️ Normal click failed ({e}), trying JS...", flush=True)
 
     if not clicked:
         result = page.evaluate("""() => {
@@ -267,17 +319,17 @@ def send_prompt(page, prompt_text, label, screenshot_prefix):
             return false;
         }""")
         if result:
-            print(f"[{label}] ✅ JS 兜底点击成功", flush=True)
+            print(f"[{label}] ✅ JS fallback click succeeded", flush=True)
         else:
-            raise RuntimeError(f"[{label}] ❌ 找不到发送按钮，流程中止")
+            raise RuntimeError(f"[{label}] ❌ Submit button not found, aborting")
 
-    print(f"[{label}] ✅ 已发送", flush=True)
+    print(f"[{label}] ✅ Sent", flush=True)
     time.sleep(5)
 
 
-# ════════════════════════════════════════════════════════════════
-# 等待 Grok 生成完毕
-# ════════════════════════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════════════════
+# Wait for Grok to finish generating
+# ════════════════════════════════════════════════════════════════════════════
 def _get_last_msg(page):
     return page.evaluate("""() => {
         const msgs = document.querySelectorAll(
@@ -290,7 +342,7 @@ def _get_last_msg(page):
 def wait_and_extract(page, label, screenshot_prefix,
                      interval=3, stable_rounds=4, max_wait=120,
                      extend_if_growing=False, min_len=80):
-    print(f"[{label}] 等待回复（最长 {max_wait}s，最小有效长度 {min_len}）...", flush=True)
+    print(f"[{label}] Waiting for reply (max {max_wait}s, min len {min_len})...", flush=True)
     last_len  = -1
     stable    = 0
     elapsed   = 0
@@ -302,32 +354,32 @@ def wait_and_extract(page, label, screenshot_prefix,
         try:
             text = _get_last_msg(page)
         except Exception as e:
-            print(f"[{label}] ⚠️ 页面异常：{e}", flush=True)
+            print(f"[{label}] ⚠️ Page error: {e}", flush=True)
             return last_text.strip()
         last_text = text
         cur_len = len(text.strip())
-        print(f"  {elapsed}s | 字符数: {cur_len}", flush=True)
+        print(f"  {elapsed}s | chars: {cur_len}", flush=True)
 
         if cur_len == last_len and cur_len >= min_len:
             stable += 1
             if stable >= stable_rounds:
-                print(f"[{label}] ✅ 完毕（{cur_len} 字符）", flush=True)
+                print(f"[{label}] ✅ Done ({cur_len} chars)", flush=True)
                 return text.strip()
         else:
             stable   = 0
             last_len = cur_len
 
     if extend_if_growing:
-        print(f"[{label}] ⏳ 继续延长等待（最多 300s）...", flush=True)
+        print(f"[{label}] ⏳ Extending wait (up to 300s)...", flush=True)
         prev_len = last_len; prev_text = last_text; ext = 0
         while ext < 300:
             time.sleep(5); ext += 5
             try:
                 text = _get_last_msg(page)
-            except Exception as e:
+            except Exception:
                 return prev_text.strip()
             cur_len = len(text.strip())
-            print(f"  延长 +{ext}s | 字符数: {cur_len}", flush=True)
+            print(f"  +{ext}s | chars: {cur_len}", flush=True)
             if cur_len == prev_len:
                 return text.strip()
             prev_len = cur_len; prev_text = text
@@ -342,124 +394,367 @@ def wait_and_extract(page, label, screenshot_prefix,
             return last_text.strip()
 
 
-# ════════════════════════════════════════════════════════════════
-# 阶段 A 提示词
-# ════════════════════════════════════════════════════════════════
-def build_prompt_a():
+# ════════════════════════════════════════════════════════════════════════════
+# JSON Lines parser (tolerates non-JSON lines in Grok output)
+# ════════════════════════════════════════════════════════════════════════════
+def parse_jsonlines(text: str) -> list:
+    """Return list of dicts parsed from valid JSON Lines in text."""
+    results = []
+    for line in text.splitlines():
+        line = line.strip()
+        if not line or not line.startswith('{') or not line.endswith('}'):
+            continue
+        try:
+            results.append(json.loads(line))
+        except json.JSONDecodeError:
+            continue
+    return results
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# Phase 1 prompt: metadata scan (all accounts, B-level strategy)
+# ════════════════════════════════════════════════════════════════════════════
+def build_phase1_prompt(accounts: list) -> str:
+    """
+    Build a Phase-1 prompt for up to 24 accounts (8 rounds × 3 parallel).
+    Search query: from:account (no keywords), limit=10, mode=Latest.
+    Output: newest 3 posts + 1 metadata row per account.
+    """
+    rounds = [accounts[i:i+3] for i in range(0, len(accounts), 3)]
+    rounds_text = "\n".join(
+        f"第{i+1}轮：{' | '.join(r)}"
+        for i, r in enumerate(rounds)
+    )
     return (
-        "执行Tiered Scan模式：你现在是X商业情报深度分析师。\n\n"
-        "【核心策略】\n"
-        "Tier1（全量）：搜索所有推文 + 重点帖调用 x_thread_fetch 拉完整线程。\n"
-        "Tier2（活跃）：仅保留赞>=30的帖做互动分析。\n"
-        "Tier3（泛列）：仅保留赞>=100或大事件帖。\n"
-        "使用 parallel 调用（一次最多同时发3个工具请求）。\n\n"
-        "【第一轮搜索：3批并行】\n"
-        "批次1 (Tier1 巨头18人)：@elonmusk @sama @karpathy @demishassabis @darioamodei "
-        "@OpenAI @AnthropicAI @GoogleDeepMind @GaryMarcus @xAI @AIatMeta @GoogleAI "
-        "@MSFTResearch @IlyaSutskever @gregbrockman @rowancheung @clmcleod @bindureddy\n"
-        "批次2 (Tier2 中文KOL16人)：@dotey @oran_ge @vista8 @imxiaohu @Sxsyer "
-        "@K_O_D_A_D_A @tualatrix @linyunqiu @garywong @web3buidl @AI_Era @AIGC_News "
-        "@jiangjiang @hw_star @mranti @nishuang\n"
-        "批次3 (Tier3 VC媒体16人)：@a16z @ycombinator @lightspeedvp @sequoia "
-        "@foundersfund @eladgil @pmarca @bchesky @chamath @paulg @TheInformation "
-        "@TechCrunch @verge @WIRED @Scobleizer @bentossell\n\n"
-        "【强制规则】\n"
-        "1. 每批次搜索如返回0条，立即去掉时间参数重试（必须成功）。\n"
-        "2. 重点推文（赞>100或含争论）立即调用 x_thread_fetch 拉完整互动。\n"
-        "3. 分析只关注：新观点、吵架记录、市场反馈强度。\n"
-        "4. 所有引用的 X 帖子原文必须翻译成中文，严禁保留英文原文。\n\n"
-        "【输出限制（严格遵守）】\n"
-        "搜索完成后，只输出一段<=200字的\"内部情报摘要\"（含核心洞察+数据缓存），最后一行必须是：\n"
-        "第一轮扫描完毕，等待第二轮输入。\n"
-        "禁止任何其他文字、解释、日报、代码块。"
+        "你是X平台数据采集工具。执行以下账号搜索，输出纯JSON Lines格式。\n\n"
+        "【搜索规则】\n"
+        "1. 每个账号单独调用 x_keyword_search：query=from:账号名，mode=Latest，limit=10\n"
+        "2. 按轮次并行执行（每轮同时搜索3个账号）\n"
+        "3. 不加任何关键词，不加 since 时间参数\n"
+        "4. 每个账号输出：最新3条帖子 + 1行元数据\n\n"
+        f"【账号列表（共{len(accounts)}个，按轮次执行）】\n"
+        f"{rounds_text}\n\n"
+        "【输出格式（只输出JSON Lines，严禁输出任何其他文字）】\n"
+        '帖子行：{"a":"账号名","l":点赞数,"t":"MMDD","s":"英文原文摘要50词内","tag":"raw"}\n'
+        '元数据行：{"a":"账号名","type":"meta","total":返回总条数,"max_l":最高点赞数,"latest":"MMDD"}\n'
+        '不活跃账号：{"a":"账号名","type":"meta","total":0,"max_l":0,"latest":"NA"}\n\n'
+        "【严格限制】\n"
+        "- 账号名不带@符号，与from:查询中的账号名完全一致\n"
+        "- t字段格式MMDD（如0309=3月9日）\n"
+        "- 每个账号先输出帖子行（最多3行），再输出1行元数据行\n"
+        "- 不翻译、不解释、不总结、不过滤\n"
+        "- 第一行到最后一行全部是JSON"
     )
 
 
-# ════════════════════════════════════════════════════════════════
-# 🌟 阶段 B 提示词（专为匹配 PDF 格式深度定制版）
-# ════════════════════════════════════════════════════════════════
-def build_prompt_b():
-    date_today, _ = get_dates()
+# ════════════════════════════════════════════════════════════════════════════
+# Phase 2 prompts: tier-specific collection
+# ════════════════════════════════════════════════════════════════════════════
+def build_phase2_s_prompt(accounts: list) -> str:
+    """S-tier: 10 posts + x_thread_fetch for likes >5000, qt field for quotes."""
+    rounds = [accounts[i:i+3] for i in range(0, len(accounts), 3)]
+    rounds_text = "\n".join(
+        f"第{i+1}轮：{' | '.join(r)}"
+        for i, r in enumerate(rounds)
+    )
     return (
-        "执行Tiered Scan模式：这是第二轮搜索（覆盖后50个核心账号）。\n\n"
-        "【数据复用】\n"
-        "直接复用第一轮已搜索到的数据缓存，继续补充以下账号的最新动态。\n"
-        "每批次搜索如返回0条，立即去掉时间参数重试（必须成功）。\n\n"
-        "【第二轮搜索：3批并行】\n"
-        "批次4 (Tier1 开源与基础设施 18人)：\n"
-        "@HuggingFace @MistralAI @Perplexity_AI @GroqInc @Cohere @TogetherCompute "
-        "@runwayml @Midjourney @StabilityAI @Scale_AI @CerebrasSystems @tenstorrent "
-        "@weights_biases @langchainai @llama_index @supabase @vllm_project @huggingface_hub\n\n"
-        "批次5 (Tier2 硬件与空间计算 16人)：\n"
-        "@nvidia @AMD @Intel @SKhynix @tsmc @magicleap @NathieVR @PalmerLuckey "
-        "@ID_AA_Carmack @boz @rabovitz @htcvive @XREAL_Global @RayBan @MetaQuestVR @PatrickMoorhead\n\n"
-        "批次6 (Tier3 研究员与硬核圈 16人)：\n"
-        "@jeffdean @chrmanning @hardmaru @goodfellow_ian @feifeili @_akhaliq "
-        "@promptengineer @AI_News_Tech @siliconvalley @aithread @aibreakdown "
-        "@aiexplained @aipubcast @lexfridman @hubermanlab @swyx\n\n"
-        "【最终成稿指令（严格执行）】\n"
-        "完成检索后，综合两轮所有高价值情报，输出不少于10条最震撼的话题，并排版成类似「投资机构专业尽调/扫描报告」的格式。\n"
-        "严格模板（注意：必须精确包含【数据看板】、【执行摘要】三个定位符，严禁输出Markdown代码块的反引号）：\n\n"
-        "@@@START@@@\n"
-        f"📡 硅谷AI圈大事扫描 | {date_today}\n\n"
-        "【数据看板】\n"
-        "跟踪大V总数: 100 | 有动态的大V: [填入预估数字] | 重点高价值动态: 10 | 扫描到风险/争议: [填入数字]\n\n"
-        "【执行摘要】\n"
-        f"**{date_today} | 本次扫描主要抓取大模型巨头、开源生态、硬件与空间计算等行业的信息**\n"
-        "**🟢 重大利好/突破**\n"
-        "- [1句话总结今天最核心的正面进展]\n"
-        "- [如有第2条正面进展，写在这里]\n"
-        "**🔴 重大风险/争议**\n"
-        "- [1句话总结今天最核心的负面、撕逼或争议事件]\n\n"
-        "【动态详情】\n"
-        "**🏰 巨头宫斗**\n\n"
-        "**🍉 1. 话题标题**\n"
-        "**🗣️ 极客原声态：**\n"
-        "@账号 | 姓名 | 身份\n"
-        "> \"中文翻译内容\"(❤️赞/💬评)\n"
-        "**📝 严肃吃瓜：**\n"
-        "• 📌 增量事实和知识...\n"
-        "• 🧠 背后隐性博弈分析...\n"
-        "• 🎯 资本风向标...\n\n"
-        "（按此格式完成剩余话题，不少于10条，合理分配 巨头宫斗、中文圈、开源基建、硬件与空间计算 等维度分类标题）\n"
-        "@@@END@@@"
+        "你是X平台数据采集工具。执行以下S级账号深度采集，输出纯JSON Lines格式。\n\n"
+        "【S级规则】\n"
+        "1. 每个账号调用 x_keyword_search：query=from:账号名，mode=Latest，limit=10\n"
+        "2. 输出全部10条帖子（不截断）\n"
+        "3. 对点赞>5000的帖子，额外调用 x_thread_fetch 获取完整线程（每账号最多5次）\n"
+        "4. 转发/引用帖（RT或QT）：在qt字段记录被引用原帖的作者和内容摘要\n"
+        "5. 每轮并行3个账号\n\n"
+        f"【S级账号（共{len(accounts)}个）】\n"
+        f"{rounds_text}\n\n"
+        "【输出格式（只输出JSON Lines）】\n"
+        '普通帖：{"a":"账号名","l":点赞数,"t":"MMDD","s":"英文摘要50词内","tag":"raw"}\n'
+        '引用帖：{"a":"账号名","l":点赞数,"t":"MMDD","s":"评论内容摘要","qt":"@原作者: 原帖摘要","tag":"raw"}\n'
+        '线程帖：{"a":"账号名","l":点赞数,"t":"MMDD","s":"原文摘要","tag":"raw",'
+        '"replies":[{"from":"回复者账号","text":"回复内容","l":点赞数}]}\n\n'
+        "【严格限制】\n"
+        "- 账号名不带@，与from:查询完全一致\n"
+        "- 不翻译、不解释，只输出JSON\n"
+        "- s字段用英文"
     )
 
 
-# ════════════════════════════════════════════════════════════════
-# 阶段 C 提示词
-# ════════════════════════════════════════════════════════════════
-def build_prompt_c():
+def build_phase2_a_prompt(accounts: list) -> str:
+    """A-tier: 5 newest posts, qt field for retweets/quotes."""
+    rounds = [accounts[i:i+3] for i in range(0, len(accounts), 3)]
+    rounds_text = "\n".join(
+        f"第{i+1}轮：{' | '.join(r)}"
+        for i, r in enumerate(rounds)
+    )
     return (
-        "执行阶段C：标题 + 封面图提示词生成（从当前不少于10条新闻中提炼）。\n\n"
-        "从以上新闻中，挑选最具冲突感的核心事件，生成以下三项输出：\n\n"
-        "TITLE: <中文标题，15~30个汉字，极度抓眼球>\n"
-        "PROMPT: <英文文生图提示词，American comic book style，两股势力对抗，<=150词>\n"
-        "INSIGHT: <150~200字深度解读，分析对中国AI从业者/VC/散户的影响，幽默风趣>"
+        "你是X平台数据采集工具。执行以下A级账号采集，输出纯JSON Lines格式。\n\n"
+        "【A级规则】\n"
+        "1. 每个账号调用 x_keyword_search：query=from:账号名，mode=Latest，limit=10\n"
+        "2. 只输出最新5条帖子\n"
+        "3. 转发/引用帖（RT或QT）：在qt字段记录被引用原帖的作者和内容摘要\n"
+        "4. 每轮并行3个账号\n\n"
+        f"【A级账号（共{len(accounts)}个）】\n"
+        f"{rounds_text}\n\n"
+        "【输出格式（只输出JSON Lines）】\n"
+        '普通帖：{"a":"账号名","l":点赞数,"t":"MMDD","s":"英文摘要50词内","tag":"raw"}\n'
+        '引用帖：{"a":"账号名","l":点赞数,"t":"MMDD","s":"评论内容摘要","qt":"@原作者: 原帖摘要","tag":"raw"}\n\n'
+        "【严格限制】\n"
+        "- 账号名不带@，与from:查询完全一致\n"
+        "- 不翻译、不解释，只输出JSON\n"
+        "- s字段用英文"
     )
 
 
-# ════════════════════════════════════════════════════════════════
-# 格式清洗
-# ════════════════════════════════════════════════════════════════
-def clean_format(text: str) -> str:
-    # 压紧排版
-    text = re.sub(r'(@\S[^\n]*)\n\n+(> )', r'\1\n\2', text)
-    text = re.sub(r'(> "[^\n]*"[^\n]*)\n\n+(\*\*📝)', r'\1\n\2', text)
-    text = re.sub(r'(• [^\n]+)\n\n+(• )', r'\1\n\2', text)
-    text = re.sub(r'(• 📌 )涨姿势：\s*', r'\1', text)
-    text = re.sub(r'(• 🧠 )猜博弈：\s*', r'\1', text)
-    text = re.sub(r'(• 🎯 )识风向：\s*', r'\1', text)
-    return text
+# ════════════════════════════════════════════════════════════════════════════
+# Account classification
+# ════════════════════════════════════════════════════════════════════════════
+def classify_accounts(meta_results: dict) -> dict:
+    """
+    Classify accounts based on Phase-1 metadata.
+    Returns {account: tier} where tier ∈ {S, A, B, inactive}.
+
+    S:        max_likes > 10000 AND posted within last 7 days
+    A:        max_likes > 1000  AND posted within last 14 days
+    B:        other active accounts
+    inactive: 0 posts or no posts in last 30 days
+    """
+    tz = timezone(timedelta(hours=8))
+    today = datetime.now(tz)
+    classification = {}
+
+    for account, meta in meta_results.items():
+        total  = meta.get("total", 0)
+        max_l  = meta.get("max_l", 0)
+        latest = meta.get("latest", "NA")
+
+        if total == 0 or latest == "NA":
+            classification[account] = "inactive"
+            continue
+
+        # Parse MMDD → days since latest post
+        try:
+            mm = int(latest[:2])
+            dd = int(latest[2:])
+            latest_date = today.replace(month=mm, day=dd)
+            # If the parsed date is in the future, it belongs to the previous year
+            if latest_date > today:
+                latest_date = latest_date.replace(year=today.year - 1)
+            days_since = (today - latest_date).days
+        except (ValueError, TypeError):
+            days_since = 999
+
+        if days_since > 30:
+            classification[account] = "inactive"
+        elif max_l > 10000 and days_since <= 7:
+            classification[account] = "S"
+        elif max_l > 1000 and days_since <= 14:
+            classification[account] = "A"
+        else:
+            classification[account] = "B"
+
+    return classification
 
 
+# ════════════════════════════════════════════════════════════════════════════
+# Open a new Grok conversation page
+# ════════════════════════════════════════════════════════════════════════════
+def open_grok_page(context):
+    """Open a new tab, navigate to grok.com, verify login, enable beta."""
+    page = context.new_page()
+    try:
+        page.goto("https://grok.com", wait_until="domcontentloaded", timeout=60000)
+        time.sleep(3)
+        if "sign" in page.url.lower() or "login" in page.url.lower():
+            print("❌ Not logged in – session expired", flush=True)
+            page.close()
+            return None
+        enable_grok4_beta(page)
+        return page
+    except Exception as e:
+        print(f"❌ Failed to open Grok page: {e}", flush=True)
+        try:
+            page.close()
+        except Exception:
+            pass
+        return None
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# Run one Grok batch conversation
+# ════════════════════════════════════════════════════════════════════════════
+def run_grok_batch(context, accounts: list, prompt_builder, label: str) -> list:
+    """
+    Open a fresh Grok page, send the prompt, wait, parse and return JSON objects.
+    Each call ≈ 8 rounds × 3 parallel = 24 accounts (within 25-call safety limit).
+    """
+    if not accounts:
+        return []
+
+    elapsed = time.time() - _START_TIME
+    print(f"\n[{label}] Starting batch ({len(accounts)} accounts, "
+          f"elapsed: {elapsed:.0f}s)...", flush=True)
+
+    page = open_grok_page(context)
+    if page is None:
+        return []
+
+    try:
+        prompt = prompt_builder(accounts)
+        send_prompt(page, prompt, label, label.lower().replace(" ", "_"))
+
+        print(f"[{label}] ⏳ Waiting 45s for Grok to start...", flush=True)
+        time.sleep(45)
+
+        raw_text = wait_and_extract(
+            page, label, label.lower().replace(" ", "_"),
+            interval=5, stable_rounds=3, max_wait=360,
+            extend_if_growing=True, min_len=50,
+        )
+        results = parse_jsonlines(raw_text)
+        print(f"[{label}] ✅ Parsed {len(results)} JSON objects", flush=True)
+        return results
+
+    except Exception as e:
+        print(f"[{label}] ❌ Error: {e}", flush=True)
+        return []
+    finally:
+        try:
+            page.close()
+        except Exception:
+            pass
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# Kimi summarisation (moonshot-v1-32k)
+# ════════════════════════════════════════════════════════════════════════════
+def kimi_summarize(combined_jsonl: str, today_str: str):
+    """
+    Send combined JSON Lines to Kimi for full analysis and daily-report generation.
+    Returns (report_text, cover_title, cover_prompt, cover_insight).
+    """
+    if not KIMI_API_KEY:
+        print("[Kimi] ⚠️ KIMI_API_KEY not configured", flush=True)
+        return "", "", "", ""
+
+    # Truncate if too large for 32k context (~22 000 chars safe for prompt+response)
+    max_data_chars = 22000
+    if len(combined_jsonl) > max_data_chars:
+        print(f"[Kimi] ⚠️ Data truncated from {len(combined_jsonl)} "
+              f"to {max_data_chars} chars", flush=True)
+        combined_jsonl = combined_jsonl[:max_data_chars]
+
+    kimi_prompt = f"""你是硅谷AI圈资深分析师。以下是今天从X平台采集的原始JSON Lines数据：
+
+{combined_jsonl}
+
+今天日期：{today_str}
+
+请按顺序完成以下任务：
+
+## 任务1：时间过滤
+- 只保留最近48小时内的帖子（t字段的MMDD与今天日期相比）
+- 超过48小时但点赞(l字段)>10000的帖子也保留
+- type="meta"的元数据行忽略
+
+## 任务2：价值识别
+对每条保留的帖子标注价值类别：
+AI模型/产品 | 公司竞争/融资 | AI政策/国防 | 观点争论 | 技术突破 | 资本市场 | 硬件芯片 | 社会影响
+
+## 任务3：转发链分析
+如果帖子有qt字段，分析引用者对原帖的态度（支持/反对/中立/补充信息）
+
+## 任务4：互动链还原
+如果帖子有replies字段，还原完整对话链，展示观点交锋
+
+## 任务5：趋势发现
+找出3个以上账号在48小时内讨论同一主题 = 热点趋势，最多列出5个趋势
+
+## 任务6：生成日报（严格遵守以下模板格式）
+
+@@@START@@@
+📡 硅谷AI圈大事扫描 | {today_str}
+
+【数据看板】
+跟踪大V总数: 100 | 有动态的大V: [填数字] | 重点高价值动态: [填数字] | 热点趋势: [填数字]
+
+【执行摘要】
+**{today_str} | 本次扫描主要抓取大模型巨头、开源生态、硬件与空间计算等行业的信息**
+**🟢 重大利好/突破**
+- [1句话总结今天最核心的正面进展]
+- [如有第2条正面进展，写在这里]
+**🔴 重大风险/争议**
+- [1句话总结今天最核心的负面、撕逼或争议事件]
+
+【动态详情】
+**🏰 巨头宫斗**
+
+**🍉 1. 话题标题**
+**🗣️ 极客原声态：**
+@账号 | 姓名 | 身份
+> "中文翻译内容"(❤️赞/💬评)
+**📝 严肃吃瓜：**
+• 📌 增量事实和知识...
+• 🧠 背后隐性博弈分析...
+• 🎯 资本风向标...
+
+（按此格式完成剩余话题，不少于10条，合理分配巨头宫斗、中文圈、开源基建、硬件与空间计算等维度分类）
+@@@END@@@
+
+## 任务7：生成封面素材（在@@@END@@@后面单独输出）
+TITLE: <中文标题，15~30个汉字，极度抓眼球>
+PROMPT: <英文文生图提示词，American comic book style，两股势力对抗，<=150词>
+INSIGHT: <150~200字深度解读，分析对中国AI从业者/VC/散户的影响，幽默风趣>"""
+
+    try:
+        print(f"[Kimi] Calling moonshot-v1-32k (data: {len(combined_jsonl)} chars)...",
+              flush=True)
+        resp = requests.post(
+            "https://api.moonshot.cn/v1/chat/completions",
+            headers={"Authorization": f"Bearer {KIMI_API_KEY}",
+                     "Content-Type": "application/json"},
+            json={
+                "model": "moonshot-v1-32k",
+                "messages": [{"role": "user", "content": kimi_prompt}],
+                "temperature": 0.7,
+                "max_tokens": 4000,
+            },
+            timeout=120,
+        )
+        resp.raise_for_status()
+        result = resp.json()["choices"][0]["message"]["content"].strip()
+        print(f"[Kimi] ✅ Response received ({len(result)} chars)", flush=True)
+
+        # Extract the daily report block
+        report_text = extract_markdown_block(result) or ""
+
+        # Extract cover metadata (everything after @@@END@@@)
+        after_end = result[result.find("@@@END@@@") + 9:] if "@@@END@@@" in result else result
+        title_m   = re.search(r"TITLE[:：]\s*(.+)", after_end)
+        prompt_m  = re.search(r"PROMPT[:：]\s*([\s\S]+?)(?=INSIGHT[:：]|$)", after_end)
+        insight_m = re.search(r"INSIGHT[:：]\s*([\s\S]+)", after_end)
+
+        cover_title   = title_m.group(1).strip()   if title_m   else ""
+        cover_prompt  = prompt_m.group(1).strip()  if prompt_m  else ""
+        cover_insight = insight_m.group(1).strip() if insight_m else ""
+
+        return report_text, cover_title, cover_prompt, cover_insight
+
+    except Exception as e:
+        print(f"[Kimi] ❌ Error: {e}", flush=True)
+        return "", "", "", ""
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# Kimi fallback (TITLE / PROMPT / INSIGHT only, moonshot-v1-8k)
+# ════════════════════════════════════════════════════════════════════════════
 def kimi_fallback(raw_b_text):
     if not KIMI_API_KEY or not raw_b_text or len(raw_b_text) < 100:
         return "", "", ""
     try:
         resp = requests.post(
             "https://api.moonshot.cn/v1/chat/completions",
-            headers={"Authorization": f"Bearer {KIMI_API_KEY}", "Content-Type": "application/json"},
+            headers={"Authorization": f"Bearer {KIMI_API_KEY}",
+                     "Content-Type": "application/json"},
             json={
                 "model": "moonshot-v1-8k",
                 "messages": [
@@ -486,14 +781,29 @@ def kimi_fallback(raw_b_text):
         return "", "", ""
 
 
+# ════════════════════════════════════════════════════════════════════════════
+# Format cleanup
+# ════════════════════════════════════════════════════════════════════════════
+def clean_format(text: str) -> str:
+    text = re.sub(r'(@\S[^\n]*)\n\n+(> )', r'\1\n\2', text)
+    text = re.sub(r'(> "[^\n]*"[^\n]*)\n\n+(\*\*📝)', r'\1\n\2', text)
+    text = re.sub(r'(• [^\n]+)\n\n+(• )', r'\1\n\2', text)
+    text = re.sub(r'(• 📌 )涨姿势：\s*', r'\1', text)
+    text = re.sub(r'(• 🧠 )猜博弈：\s*', r'\1', text)
+    text = re.sub(r'(• 🎯 )识风向：\s*', r'\1', text)
+    return text
+
+
 def generate_cover_image(prompt):
     if not SF_API_KEY or not prompt:
         return ""
     try:
         resp = requests.post(
             "https://api.siliconflow.cn/v1/images/generations",
-            headers={"Authorization": f"Bearer {SF_API_KEY}", "Content-Type": "application/json"},
-            json={"model": "black-forest-labs/FLUX.1-schnell", "prompt": prompt, "n": 1, "image_size": "1280x720"},
+            headers={"Authorization": f"Bearer {SF_API_KEY}",
+                     "Content-Type": "application/json"},
+            json={"model": "black-forest-labs/FLUX.1-schnell",
+                  "prompt": prompt, "n": 1, "image_size": "1280x720"},
             timeout=120,
         )
         resp.raise_for_status()
@@ -522,28 +832,30 @@ def upload_to_imgbb(image_path):
         return ""
 
 
-# ════════════════════════════════════════════════════════════════
-# 🌟 核心升级：生成高度类似 PDF 尽调报告的飞书卡片
-# ════════════════════════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════════════════
+# 🌟 Feishu card builder – PDF-level layout (fully preserved)
+# ════════════════════════════════════════════════════════════════════════════
 def build_feishu_card(text, title, cover_url="", insight=""):
     text = clean_format(text)
     elements = []
 
-    # --- 1. 顶部：封面与点评 ---
+    # --- 1. Top: cover image + insight ---
     if cover_url:
         elements.append({
             "tag": "div",
-            "text": {"tag": "lark_md", "content": f"🖼️ [**点击查看 AI 生成的头条封面图**]({cover_url})"}
+            "text": {"tag": "lark_md",
+                     "content": f"🖼️ [**点击查看 AI 生成的头条封面图**]({cover_url})"}
         })
 
     if insight:
         elements.append({
             "tag": "div",
-            "text": {"tag": "lark_md", "content": f"<font color='orange'>**💡 主编深度点评**</font>\n{insight}"}
+            "text": {"tag": "lark_md",
+                     "content": f"<font color='orange'>**💡 主编深度点评**</font>\n{insight}"}
         })
         elements.append({"tag": "hr"})
 
-    # --- 2. 模拟 PDF 顶部数据框（提取【数据看板】并渲染为高级 fields 网格）---
+    # --- 2. Data dashboard (【数据看板】) rendered as fields grid ---
     data_panel_match = re.search(r"【数据看板】\s*([\s\S]*?)(?=【执行摘要】)", text)
     if data_panel_match:
         data_str = data_panel_match.group(1).replace('\n', '')
@@ -552,7 +864,6 @@ def build_feishu_card(text, title, cover_url="", insight=""):
         for p in parts:
             if ':' in p or '：' in p:
                 k, v = re.split(r'[:：]', p, 1)
-                # 使用灰色小字 + 加粗数据的样式，1:1 复刻数据看板的沉稳感
                 fields.append({
                     "is_short": True,
                     "text": {
@@ -561,44 +872,35 @@ def build_feishu_card(text, title, cover_url="", insight=""):
                     }
                 })
         if fields:
-            elements.append({
-                "tag": "div",
-                "fields": fields
-            })
+            elements.append({"tag": "div", "fields": fields})
             elements.append({"tag": "hr"})
-        # 提取完毕，将原文本中的这块抹去
         text = text.replace(data_panel_match.group(0), "")
 
-    # --- 3. 模拟 PDF 的 SUMMARY（提取【执行摘要】并着色）---
-    # 用红绿双色清晰界定“利好”与“风险”
+    # --- 3. Executive summary (【执行摘要】) with red/green colouring ---
     summary_match = re.search(r"【执行摘要】\s*([\s\S]*?)(?=【动态详情】|\*\*.)", text)
     if summary_match:
         summary_text = summary_match.group(1).strip()
-        # 注入颜色标签
-        summary_text = summary_text.replace("**🟢 重大利好/突破**", "<font color='green'>**🟢 重大利好/突破**</font>")
-        summary_text = summary_text.replace("**🔴 重大风险/争议**", "<font color='red'>**🔴 重大风险/争议**</font>")
-        
+        summary_text = summary_text.replace(
+            "**🟢 重大利好/突破**", "<font color='green'>**🟢 重大利好/突破**</font>")
+        summary_text = summary_text.replace(
+            "**🔴 重大风险/争议**", "<font color='red'>**🔴 重大风险/争议**</font>")
         elements.append({
             "tag": "div",
-            "text": {
-                "tag": "lark_md",
-                "content": f"**📋 EXECUTIVE SUMMARY**\n{summary_text}"
-            }
+            "text": {"tag": "lark_md",
+                     "content": f"**📋 EXECUTIVE SUMMARY**\n{summary_text}"}
         })
         elements.append({"tag": "hr"})
         text = text.replace(summary_match.group(0), "")
 
-    # 清理残余的标记符和可能多余的废话标题
+    # Clean up residual markers
     text = text.replace("【动态详情】", "").strip()
-    text = re.sub(r"^📡.*?\n+", "", text).strip() 
+    text = re.sub(r"^📡.*?\n+", "", text).strip()
 
-    # --- 4. 模拟 PDF 列表（按 🍉 进行精准切割，防止一块文本过长导致阅读疲劳）---
-    # 使用正则前瞻，每次遇到 🍉 就切出一块新的飞书 block
+    # --- 4. Story blocks split on 🍉 ---
     for part in re.split(r"(?=\*\*🍉)", text):
         part = part.strip()
         if not part:
             continue
-        # 飞书单文本块上限约 5000 字，按瓜切分极其稳妥
         elements.append({
             "tag": "div",
             "text": {"tag": "lark_md", "content": part[:4000]},
@@ -607,12 +909,10 @@ def build_feishu_card(text, title, cover_url="", insight=""):
     return {
         "msg_type": "interactive",
         "card": {
-            "config": {
-                "wide_screen_mode": True  # 强制宽屏模式，这是让排版看起来像 PDF/PC端网页的核心开关
-            },
+            "config": {"wide_screen_mode": True},
             "header": {
                 "title": {"tag": "plain_text", "content": f"📊 {title}"},
-                "template": "indigo", # 使用经典的深靛蓝色（indigo），最符合投资分析报告的调性
+                "template": "indigo",
             },
             "elements": elements,
         },
@@ -626,34 +926,53 @@ def push_to_feishu(card_payload):
     for i, url in enumerate(webhooks, 1):
         try:
             resp = requests.post(url, json=card_payload, timeout=30)
-            print(f"飞书推送 #{i}：{resp.status_code} | {resp.text[:80]}", flush=True)
+            print(f"Feishu push #{i}: {resp.status_code} | {resp.text[:80]}", flush=True)
         except Exception as e:
-            print(f"飞书推送 #{i} 异常：{e}", flush=True)
+            print(f"Feishu push #{i} error: {e}", flush=True)
 
 
-# ════════════════════════════════════════════════════════════════
-# 微信 HTML
-# ════════════════════════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════════════════
+# WeChat HTML push
+# ════════════════════════════════════════════════════════════════════════════
 def _md_to_html(text):
     text = re.sub(r"\*\*([^*]+?)\*\*", r"\1", text)
     return text.replace("\n", "<br/>")
 
+
 def build_wechat_html(text, cover_url="", insight=""):
     text = clean_format(text)
-    cover_block = f'<p style="text-align:center;margin:0 0 16px 0;"><img src="{cover_url}" style="max-width:100%;border-radius:8px;" /></p>' if cover_url else ""
-    insight_block = f'<div style="border-radius:8px;background:#FFF7E6;padding:12px 14px;margin:0 0 16px 0;"><div style="font-weight:bold;margin-bottom:6px;">🔍 深度解读</div><div>{insight.replace(chr(10), "<br/>")}</div></div>' if insight else ""
+    cover_block = (
+        f'<p style="text-align:center;margin:0 0 16px 0;">'
+        f'<img src="{cover_url}" style="max-width:100%;border-radius:8px;" /></p>'
+        if cover_url else ""
+    )
+    insight_block = (
+        f'<div style="border-radius:8px;background:#FFF7E6;padding:12px 14px;'
+        f'margin:0 0 16px 0;"><div style="font-weight:bold;margin-bottom:6px;">'
+        f'🔍 深度解读</div><div>{insight.replace(chr(10), "<br/>")}</div></div>'
+        if insight else ""
+    )
     return cover_block + insight_block + _md_to_html(text)
+
 
 def push_to_jijyun(html_content, title, cover_url=""):
     if not JIJYUN_WEBHOOK_URL:
         return
     try:
-        resp = requests.post(JIJYUN_WEBHOOK_URL, json={"title": title, "author": "大尉Prinski", "html_content": html_content, "cover_jpg": cover_url}, timeout=30)
-        print(f"极简云推送：{resp.status_code} | {resp.text[:120]}", flush=True)
+        resp = requests.post(
+            JIJYUN_WEBHOOK_URL,
+            json={"title": title, "author": "大尉Prinski",
+                  "html_content": html_content, "cover_jpg": cover_url},
+            timeout=30,
+        )
+        print(f"WeChat push: {resp.status_code} | {resp.text[:120]}", flush=True)
     except Exception as e:
-        print(f"极简云推送异常：{e}", flush=True)
+        print(f"WeChat push error: {e}", flush=True)
 
 
+# ════════════════════════════════════════════════════════════════════════════
+# Utility helpers
+# ════════════════════════════════════════════════════════════════════════════
 def extract_markdown_block(text):
     start = text.find("@@@START@@@")
     end   = text.find("@@@END@@@")
@@ -662,104 +981,279 @@ def extract_markdown_block(text):
     cs = start + len("@@@START@@@")
     return text[cs:end].strip() if (end != -1 and end > start) else text[cs:].strip()
 
+
 def is_valid_content(text):
-    return bool(text) and len(text) >= 300 and "@@@START@@@" in text and "🍉" in text
+    return bool(text) and len(text) >= 300 and "【数据看板】" in text and "🍉" in text
+
 
 def _is_placeholder(text):
     return not text or (text.startswith("<") and text.endswith(">"))
 
 
+# ════════════════════════════════════════════════════════════════════════════
+# Save daily data to data/ directory
+# ════════════════════════════════════════════════════════════════════════════
+def save_daily_data(today_str: str, post_objects: list, meta_results: dict,
+                    report_text: str, classification: dict):
+    """Persist all collected data under data/YYYY-MM-DD/."""
+    data_dir = Path(f"data/{today_str}")
+    data_dir.mkdir(parents=True, exist_ok=True)
+
+    # combined.txt – post lines only (no meta rows)
+    combined_txt = "\n".join(
+        json.dumps(obj, ensure_ascii=False)
+        for obj in post_objects
+        if obj.get("type") != "meta"
+    )
+    (data_dir / "combined.txt").write_text(combined_txt, encoding="utf-8")
+
+    # meta.json – per-account metadata
+    (data_dir / "meta.json").write_text(
+        json.dumps(meta_results, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+
+    # daily_report.txt – Kimi report (may be empty on first save)
+    if report_text:
+        (data_dir / "daily_report.txt").write_text(report_text, encoding="utf-8")
+
+    # data/classification.json – latest classification (updated every run)
+    cls_path = Path("data/classification.json")
+    cls_path.write_text(
+        json.dumps({"date": today_str, "classification": classification},
+                   ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+
+    print(
+        f"[Data] ✅ Saved to {data_dir} "
+        f"({sum(1 for o in post_objects if o.get('type') != 'meta')} posts, "
+        f"{len(meta_results)} accounts)",
+        flush=True,
+    )
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# Main
+# ════════════════════════════════════════════════════════════════════════════
 def main():
     print("=" * 60, flush=True)
-    print("🚀 AI吃瓜日报自动化任务启动（PDF级排版渲染版）", flush=True)
+    print("🚀 AI吃瓜日报 v2.0（Grok搜索 + Kimi总结）", flush=True)
     print("=" * 60, flush=True)
 
     check_cookie_expiry()
     is_storage_state = prepare_session_file()
+    today_str, _ = get_dates()
 
-    raw_b_text    = ""
-    cover_prompt  = ""
-    cover_title_c = ""
-    cover_insight = ""
-    saved_context = None
+    # Ensure data/ root exists for classification.json
+    Path("data").mkdir(exist_ok=True)
+
+    # ── Collected data ──────────────────────────────────────────────────────
+    meta_results  = {}    # account → {total, max_l, latest}
+    phase1_posts  = {}    # account → [post_obj, ...]  (Phase-1 data, 3 posts)
+    phase2_posts  = {}    # account → [post_obj, ...]  (Phase-2 data, S/A only)
 
     with sync_playwright() as pw:
         browser = pw.chromium.launch(
             headless=True,
             args=[
-                "--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage",
-                "--disable-gpu", "--disable-blink-features=AutomationControlled",
+                "--no-sandbox", "--disable-setuid-sandbox",
+                "--disable-dev-shm-usage", "--disable-gpu",
+                "--disable-blink-features=AutomationControlled",
                 "--window-size=1280,800",
             ],
         )
 
         ctx_opts = {
             "viewport":   {"width": 1280, "height": 800},
-            "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+            "user_agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/122.0.0.0 Safari/537.36"
+            ),
             "locale": "zh-CN",
         }
         if is_storage_state:
             ctx_opts["storage_state"] = "session_state.json"
 
         context = browser.new_context(**ctx_opts)
-
         if not is_storage_state:
             load_raw_cookies(context)
 
-        page = context.new_page()
-
-        print("\n打开 grok.com...", flush=True)
-        page.goto("https://grok.com", wait_until="domcontentloaded", timeout=60000)
+        # ── Login verification ──────────────────────────────────────────────
+        verify_page = context.new_page()
+        verify_page.goto("https://grok.com", wait_until="domcontentloaded", timeout=60000)
         time.sleep(3)
-
-        if "sign" in page.url.lower() or "login" in page.url.lower():
-            print("❌ 未登录，Cookie/Session 已失效，请更新 Super_GROK_COOKIES", flush=True)
+        if "sign" in verify_page.url.lower() or "login" in verify_page.url.lower():
+            print("❌ Not logged in – Cookie/Session expired. "
+                  "Please update SUPER_GROK_COOKIES.", flush=True)
             browser.close()
             raise SystemExit(1)
-        print("✅ 已登录 Grok", flush=True)
+        print("✅ Logged in to Grok", flush=True)
+        verify_page.close()
 
-        enable_grok4_beta(page)
+        # ════════════════════════════════════════════════════════════════════
+        # Phase 1 – Scan all accounts (batches of 24, B-level strategy)
+        # ════════════════════════════════════════════════════════════════════
+        print("\n" + "=" * 50, flush=True)
+        print("📊 Phase 1: Tiered scan – all accounts", flush=True)
+        print("=" * 50, flush=True)
 
-        send_prompt(page, build_prompt_a(), "阶段A", "03_stage_a")
-        print("[阶段A] ⏳ 强制等待 50s...", flush=True)
-        time.sleep(50)
-        wait_and_extract(page, "阶段A", "03_stage_a", interval=3, stable_rounds=4, max_wait=120, extend_if_growing=True, min_len=100)
+        BATCH_SIZE = 24   # 8 rounds × 3 parallel = 24 accounts per conversation
 
-        send_prompt(page, build_prompt_b(), "阶段B", "04_stage_b")
-        print("[阶段B] ⏳ 强制等待 60s...", flush=True)
-        time.sleep(60)
-        raw_b_text = wait_and_extract(page, "阶段B", "04_stage_b", interval=5, stable_rounds=3, max_wait=300, extend_if_growing=True, min_len=1000)
-        print(f"\n阶段B 内容长度：{len(raw_b_text)} 字符", flush=True)
+        for batch_num, batch_start in enumerate(
+                range(0, len(ALL_ACCOUNTS), BATCH_SIZE), start=1):
 
-        cover_raw = ""
-        try:
-            send_prompt(page, build_prompt_c(), "阶段C", "05_stage_c")
-            cover_raw = wait_and_extract(page, "阶段C", "05_stage_c", interval=3, stable_rounds=3, max_wait=90, extend_if_growing=False, min_len=80)
-        except Exception as e:
-            print(f"[阶段C] ⚠️ 执行异常：{e}", flush=True)
+            elapsed = time.time() - _START_TIME
+            if elapsed > PHASE1_DEADLINE:
+                remaining = ALL_ACCOUNTS[batch_start:]
+                print(
+                    f"\n[Phase 1] ⚠️ Timeout ({elapsed:.0f}s > {PHASE1_DEADLINE}s), "
+                    f"skipping {len(remaining)} remaining accounts (B-tier degradation).",
+                    flush=True,
+                )
+                break
 
-        title_m   = re.search(r"TITLE[:：]\s*(.+)", cover_raw)
-        prompt_m  = re.search(r"PROMPT[:：]\s*([\s\S]+?)(?=INSIGHT[:：]|$)", cover_raw)
-        insight_m = re.search(r"INSIGHT[:：]\s*([\s\S]+)", cover_raw)
-        cover_title_c = title_m.group(1).strip()   if title_m   else ""
-        cover_prompt  = prompt_m.group(1).strip()  if prompt_m  else ""
-        cover_insight = insight_m.group(1).strip() if insight_m else ""
+            batch   = ALL_ACCOUNTS[batch_start:batch_start + BATCH_SIZE]
+            label   = f"Phase1-Batch{batch_num}"
+            results = run_grok_batch(context, batch, build_phase1_prompt, label)
 
-        if _is_placeholder(cover_title_c) or _is_placeholder(cover_prompt) or (not cover_title_c and not cover_prompt):
-            print("[阶段C] 数据缺失或带有占位符，启动 Kimi 兜底...", flush=True)
-            cover_title_c, cover_prompt, cover_insight = kimi_fallback(raw_b_text)
+            for obj in results:
+                account = obj.get("a", "").lstrip("@")
+                if not account:
+                    continue
+                if obj.get("type") == "meta":
+                    meta_results[account] = {
+                        "total":  obj.get("total", 0),
+                        "max_l":  obj.get("max_l", 0),
+                        "latest": obj.get("latest", "NA"),
+                    }
+                else:
+                    phase1_posts.setdefault(account, []).append(obj)
 
-        saved_context = context
-        save_and_renew_session(saved_context)
+        print(
+            f"\n[Phase 1] Done: {len(meta_results)} metadata rows, "
+            f"{len(phase1_posts)} accounts with posts.",
+            flush=True,
+        )
+
+        # ════════════════════════════════════════════════════════════════════
+        # Classification
+        # ════════════════════════════════════════════════════════════════════
+        classification = classify_accounts(meta_results)
+        s_accounts = [a for a, t in classification.items() if t == "S"]
+        a_accounts = [a for a, t in classification.items() if t == "A"]
+        b_accounts = [a for a, t in classification.items() if t == "B"]
+        inactive   = [a for a, t in classification.items() if t == "inactive"]
+
+        print(
+            f"\n[Classification] S: {len(s_accounts)} | A: {len(a_accounts)} | "
+            f"B: {len(b_accounts)} | inactive: {len(inactive)}",
+            flush=True,
+        )
+        if s_accounts:
+            print(f"  S-tier: {s_accounts}", flush=True)
+        if a_accounts:
+            print(f"  A-tier (first 10): {a_accounts[:10]}", flush=True)
+
+        # ════════════════════════════════════════════════════════════════════
+        # Phase 2 – Differential re-collection for S and A tiers
+        # ════════════════════════════════════════════════════════════════════
+        if (time.time() - _START_TIME) < GLOBAL_DEADLINE and (s_accounts or a_accounts):
+            print("\n" + "=" * 50, flush=True)
+            print("📊 Phase 2: Differential collection (S + A tiers)", flush=True)
+            print("=" * 50, flush=True)
+
+            # S-tier accounts (10 posts + thread fetches)
+            for batch_start in range(0, len(s_accounts), BATCH_SIZE):
+                if (time.time() - _START_TIME) >= GLOBAL_DEADLINE:
+                    break
+                batch   = s_accounts[batch_start:batch_start + BATCH_SIZE]
+                label   = f"Phase2-S-Batch{batch_start // BATCH_SIZE + 1}"
+                results = run_grok_batch(context, batch, build_phase2_s_prompt, label)
+                for obj in results:
+                    account = obj.get("a", "").lstrip("@")
+                    if account and obj.get("type") != "meta":
+                        phase2_posts.setdefault(account, []).append(obj)
+
+            # A-tier accounts (5 posts)
+            for batch_start in range(0, len(a_accounts), BATCH_SIZE):
+                if (time.time() - _START_TIME) >= GLOBAL_DEADLINE:
+                    break
+                batch   = a_accounts[batch_start:batch_start + BATCH_SIZE]
+                label   = f"Phase2-A-Batch{batch_start // BATCH_SIZE + 1}"
+                results = run_grok_batch(context, batch, build_phase2_a_prompt, label)
+                for obj in results:
+                    account = obj.get("a", "").lstrip("@")
+                    if account and obj.get("type") != "meta":
+                        phase2_posts.setdefault(account, []).append(obj)
+
+        # ── Session renewal ─────────────────────────────────────────────────
+        save_and_renew_session(context)
         browser.close()
 
-    if not is_valid_content(raw_b_text):
-        print("\n❌ 日报内容质量不达标，终止推送。", flush=True)
-        raise SystemExit(1)
+    # ════════════════════════════════════════════════════════════════════════
+    # Merge data: Phase-2 data overrides Phase-1 for S/A accounts.
+    # B accounts retain their Phase-1 posts (3 per account).
+    # ════════════════════════════════════════════════════════════════════════
+    print("\n[Merge] Combining Phase 1 + Phase 2 data...", flush=True)
+    combined_posts: dict = {}
+    combined_posts.update(phase1_posts)     # B-tier baseline
+    combined_posts.update(phase2_posts)     # S/A override
 
-    final_markdown = extract_markdown_block(raw_b_text) or raw_b_text.strip()
-    final_markdown = clean_format(final_markdown)
+    all_post_objects = [obj for posts in combined_posts.values() for obj in posts]
+    print(
+        f"[Merge] Total: {len(all_post_objects)} posts "
+        f"from {len(combined_posts)} accounts",
+        flush=True,
+    )
 
+    # Build JSON Lines string for Kimi
+    combined_jsonl = "\n".join(
+        json.dumps(obj, ensure_ascii=False) for obj in all_post_objects
+    )
+
+    # Persist Phase-1/merge data (report will be updated after Kimi)
+    save_daily_data(today_str, all_post_objects, meta_results, "", classification)
+
+    # ════════════════════════════════════════════════════════════════════════
+    # Kimi summarisation
+    # ════════════════════════════════════════════════════════════════════════
+    print("\n" + "=" * 50, flush=True)
+    print("🤖 Kimi: Generating daily report...", flush=True)
+    print("=" * 50, flush=True)
+
+    report_text, cover_title, cover_prompt, cover_insight = kimi_summarize(
+        combined_jsonl, today_str
+    )
+
+    # Fallback if Kimi report is insufficient
+    if not is_valid_content(report_text):
+        print("[Kimi] ⚠️ Report quality check failed, trying fallback...", flush=True)
+        if not cover_title and not cover_prompt:
+            cover_title, cover_prompt, cover_insight = kimi_fallback(combined_jsonl[:6000])
+        if not report_text:
+            report_text = (
+                f"@@@START@@@\n"
+                f"📡 硅谷AI圈大事扫描 | {today_str}\n\n"
+                f"【数据看板】\n"
+                f"跟踪大V总数: 100 | 有动态的大V: {len(combined_posts)} | "
+                f"重点高价值动态: - | 热点趋势: -\n\n"
+                f"【执行摘要】\n"
+                f"**{today_str}**\n\n"
+                f"【动态详情】\n\n"
+                f"🍉 数据采集完成，共 {len(all_post_objects)} 条帖子。\n"
+                f"@@@END@@@"
+            )
+
+    # Persist final report
+    if report_text:
+        report_path = Path(f"data/{today_str}/daily_report.txt")
+        report_path.parent.mkdir(parents=True, exist_ok=True)
+        report_path.write_text(report_text, encoding="utf-8")
+
+    # ════════════════════════════════════════════════════════════════════════
+    # Cover image generation
+    # ════════════════════════════════════════════════════════════════════════
     cover_url = generate_cover_image(cover_prompt)
     if cover_url:
         import urllib.request
@@ -768,23 +1262,36 @@ def main():
         except Exception:
             pass
 
-    if cover_title_c and not _is_placeholder(cover_title_c):
-        title = cover_title_c
+    # Determine display title
+    if cover_title and not _is_placeholder(cover_title):
+        title = cover_title
     else:
-        m = re.search(r"📡.*?[|\n]", final_markdown)
-        title = m.group(0).strip('📡| \n') if m else "AI圈极客大事扫描"
-    print(f"\n最终推文标题：{title}", flush=True)
+        m = re.search(r"📡.*?[|\n]", report_text or "")
+        title = m.group(0).strip("📡| \n") if m else "AI圈极客大事扫描"
+    print(f"\nFinal title: {title}", flush=True)
 
-    imgbb_url = upload_to_imgbb("cover.png")
+    imgbb_url      = upload_to_imgbb("cover.png")
     final_cover_url = imgbb_url if imgbb_url else cover_url
 
-    print("\n推送飞书 (带 PDF 级精美排版)...", flush=True)
-    push_to_feishu(build_feishu_card(final_markdown, title, final_cover_url, cover_insight))
+    final_markdown = extract_markdown_block(report_text) or report_text or ""
+    final_markdown = clean_format(final_markdown)
+
+    # ════════════════════════════════════════════════════════════════════════
+    # Push to Feishu + WeChat
+    # ════════════════════════════════════════════════════════════════════════
+    print("\n[Push] Sending to Feishu (PDF-level layout)...", flush=True)
+    push_to_feishu(
+        build_feishu_card(final_markdown, title, final_cover_url, cover_insight)
+    )
 
     if JIJYUN_WEBHOOK_URL:
-        push_to_jijyun(build_wechat_html(final_markdown, final_cover_url, cover_insight), title, final_cover_url)
+        push_to_jijyun(
+            build_wechat_html(final_markdown, final_cover_url, cover_insight),
+            title, final_cover_url,
+        )
 
-    print("\n🎉 全部自动化任务流执行完成！", flush=True)
+    print("\n🎉 All tasks completed!", flush=True)
+
 
 if __name__ == "__main__":
     main()
