@@ -92,7 +92,6 @@ def save_and_renew_session(context):
     终极续期方案：
     1. 保存当前 Playwright storage state 到本地
     2. 通过 GitHub API 加密后写回 Super_GROK_COOKIES Secret
-    下次运行时自动加载最新 session，永不过期
     """
     try:
         context.storage_state(path="session_state.json")
@@ -146,7 +145,6 @@ def save_and_renew_session(context):
 
 
 def check_cookie_expiry():
-    """Cookie-Editor 格式时，检查 sso cookie 剩余天数，不足 5 天发飞书提醒"""
     if not GROK_COOKIES_JSON:
         return
     try:
@@ -186,7 +184,6 @@ def enable_grok4_beta(page):
         )
         model_btn.click()
         time.sleep(1)
-        page.screenshot(path="01_model_menu.png")
 
         toggle = page.wait_for_selector(
             "button[role='switch'], input[type='checkbox']", timeout=8000,
@@ -206,7 +203,6 @@ def enable_grok4_beta(page):
             print("[模型] ✅ 已是开启状态", flush=True)
         page.keyboard.press("Escape")
         time.sleep(0.5)
-        page.screenshot(path="02_model_confirmed.png")
     except Exception as e:
         print(f"[模型] ⚠️ 失败，继续使用当前模型：{e}", flush=True)
 
@@ -240,7 +236,6 @@ def send_prompt(page, prompt_text, label, screenshot_prefix):
                 time.sleep(0.2)
 
     time.sleep(1.5)
-    page.screenshot(path=f"{screenshot_prefix}_before.png")
 
     try:
         inp = page.query_selector("div[contenteditable='true'], textarea")
@@ -317,10 +312,6 @@ def wait_and_extract(page, label, screenshot_prefix,
             stable += 1
             if stable >= stable_rounds:
                 print(f"[{label}] ✅ 完毕（{cur_len} 字符）", flush=True)
-                try:
-                    page.screenshot(path=f"{screenshot_prefix}_done.png")
-                except Exception:
-                    pass
                 return text.strip()
         else:
             stable   = 0
@@ -334,15 +325,10 @@ def wait_and_extract(page, label, screenshot_prefix,
             try:
                 text = _get_last_msg(page)
             except Exception as e:
-                print(f"[{label}] ⚠️ 延长阶段异常：{e}", flush=True)
                 return prev_text.strip()
             cur_len = len(text.strip())
             print(f"  延长 +{ext}s | 字符数: {cur_len}", flush=True)
             if cur_len == prev_len:
-                try:
-                    page.screenshot(path=f"{screenshot_prefix}_done.png")
-                except Exception:
-                    pass
                 return text.strip()
             prev_len = cur_len; prev_text = text
         try:
@@ -351,14 +337,13 @@ def wait_and_extract(page, label, screenshot_prefix,
             return prev_text.strip()
     else:
         try:
-            page.screenshot(path=f"{screenshot_prefix}_timeout.png")
             return _get_last_msg(page).strip()
         except Exception:
             return last_text.strip()
 
 
 # ════════════════════════════════════════════════════════════════
-# 阶段 A 提示词（无时间限制）
+# 阶段 A 提示词
 # ════════════════════════════════════════════════════════════════
 def build_prompt_a():
     return (
@@ -391,7 +376,7 @@ def build_prompt_a():
 
 
 # ════════════════════════════════════════════════════════════════
-# 阶段 B 提示词（无时间限制，最少10条）
+# 🌟 阶段 B 提示词（专为匹配 PDF 格式深度定制版）
 # ════════════════════════════════════════════════════════════════
 def build_prompt_b():
     date_today, _ = get_dates()
@@ -400,11 +385,6 @@ def build_prompt_b():
         "【数据复用】\n"
         "直接复用第一轮已搜索到的数据缓存，继续补充以下账号的最新动态。\n"
         "每批次搜索如返回0条，立即去掉时间参数重试（必须成功）。\n\n"
-        "【核心策略（复用第一轮）】\n"
-        "Tier1：全量搜索 + 重点帖立即调用 x_thread_fetch 拉完整线程和互动。\n"
-        "Tier2：仅保留赞>=30的帖做深度分析。\n"
-        "Tier3：仅保留赞>=100或重大事件。\n"
-        "优先并行调用工具（一次最多同时发3个请求）。\n\n"
         "【第二轮搜索：3批并行】\n"
         "批次4 (Tier1 开源与基础设施 18人)：\n"
         "@HuggingFace @MistralAI @Perplexity_AI @GroqInc @Cohere @TogetherCompute "
@@ -418,14 +398,21 @@ def build_prompt_b():
         "@promptengineer @AI_News_Tech @siliconvalley @aithread @aibreakdown "
         "@aiexplained @aipubcast @lexfridman @hubermanlab @swyx\n\n"
         "【最终成稿指令（严格执行）】\n"
-        "完成检索后，综合第一轮+第二轮所有高价值情报，输出不少于10条最震撼的话题。\n"
-        "严格按以下格式输出日报：\n\n"
-        "输出必须以 @@@START@@@ 开头，以 @@@END@@@ 单独成行结束，其后不得有任何其他内容。\n"
-        "禁止代码块、额外文字、思考过程。\n\n"
-        "严格模板（注意：@账号行与引用行之间禁止空行，引用行与📝之间禁止空行，各bullet之间禁止空行）：\n"
+        "完成检索后，综合两轮所有高价值情报，输出不少于10条最震撼的话题，并排版成类似「投资机构专业尽调/扫描报告」的格式。\n"
+        "严格模板（注意：必须精确包含【数据看板】、【执行摘要】三个定位符，严禁输出Markdown代码块的反引号）：\n\n"
         "@@@START@@@\n"
-        f"📡 昨夜，X上硅谷AI圈都在聊啥 | {date_today}\n\n"
-        "**🏰巨头宫斗**\n\n"
+        f"📡 硅谷AI圈大事扫描 | {date_today}\n\n"
+        "【数据看板】\n"
+        "跟踪大V总数: 100 | 有动态的大V: [填入预估数字] | 重点高价值动态: 10 | 扫描到风险/争议: [填入数字]\n\n"
+        "【执行摘要】\n"
+        f"**{date_today} | 本次扫描主要抓取大模型巨头、开源生态、硬件与空间计算等行业的信息**\n"
+        "**🟢 重大利好/突破**\n"
+        "- [1句话总结今天最核心的正面进展]\n"
+        "- [如有第2条正面进展，写在这里]\n"
+        "**🔴 重大风险/争议**\n"
+        "- [1句话总结今天最核心的负面、撕逼或争议事件]\n\n"
+        "【动态详情】\n"
+        "**🏰 巨头宫斗**\n\n"
         "**🍉 1. 话题标题**\n"
         "**🗣️ 极客原声态：**\n"
         "@账号 | 姓名 | 身份\n"
@@ -433,76 +420,42 @@ def build_prompt_b():
         "**📝 严肃吃瓜：**\n"
         "• 📌 增量事实和知识...\n"
         "• 🧠 背后隐性博弈分析...\n"
-        "• 🎯 一二级资本市场影响（如有）...\n\n"
-        "（按此格式完成剩余话题，不少于10条，合理分配 巨头宫斗 中文圈 硬件与空间计算 投资人 等维度）\n"
+        "• 🎯 资本风向标...\n\n"
+        "（按此格式完成剩余话题，不少于10条，合理分配 巨头宫斗、中文圈、开源基建、硬件与空间计算 等维度分类标题）\n"
         "@@@END@@@"
     )
 
 
 # ════════════════════════════════════════════════════════════════
-# 阶段 C 提示词（原版保留）
+# 阶段 C 提示词
 # ════════════════════════════════════════════════════════════════
 def build_prompt_c():
     return (
         "执行阶段C：标题 + 封面图提示词生成（从当前不少于10条新闻中提炼）。\n\n"
-        "【核心任务（一步完成）】\n"
-        "从以上新闻中，挑选最具冲突感、炸裂感或吃瓜属性的1~2个核心事件，生成以下三项输出：\n\n"
-        "输出一：微信公众号文章标题\n"
-        "- 极度抓眼球，制造强烈好奇心或情绪冲击\n"
-        "- 风格参考：XXX公开撕XXX：这场战争刚刚开始 / AI圈最大瓜：XXX当众打脸XXX\n"
-        "- 允许用数字、破折号、感叹号增强张力\n"
-        "- 长度严格15~30个汉字\n"
-        "- 禁止平淡陈述、学术腔\n\n"
-        "输出二：封面图英文提示词\n"
-        "- 风格：American comic book style，Marvel/DC panel感，bold black ink outlines，"
-        "flat vibrant colors，halftone dot shading\n"
-        "- 构图：两股势力正面对抗，表情极度夸张，动作感强烈\n"
-        "- 象征物：用抽象符号（芯片/机器人/火箭/巨型拳头/美元等）代表主角，禁止真实人脸和公司Logo\n"
-        "- 对话气泡：一句<=10个英文单词的台词，点出冲突核心\n"
-        "- 画幅：横版16:9，适合公众号封面\n"
-        "- 长度：英文提示词<=150词\n"
-        "- 禁止：中文文字、水印、写实感\n\n"
-        "输出三：深度解读\n"
-        "- 字数：150~200字以内\n"
-        "- 重点分析对以下三类群体的影响：\n"
-        "(a) 中国AI行业及从业人员\n"
-        "(b) 中国VC一级市场投资人\n"
-        "(c) 散户和普通用户\n"
-        "- 语言风格幽默风趣，每个维度1~2句话点明核心，如果该维度没啥影响就不必强行分析\n"
-        "- 整体为流畅段落，禁止列表、禁止标题\n\n"
-        "【输出铁闸（必须严格遵守）】\n"
-        "只输出以下三行，禁止任何解释、思考、额外文字：\n"
-        "TITLE: <中文标题>\n"
-        "PROMPT: <英文提示词>\n"
-        "INSIGHT: <150~200字深度解读>"
+        "从以上新闻中，挑选最具冲突感的核心事件，生成以下三项输出：\n\n"
+        "TITLE: <中文标题，15~30个汉字，极度抓眼球>\n"
+        "PROMPT: <英文文生图提示词，American comic book style，两股势力对抗，<=150词>\n"
+        "INSIGHT: <150~200字深度解读，分析对中国AI从业者/VC/散户的影响，幽默风趣>"
     )
 
 
 # ════════════════════════════════════════════════════════════════
-# 格式清洗（修改2：删多余空行 + 去掉前缀标签）
+# 格式清洗
 # ════════════════════════════════════════════════════════════════
 def clean_format(text: str) -> str:
-    # @账号行 与 > 引用行之间去掉空行
+    # 压紧排版
     text = re.sub(r'(@\S[^\n]*)\n\n+(> )', r'\1\n\2', text)
-    # > 引用行 与 📝 之间去掉空行
     text = re.sub(r'(> "[^\n]*"[^\n]*)\n\n+(\*\*📝)', r'\1\n\2', text)
-    # bullet 之间去掉空行
     text = re.sub(r'(• [^\n]+)\n\n+(• )', r'\1\n\2', text)
-    # 去掉 bullet 里的前缀标签
     text = re.sub(r'(• 📌 )涨姿势：\s*', r'\1', text)
     text = re.sub(r'(• 🧠 )猜博弈：\s*', r'\1', text)
     text = re.sub(r'(• 🎯 )识风向：\s*', r'\1', text)
     return text
 
 
-# ════════════════════════════════════════════════════════════════
-# Kimi 兜底（阶段C无结果时）
-# ════════════════════════════════════════════════════════════════
 def kimi_fallback(raw_b_text):
     if not KIMI_API_KEY or not raw_b_text or len(raw_b_text) < 100:
-        print("[Kimi兜底] 跳过（无 API Key 或内容过短）", flush=True)
         return "", "", ""
-    print("\n[Kimi兜底] 阶段C无结果，调用 Kimi API...", flush=True)
     try:
         resp = requests.post(
             "https://api.moonshot.cn/v1/chat/completions",
@@ -510,15 +463,10 @@ def kimi_fallback(raw_b_text):
             json={
                 "model": "moonshot-v1-8k",
                 "messages": [
-                    {"role": "system", "content": "你是一位擅长撰写爆款公众号标题和封面文案的资深编辑，熟悉AI和科技圈动态。"},
                     {"role": "user", "content": (
-                        "以下是今日硅谷AI圈热点日报内容：\n\n"
-                        + raw_b_text[:6000]
-                        + "\n\n请根据以上内容，挑选最具冲突感的1~2个核心事件，严格只输出以下三行：\n"
-                        "TITLE: <中文标题，15~30个汉字，极度抓眼球>\n"
-                        "PROMPT: <英文文生图提示词，American comic book style，两股势力对抗，<=150词>\n"
-                        "INSIGHT: <150~200字深度解读，分析对中国AI从业者/VC/散户的影响，幽默风趣>"
-                    )},
+                        "根据以下内容生成三行结果：\n" + raw_b_text[:6000] +
+                        "\nTITLE: <标题>\nPROMPT: <英文提示词>\nINSIGHT: <解读>"
+                    )}
                 ],
                 "temperature": 0.7, "max_tokens": 1000,
             },
@@ -526,7 +474,6 @@ def kimi_fallback(raw_b_text):
         )
         resp.raise_for_status()
         result = resp.json()["choices"][0]["message"]["content"].strip()
-        print(f"[Kimi兜底] 生成成功，长度：{len(result)} 字符", flush=True)
         title_m   = re.search(r"TITLE[:：]\s*(.+)", result)
         prompt_m  = re.search(r"PROMPT[:：]\s*([\s\S]+?)(?=INSIGHT[:：]|$)", result)
         insight_m = re.search(r"INSIGHT[:：]\s*([\s\S]+)", result)
@@ -535,19 +482,13 @@ def kimi_fallback(raw_b_text):
             prompt_m.group(1).strip()  if prompt_m  else "",
             insight_m.group(1).strip() if insight_m else "",
         )
-    except Exception as e:
-        print(f"[Kimi兜底] 调用失败：{e}", flush=True)
+    except Exception:
         return "", "", ""
 
 
-# ════════════════════════════════════════════════════════════════
-# 硅基流动生图
-# ════════════════════════════════════════════════════════════════
 def generate_cover_image(prompt):
     if not SF_API_KEY or not prompt:
-        print("生图跳过（SF_API_KEY 或提示词为空）", flush=True)
         return ""
-    print("\n[生图] 调用硅基流动 FLUX.1-schnell...", flush=True)
     try:
         resp = requests.post(
             "https://api.siliconflow.cn/v1/images/generations",
@@ -556,33 +497,14 @@ def generate_cover_image(prompt):
             timeout=120,
         )
         resp.raise_for_status()
-        image_url = resp.json()["data"][0]["url"]
-        print(f"[生图] ✅ 封面图生成成功：{image_url[:80]}...", flush=True)
-        return image_url
-    except Exception as e:
-        print(f"[生图] ❌ 生图失败：{e}", flush=True)
+        return resp.json()["data"][0]["url"]
+    except Exception:
         return ""
-
-
-def download_image(url, save_path="cover.png"):
-    if not url:
-        return False
-    try:
-        resp = requests.get(url, timeout=60)
-        resp.raise_for_status()
-        with open(save_path, "wb") as f:
-            f.write(resp.content)
-        print(f"[下载] ✅ 已保存到 {save_path}（{len(resp.content)//1024} KB）", flush=True)
-        return True
-    except Exception as e:
-        print(f"[下载] ❌ 下载失败：{e}", flush=True)
-        return False
 
 
 def upload_to_imgbb(image_path):
     imgbb_key = os.getenv("IMGBB_API_KEY", "")
     if not imgbb_key or not os.path.exists(image_path):
-        print("[图床] 跳过 ImgBB 上传", flush=True)
         return ""
     try:
         with open(image_path, "rb") as f:
@@ -594,51 +516,103 @@ def upload_to_imgbb(image_path):
         resp.raise_for_status()
         data = resp.json()
         if data.get("success"):
-            url = data["data"]["url"]
-            print(f"[图床] ✅ ImgBB URL：{url}", flush=True)
-            return url
-        print(f"[图床] ❌ 上传失败：{data}", flush=True)
+            return data["data"]["url"]
         return ""
-    except Exception as e:
-        print(f"[图床] ❌ 上传异常：{e}", flush=True)
+    except Exception:
         return ""
 
 
 # ════════════════════════════════════════════════════════════════
-# 飞书卡片推送（多 Webhook）
+# 🌟 核心升级：生成高度类似 PDF 尽调报告的飞书卡片
 # ════════════════════════════════════════════════════════════════
 def build_feishu_card(text, title, cover_url="", insight=""):
-    text     = clean_format(text)
+    text = clean_format(text)
     elements = []
+
+    # --- 1. 顶部：封面与点评 ---
+    if cover_url:
+        elements.append({
+            "tag": "div",
+            "text": {"tag": "lark_md", "content": f"🖼️ [**点击查看 AI 生成的头条封面图**]({cover_url})"}
+        })
 
     if insight:
         elements.append({
             "tag": "div",
-            "text": {"tag": "lark_md", "content": f"**🔍 深度解读**\n{insight}"},
+            "text": {"tag": "lark_md", "content": f"<font color='orange'>**💡 主编深度点评**</font>\n{insight}"}
         })
         elements.append({"tag": "hr"})
 
+    # --- 2. 模拟 PDF 顶部数据框（提取【数据看板】并渲染为高级 fields 网格）---
+    data_panel_match = re.search(r"【数据看板】\s*([\s\S]*?)(?=【执行摘要】)", text)
+    if data_panel_match:
+        data_str = data_panel_match.group(1).replace('\n', '')
+        parts = [p.strip() for p in data_str.split('|')]
+        fields = []
+        for p in parts:
+            if ':' in p or '：' in p:
+                k, v = re.split(r'[:：]', p, 1)
+                # 使用灰色小字 + 加粗数据的样式，1:1 复刻数据看板的沉稳感
+                fields.append({
+                    "is_short": True,
+                    "text": {
+                        "tag": "lark_md",
+                        "content": f"**{k.strip()}**\n<font color='grey'>{v.strip()}</font>"
+                    }
+                })
+        if fields:
+            elements.append({
+                "tag": "div",
+                "fields": fields
+            })
+            elements.append({"tag": "hr"})
+        # 提取完毕，将原文本中的这块抹去
+        text = text.replace(data_panel_match.group(0), "")
+
+    # --- 3. 模拟 PDF 的 SUMMARY（提取【执行摘要】并着色）---
+    # 用红绿双色清晰界定“利好”与“风险”
+    summary_match = re.search(r"【执行摘要】\s*([\s\S]*?)(?=【动态详情】|\*\*.)", text)
+    if summary_match:
+        summary_text = summary_match.group(1).strip()
+        # 注入颜色标签
+        summary_text = summary_text.replace("**🟢 重大利好/突破**", "<font color='green'>**🟢 重大利好/突破**</font>")
+        summary_text = summary_text.replace("**🔴 重大风险/争议**", "<font color='red'>**🔴 重大风险/争议**</font>")
+        
+        elements.append({
+            "tag": "div",
+            "text": {
+                "tag": "lark_md",
+                "content": f"**📋 EXECUTIVE SUMMARY**\n{summary_text}"
+            }
+        })
+        elements.append({"tag": "hr"})
+        text = text.replace(summary_match.group(0), "")
+
+    # 清理残余的标记符和可能多余的废话标题
+    text = text.replace("【动态详情】", "").strip()
+    text = re.sub(r"^📡.*?\n+", "", text).strip() 
+
+    # --- 4. 模拟 PDF 列表（按 🍉 进行精准切割，防止一块文本过长导致阅读疲劳）---
+    # 使用正则前瞻，每次遇到 🍉 就切出一块新的飞书 block
     for part in re.split(r"(?=\*\*🍉)", text):
-        if not part.strip():
+        part = part.strip()
+        if not part:
             continue
+        # 飞书单文本块上限约 5000 字，按瓜切分极其稳妥
         elements.append({
             "tag": "div",
-            "text": {"tag": "lark_md", "content": part[:3800]},
-        })
-
-    if cover_url:
-        elements.append({"tag": "hr"})
-        elements.append({
-            "tag": "div",
-            "text": {"tag": "lark_md", "content": f"🖼️ [点击查看封面图]({cover_url})"},
+            "text": {"tag": "lark_md", "content": part[:4000]},
         })
 
     return {
         "msg_type": "interactive",
         "card": {
+            "config": {
+                "wide_screen_mode": True  # 强制宽屏模式，这是让排版看起来像 PDF/PC端网页的核心开关
+            },
             "header": {
-                "title": {"tag": "plain_text", "content": f"📡 {title}"},
-                "template": "blue",
+                "title": {"tag": "plain_text", "content": f"📊 {title}"},
+                "template": "indigo", # 使用经典的深靛蓝色（indigo），最符合投资分析报告的调性
             },
             "elements": elements,
         },
@@ -648,7 +622,6 @@ def build_feishu_card(text, title, cover_url="", insight=""):
 def push_to_feishu(card_payload):
     webhooks = get_feishu_webhooks()
     if not webhooks:
-        print("⚠️ 未配置任何 FEISHU_WEBHOOK_URL，跳过", flush=True)
         return
     for i, url in enumerate(webhooks, 1):
         try:
@@ -659,48 +632,28 @@ def push_to_feishu(card_payload):
 
 
 # ════════════════════════════════════════════════════════════════
-# 微信 HTML（集简云，个人号暂不可用，保留备用）
+# 微信 HTML
 # ════════════════════════════════════════════════════════════════
 def _md_to_html(text):
     text = re.sub(r"\*\*([^*]+?)\*\*", r"\1", text)
     return text.replace("\n", "<br/>")
 
-
 def build_wechat_html(text, cover_url="", insight=""):
     text = clean_format(text)
-    cover_block = (
-        f'<p style="text-align:center;margin:0 0 16px 0;">'
-        f'<img src="{cover_url}" style="max-width:100%;border-radius:8px;" /></p>'
-        if cover_url else ""
-    )
-    insight_block = (
-        '<div style="border-radius:8px;background:#FFF7E6;padding:12px 14px;margin:0 0 16px 0;">'
-        '<div style="font-weight:bold;margin-bottom:6px;">🔍 深度解读</div>'
-        f'<div>{insight.replace(chr(10), "<br/>")}</div></div>'
-        if insight else ""
-    )
+    cover_block = f'<p style="text-align:center;margin:0 0 16px 0;"><img src="{cover_url}" style="max-width:100%;border-radius:8px;" /></p>' if cover_url else ""
+    insight_block = f'<div style="border-radius:8px;background:#FFF7E6;padding:12px 14px;margin:0 0 16px 0;"><div style="font-weight:bold;margin-bottom:6px;">🔍 深度解读</div><div>{insight.replace(chr(10), "<br/>")}</div></div>' if insight else ""
     return cover_block + insight_block + _md_to_html(text)
-
 
 def push_to_jijyun(html_content, title, cover_url=""):
     if not JIJYUN_WEBHOOK_URL:
-        print("⚠️ JIJYUN_WEBHOOK_URL 未配置，跳过", flush=True)
         return
     try:
-        resp = requests.post(
-            JIJYUN_WEBHOOK_URL,
-            json={"title": title, "author": "大尉Prinski",
-                  "html_content": html_content, "cover_jpg": cover_url},
-            timeout=30,
-        )
+        resp = requests.post(JIJYUN_WEBHOOK_URL, json={"title": title, "author": "大尉Prinski", "html_content": html_content, "cover_jpg": cover_url}, timeout=30)
         print(f"极简云推送：{resp.status_code} | {resp.text[:120]}", flush=True)
     except Exception as e:
         print(f"极简云推送异常：{e}", flush=True)
 
 
-# ════════════════════════════════════════════════════════════════
-# 提取正文 / 质量检查
-# ════════════════════════════════════════════════════════════════
 def extract_markdown_block(text):
     start = text.find("@@@START@@@")
     end   = text.find("@@@END@@@")
@@ -709,25 +662,19 @@ def extract_markdown_block(text):
     cs = start + len("@@@START@@@")
     return text[cs:end].strip() if (end != -1 and end > start) else text[cs:].strip()
 
-
 def is_valid_content(text):
     return bool(text) and len(text) >= 300 and "@@@START@@@" in text and "🍉" in text
-
 
 def _is_placeholder(text):
     return not text or (text.startswith("<") and text.endswith(">"))
 
 
-# ════════════════════════════════════════════════════════════════
-# 主流程
-# ════════════════════════════════════════════════════════════════
 def main():
     print("=" * 60, flush=True)
-    print("🚀 AI吃瓜日报自动化任务启动（Session 自我续期版）", flush=True)
+    print("🚀 AI吃瓜日报自动化任务启动（PDF级排版渲染版）", flush=True)
     print("=" * 60, flush=True)
 
     check_cookie_expiry()
-
     is_storage_state = prepare_session_file()
 
     raw_b_text    = ""
@@ -740,22 +687,15 @@ def main():
         browser = pw.chromium.launch(
             headless=True,
             args=[
-                "--no-sandbox",
-                "--disable-setuid-sandbox",
-                "--disable-dev-shm-usage",
-                "--disable-gpu",
-                "--disable-blink-features=AutomationControlled",
+                "--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage",
+                "--disable-gpu", "--disable-blink-features=AutomationControlled",
                 "--window-size=1280,800",
             ],
         )
 
         ctx_opts = {
             "viewport":   {"width": 1280, "height": 800},
-            "user_agent": (
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/122.0.0.0 Safari/537.36"
-            ),
+            "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
             "locale": "zh-CN",
         }
         if is_storage_state:
@@ -768,53 +708,33 @@ def main():
 
         page = context.new_page()
 
-        # Step 1：打开 Grok
         print("\n打开 grok.com...", flush=True)
         page.goto("https://grok.com", wait_until="domcontentloaded", timeout=60000)
         time.sleep(3)
-        page.screenshot(path="00_opened.png")
 
-        # 检查登录状态
         if "sign" in page.url.lower() or "login" in page.url.lower():
             print("❌ 未登录，Cookie/Session 已失效，请更新 Super_GROK_COOKIES", flush=True)
-            page.screenshot(path="00_login_required.png")
             browser.close()
             raise SystemExit(1)
         print("✅ 已登录 Grok", flush=True)
 
-        # Step 2：开启 Grok 4.20 Beta
         enable_grok4_beta(page)
 
-        # Step 3：阶段 A
         send_prompt(page, build_prompt_a(), "阶段A", "03_stage_a")
         print("[阶段A] ⏳ 强制等待 50s...", flush=True)
         time.sleep(50)
-        wait_and_extract(
-            page, "阶段A", "03_stage_a",
-            interval=3, stable_rounds=4, max_wait=120,
-            extend_if_growing=True, min_len=100,
-        )
+        wait_and_extract(page, "阶段A", "03_stage_a", interval=3, stable_rounds=4, max_wait=120, extend_if_growing=True, min_len=100)
 
-        # Step 4：阶段 B
         send_prompt(page, build_prompt_b(), "阶段B", "04_stage_b")
         print("[阶段B] ⏳ 强制等待 60s...", flush=True)
         time.sleep(60)
-        raw_b_text = wait_and_extract(
-            page, "阶段B", "04_stage_b",
-            interval=5, stable_rounds=3, max_wait=300,
-            extend_if_growing=True, min_len=1000,
-        )
+        raw_b_text = wait_and_extract(page, "阶段B", "04_stage_b", interval=5, stable_rounds=3, max_wait=300, extend_if_growing=True, min_len=1000)
         print(f"\n阶段B 内容长度：{len(raw_b_text)} 字符", flush=True)
 
-        # Step 5：阶段 C
         cover_raw = ""
         try:
             send_prompt(page, build_prompt_c(), "阶段C", "05_stage_c")
-            cover_raw = wait_and_extract(
-                page, "阶段C", "05_stage_c",
-                interval=3, stable_rounds=3, max_wait=90,
-                extend_if_growing=False, min_len=80,
-            )
+            cover_raw = wait_and_extract(page, "阶段C", "05_stage_c", interval=3, stable_rounds=3, max_wait=90, extend_if_growing=False, min_len=80)
         except Exception as e:
             print(f"[阶段C] ⚠️ 执行异常：{e}", flush=True)
 
@@ -825,66 +745,46 @@ def main():
         cover_prompt  = prompt_m.group(1).strip()  if prompt_m  else ""
         cover_insight = insight_m.group(1).strip() if insight_m else ""
 
-        # 检测占位符，触发 Kimi 兜底
-        if _is_placeholder(cover_title_c) or _is_placeholder(cover_prompt):
-            print("[阶段C] 检测到占位符，启动 Kimi 兜底...", flush=True)
-            cover_title_c, cover_prompt, cover_insight = kimi_fallback(raw_b_text)
-        elif not cover_title_c and not cover_prompt:
-            print("[阶段C] 三项均为空，启动 Kimi 兜底...", flush=True)
+        if _is_placeholder(cover_title_c) or _is_placeholder(cover_prompt) or (not cover_title_c and not cover_prompt):
+            print("[阶段C] 数据缺失或带有占位符，启动 Kimi 兜底...", flush=True)
             cover_title_c, cover_prompt, cover_insight = kimi_fallback(raw_b_text)
 
-        print(f"\n[阶段C] 动态标题：{cover_title_c}", flush=True)
-        print(f"[阶段C] 封面图提示词：{cover_prompt[:80]}...", flush=True)
-        print(f"[阶段C] 深度解读：{cover_insight[:60]}...", flush=True)
-
-        # 保存 context 引用，供续期使用
         saved_context = context
-
-        # ── Session 自我续期 ─────────────────────────────────────
         save_and_renew_session(saved_context)
-
         browser.close()
 
-    # 内容质量守卫
     if not is_valid_content(raw_b_text):
         print("\n❌ 日报内容质量不达标，终止推送。", flush=True)
-        print(f" 原始内容前200字：{raw_b_text[:200]}", flush=True)
         raise SystemExit(1)
 
     final_markdown = extract_markdown_block(raw_b_text) or raw_b_text.strip()
     final_markdown = clean_format(final_markdown)
 
-    # Step 6：生图
     cover_url = generate_cover_image(cover_prompt)
-    download_image(cover_url, "cover.png")
+    if cover_url:
+        import urllib.request
+        try:
+            urllib.request.urlretrieve(cover_url, "cover.png")
+        except Exception:
+            pass
 
-    # Step 7：标题
     if cover_title_c and not _is_placeholder(cover_title_c):
         title = cover_title_c
     else:
-        m = re.search(r"昨夜，X上[^\n]*", final_markdown)
-        title = m.group(0).strip() if m else "AI圈极客吃瓜日报"
-    print(f"\n标题：{title}", flush=True)
+        m = re.search(r"📡.*?[|\n]", final_markdown)
+        title = m.group(0).strip('📡| \n') if m else "AI圈极客大事扫描"
+    print(f"\n最终推文标题：{title}", flush=True)
 
-    # Step 8：ImgBB
     imgbb_url = upload_to_imgbb("cover.png")
     final_cover_url = imgbb_url if imgbb_url else cover_url
-    print(f"封面图最终 URL：{final_cover_url[:80] if final_cover_url else '无'}", flush=True)
 
-    # Step 9：推送飞书（全部 Webhook）
-    print("\n推送飞书...", flush=True)
+    print("\n推送飞书 (带 PDF 级精美排版)...", flush=True)
     push_to_feishu(build_feishu_card(final_markdown, title, final_cover_url, cover_insight))
 
-    # Step 10：推送极简云（微信，个人号暂不可用，配置了才推）
     if JIJYUN_WEBHOOK_URL:
-        print("推送极简云...", flush=True)
-        push_to_jijyun(
-            build_wechat_html(final_markdown, final_cover_url, cover_insight),
-            title, final_cover_url,
-        )
+        push_to_jijyun(build_wechat_html(final_markdown, final_cover_url, cover_insight), title, final_cover_url)
 
-    print("\n🎉 全部完成！", flush=True)
-
+    print("\n🎉 全部自动化任务流执行完成！", flush=True)
 
 if __name__ == "__main__":
     main()
