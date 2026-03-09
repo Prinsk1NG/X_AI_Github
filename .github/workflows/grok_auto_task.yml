@@ -8,7 +8,9 @@ on:
 jobs:
   run-grok:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 60
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
@@ -39,6 +41,7 @@ jobs:
           KIMI_API_KEY:         ${{ secrets.KIMI_API_KEY }}
           PAT_FOR_SECRETS:      ${{ secrets.PAT_FOR_SECRETS }}
           GITHUB_REPOSITORY:    ${{ github.repository }}
+          JIJYUN_WEBHOOK_URL:   ${{ secrets.JIJYUN_WEBHOOK_URL }}
         run: python grok_auto_task.py
 
       - name: Commit daily data

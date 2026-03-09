@@ -37,8 +37,8 @@ GITHUB_REPOSITORY  = os.getenv("GITHUB_REPOSITORY", "")
 
 # ── Global timeout tracking ──────────────────────────────────────────────────
 _START_TIME      = time.time()
-PHASE1_DEADLINE  = 14 * 60   # 14 min → trigger degradation (skip remaining batches)
-GLOBAL_DEADLINE  = 18 * 60   # 18 min → stop Grok, hand off to Kimi
+PHASE1_DEADLINE  = 20 * 60   # 20 min → trigger degradation (skip remaining batches)
+GLOBAL_DEADLINE  = 45 * 60   # 45 min → stop Grok, hand off to Kimi
 
 # ── 100 accounts – ordered high-value first so degradation truncates B-tier ──
 ALL_ACCOUNTS = [
@@ -582,7 +582,8 @@ def open_grok_page(context):
 # ════════════════════════════════════════════════════════════════════════════
 # Run one Grok batch conversation
 # ════════════════════════════════════════════════════════════════════════════
-def run_grok_batch(context, accounts: list, prompt_builder, label: str) -> list:
+def run_grok_batch(context, accounts: list, prompt_builder, label: str,
+                   initial_wait: int = 60) -> list:
     """
     Open a fresh Grok page, send the prompt, wait, parse and return JSON objects.
     Each call ≈ 8 rounds × 3 parallel = 24 accounts (within 25-call safety limit).
@@ -602,12 +603,12 @@ def run_grok_batch(context, accounts: list, prompt_builder, label: str) -> list:
         prompt = prompt_builder(accounts)
         send_prompt(page, prompt, label, label.lower().replace(" ", "_"))
 
-        print(f"[{label}] ⏳ Waiting 45s for Grok to start...", flush=True)
-        time.sleep(45)
+        print(f"[{label}] ⏳ Waiting {initial_wait}s for Grok to start...", flush=True)
+        time.sleep(initial_wait)
 
         raw_text = wait_and_extract(
             page, label, label.lower().replace(" ", "_"),
-            interval=5, stable_rounds=3, max_wait=360,
+            interval=5, stable_rounds=5, max_wait=360,
             extend_if_growing=True, min_len=50,
         )
         results = parse_jsonlines(raw_text)
@@ -625,7 +626,7 @@ def run_grok_batch(context, accounts: list, prompt_builder, label: str) -> list:
 
 
 # ════════════════════════════════════════════════════════════════════════════
-# Kimi summarisation (moonshot-v1-32k)
+# Kimi summarisation (moonshot-v1-kimi-k2 / K2.5)
 # ════════════════════════════════════════════════════════════════════════════
 def kimi_summarize(combined_jsonl: str, today_str: str):
     """
@@ -636,8 +637,8 @@ def kimi_summarize(combined_jsonl: str, today_str: str):
         print("[Kimi] ⚠️ KIMI_API_KEY not configured", flush=True)
         return "", "", "", ""
 
-    # Truncate if too large for 32k context (~22 000 chars safe for prompt+response)
-    max_data_chars = 22000
+    # K2.5 supports ~256K tokens; 200K chars ≈ 150K tokens, safely within the window
+    max_data_chars = 200000
     if len(combined_jsonl) > max_data_chars:
         print(f"[Kimi] ⚠️ Data truncated from {len(combined_jsonl)} "
               f"to {max_data_chars} chars", flush=True)
@@ -648,6 +649,11 @@ def kimi_summarize(combined_jsonl: str, today_str: str):
 {combined_jsonl}
 
 今天日期：{today_str}
+
+【重要规则：语言要求】
+- 最终报告中所有引用的推文内容必须翻译成中文输出
+- 严禁在报告中保留任何英文原文推文（包括帖子摘要、引用内容等）
+- 翻译风格：准确、简洁、口语化
 
 请按顺序完成以下任务：
 
@@ -691,11 +697,9 @@ AI模型/产品 | 公司竞争/融资 | AI政策/国防 | 观点争论 | 技术�
 **🍉 1. 话题标题**
 **🗣️ 极客原声态：**
 @账号 | 姓名 | 身份
-> "中文翻译内容"(❤️赞/💬评)
-**📝 严肃吃瓜：**
-• 📌 增量事实和知识...
-• 🧠 背后隐性博弈分析...
-• 🎯 资本风向标...
+> "中文翻译内容（禁止保留英文原文）"(❤️赞/💬评)
+**💡 Insight：**
+[针对本话题事实的深度解读，可包含行业影响、投资启发、普通人日常生活启发；有相关启发就写，没有就不写；100字以内]
 
 （按此格式完成剩余话题，不少于10条，合理分配巨头宫斗、中文圈、开源基建、硬件与空间计算等维度分类）
 @@@END@@@
@@ -703,22 +707,22 @@ AI模型/产品 | 公司竞争/融资 | AI政策/国防 | 观点争论 | 技术�
 ## 任务7：生成封面素材（在@@@END@@@后面单独输出）
 TITLE: <中文标题，15~30个汉字，极度抓眼球>
 PROMPT: <英文文生图提示词，American comic book style，两股势力对抗，<=150词>
-INSIGHT: <150~200字深度解读，分析对中国AI从业者/VC/散户的影响，幽默风趣>"""
+INSIGHT: <100字以内，针对今天标题所描述事实的深度解读。可包含：行业影响、投资启发、普通人日常生活启发。有相关启发就写，没有就不写>"""
 
     try:
-        print(f"[Kimi] Calling moonshot-v1-32k (data: {len(combined_jsonl)} chars)...",
+        print(f"[Kimi] Calling moonshot-v1-kimi-k2 (data: {len(combined_jsonl)} chars)...",
               flush=True)
         resp = requests.post(
             "https://api.moonshot.cn/v1/chat/completions",
             headers={"Authorization": f"Bearer {KIMI_API_KEY}",
                      "Content-Type": "application/json"},
             json={
-                "model": "moonshot-v1-32k",
+                "model": "moonshot-v1-kimi-k2",
                 "messages": [{"role": "user", "content": kimi_prompt}],
                 "temperature": 0.7,
-                "max_tokens": 4000,
+                "max_tokens": 8000,
             },
-            timeout=120,
+            timeout=180,
         )
         resp.raise_for_status()
         result = resp.json()["choices"][0]["message"]["content"].strip()
@@ -756,11 +760,11 @@ def kimi_fallback(raw_b_text):
             headers={"Authorization": f"Bearer {KIMI_API_KEY}",
                      "Content-Type": "application/json"},
             json={
-                "model": "moonshot-v1-8k",
+                "model": "moonshot-v1-kimi-k2",
                 "messages": [
                     {"role": "user", "content": (
                         "根据以下内容生成三行结果：\n" + raw_b_text[:6000] +
-                        "\nTITLE: <标题>\nPROMPT: <英文提示词>\nINSIGHT: <解读>"
+                        "\nTITLE: <标题>\nPROMPT: <英文提示词>\nINSIGHT: <100字以内解读>"
                     )}
                 ],
                 "temperature": 0.7, "max_tokens": 1000,
@@ -833,29 +837,52 @@ def upload_to_imgbb(image_path):
 
 
 # ════════════════════════════════════════════════════════════════════════════
-# 🌟 Feishu card builder – PDF-level layout (fully preserved)
+# 🌟 Feishu multi-card builder – one dashboard card + one card per topic
 # ════════════════════════════════════════════════════════════════════════════
-def build_feishu_card(text, title, cover_url="", insight=""):
-    text = clean_format(text)
-    elements = []
 
-    # --- 1. Top: cover image + insight ---
-    if cover_url:
-        elements.append({
-            "tag": "div",
-            "text": {"tag": "lark_md",
-                     "content": f"🖼️ [**点击查看 AI 生成的头条封面图**]({cover_url})"}
-        })
+# Category keyword → Feishu header template colour
+_CATEGORY_COLORS = {
+    "巨头宫斗": "indigo", "宫斗": "indigo",
+    "中文圈":   "orange",
+    "开源基建": "green",  "开源": "green", "基建": "green",
+    # 硬件 and 空间计算 are treated as one visual dimension, both mapped to purple
+    "硬件":     "purple", "空间计算": "purple",
+    "投资":     "blue",
+    "研究员":   "grey",   "研究": "grey",
+}
+
+
+def _category_color(text: str):
+    """Return Feishu template color if text contains a known category keyword, else None."""
+    for kw, color in _CATEGORY_COLORS.items():
+        if kw in text:
+            return color
+    return None
+
+
+def build_feishu_cards(text: str, title: str, insight: str = "") -> list:
+    """
+    Build a list of Feishu interactive card payloads:
+      - Card 0: data dashboard + executive summary (+ insight)
+      - Card N: one card per 🍉 topic, coloured by category
+    No cover images are included in any card.
+    """
+    text = clean_format(text)
+    cards = []
+
+    # ── Card 0: Dashboard + Summary ─────────────────────────────────────────
+    elements = []
 
     if insight:
         elements.append({
             "tag": "div",
             "text": {"tag": "lark_md",
-                     "content": f"<font color='orange'>**💡 主编深度点评**</font>\n{insight}"}
+                     "content": f"<font color='orange'>**💡 Insight**</font>\n{insight}"}
         })
         elements.append({"tag": "hr"})
 
-    # --- 2. Data dashboard (【数据看板】) rendered as fields grid ---
+    # Data panel
+    remaining = text
     data_panel_match = re.search(r"【数据看板】\s*([\s\S]*?)(?=【执行摘要】)", text)
     if data_panel_match:
         data_str = data_panel_match.group(1).replace('\n', '')
@@ -874,10 +901,10 @@ def build_feishu_card(text, title, cover_url="", insight=""):
         if fields:
             elements.append({"tag": "div", "fields": fields})
             elements.append({"tag": "hr"})
-        text = text.replace(data_panel_match.group(0), "")
+        remaining = remaining.replace(data_panel_match.group(0), "")
 
-    # --- 3. Executive summary (【执行摘要】) with red/green colouring ---
-    summary_match = re.search(r"【执行摘要】\s*([\s\S]*?)(?=【动态详情】|\*\*.)", text)
+    # Executive summary
+    summary_match = re.search(r"【执行摘要】\s*([\s\S]*?)(?=【动态详情】|\*\*.)", remaining)
     if summary_match:
         summary_text = summary_match.group(1).strip()
         summary_text = summary_text.replace(
@@ -889,24 +916,9 @@ def build_feishu_card(text, title, cover_url="", insight=""):
             "text": {"tag": "lark_md",
                      "content": f"**📋 EXECUTIVE SUMMARY**\n{summary_text}"}
         })
-        elements.append({"tag": "hr"})
-        text = text.replace(summary_match.group(0), "")
+        remaining = remaining.replace(summary_match.group(0), "")
 
-    # Clean up residual markers
-    text = text.replace("【动态详情】", "").strip()
-    text = re.sub(r"^📡.*?\n+", "", text).strip()
-
-    # --- 4. Story blocks split on 🍉 ---
-    for part in re.split(r"(?=\*\*🍉)", text):
-        part = part.strip()
-        if not part:
-            continue
-        elements.append({
-            "tag": "div",
-            "text": {"tag": "lark_md", "content": part[:4000]},
-        })
-
-    return {
+    cards.append({
         "msg_type": "interactive",
         "card": {
             "config": {"wide_screen_mode": True},
@@ -916,19 +928,87 @@ def build_feishu_card(text, title, cover_url="", insight=""):
             },
             "elements": elements,
         },
-    }
+    })
+
+    # ── Topic cards ──────────────────────────────────────────────────────────
+    # Strip boilerplate markers
+    remaining = remaining.replace("【动态详情】", "").strip()
+    remaining = re.sub(r"^📡.*?\n+", "", remaining).strip()
+
+    # First pass: determine category color per topic number by scanning lines
+    topic_colors: dict = {}
+    current_color = "indigo"
+    topic_idx = 0
+    for line in remaining.splitlines():
+        stripped = line.strip()
+        # Only update color for lines that actually match a known category keyword
+        if stripped.startswith("**") and "🍉" not in stripped:
+            matched = _category_color(stripped)
+            if matched is not None:
+                current_color = matched
+        elif "**🍉" in stripped:
+            topic_idx += 1
+            topic_colors[topic_idx] = current_color
+
+    # Second pass: build individual topic cards
+    current_color = "indigo"
+    topic_idx = 0
+    for part in re.split(r"(?=\*\*🍉)", remaining):
+        part = part.strip()
+        if not part:
+            continue
+
+        # Check whether this chunk is a pure section header block (no 🍉 topics inside)
+        if "**🍉" not in part:
+            # Update color if any category keyword is present
+            matched = _category_color(part)
+            if matched is not None:
+                current_color = matched
+            continue
+
+        topic_idx += 1
+        color = topic_colors.get(topic_idx, current_color)
+
+        # Extract short title for card header
+        title_match = re.match(r"\*\*🍉\s*\d*[.、]?\s*([^\n*]+?)\*{0,2}\s*$",
+                               part.splitlines()[0])
+        topic_title = title_match.group(1).strip() if title_match else "话题"
+
+        cards.append({
+            "msg_type": "interactive",
+            "card": {
+                "config": {"wide_screen_mode": True},
+                "header": {
+                    "title": {"tag": "plain_text", "content": f"🍉 {topic_title}"},
+                    "template": color,
+                },
+                "elements": [{
+                    "tag": "div",
+                    "text": {"tag": "lark_md", "content": part[:4000]},
+                }],
+            },
+        })
+
+    return cards
 
 
-def push_to_feishu(card_payload):
+def push_to_feishu(cards):
+    """Push one or more Feishu card payloads to all configured webhooks."""
     webhooks = get_feishu_webhooks()
     if not webhooks:
         return
-    for i, url in enumerate(webhooks, 1):
-        try:
-            resp = requests.post(url, json=card_payload, timeout=30)
-            print(f"Feishu push #{i}: {resp.status_code} | {resp.text[:80]}", flush=True)
-        except Exception as e:
-            print(f"Feishu push #{i} error: {e}", flush=True)
+    if isinstance(cards, dict):
+        cards = [cards]
+    for idx, card in enumerate(cards, 1):
+        for i, url in enumerate(webhooks, 1):
+            try:
+                resp = requests.post(url, json=card, timeout=30)
+                print(f"Feishu card {idx} → webhook #{i}: "
+                      f"{resp.status_code} | {resp.text[:80]}", flush=True)
+            except Exception as e:
+                print(f"Feishu card {idx} → webhook #{i} error: {e}", flush=True)
+        if idx < len(cards):
+            time.sleep(0.5)  # brief pause to avoid webhook rate-limits
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -1169,7 +1249,8 @@ def main():
                     break
                 batch   = s_accounts[batch_start:batch_start + BATCH_SIZE]
                 label   = f"Phase2-S-Batch{batch_start // BATCH_SIZE + 1}"
-                results = run_grok_batch(context, batch, build_phase2_s_prompt, label)
+                results = run_grok_batch(context, batch, build_phase2_s_prompt, label,
+                                         initial_wait=90)
                 for obj in results:
                     account = obj.get("a", "").lstrip("@")
                     if account and obj.get("type") != "meta":
@@ -1279,16 +1360,15 @@ def main():
     # ════════════════════════════════════════════════════════════════════════
     # Push to Feishu + WeChat
     # ════════════════════════════════════════════════════════════════════════
-    print("\n[Push] Sending to Feishu (PDF-level layout)...", flush=True)
+    print("\n[Push] Sending to Feishu (multi-card layout)...", flush=True)
     push_to_feishu(
-        build_feishu_card(final_markdown, title, final_cover_url, cover_insight)
+        build_feishu_cards(final_markdown, title, cover_insight)
     )
 
-    if JIJYUN_WEBHOOK_URL:
-        push_to_jijyun(
-            build_wechat_html(final_markdown, final_cover_url, cover_insight),
-            title, final_cover_url,
-        )
+    push_to_jijyun(
+        build_wechat_html(final_markdown, final_cover_url, cover_insight),
+        title, final_cover_url,
+    )
 
     print("\n🎉 All tasks completed!", flush=True)
 
