@@ -1,9 +1,9 @@
 {
   "date": "2026-03-10",
   "classification": {
-    "elonmusk": "A",
+    "elonmusk": "S",
     "sama": "S",
-    "karpathy": "A",
+    "karpathy": "B",
     "demishassabis": "A",
     "darioamodei": "inactive",
     "OpenAI": "A",
@@ -40,11 +40,11 @@
     "lightspeedvp": "B",
     "sequoia": "B",
     "foundersfund": "inactive",
-    "eladgil": "B",
-    "pmarca": "A",
+    "eladgil": "A",
+    "pmarca": "S",
     "bchesky": "B",
-    "chamath": "B",
-    "paulg": "B",
+    "chamath": "A",
+    "paulg": "A",
     "TheInformation": "B",
     "TechCrunch": "B",
     "verge": "B",
@@ -58,7 +58,7 @@
     "Cohere": "B",
     "TogetherCompute": "B",
     "runwayml": "B",
-    "Midjourney": "A",
+    "Midjourney": "B",
     "StabilityAI": "B",
     "Scale_AI": "B",
     "CerebrasSystems": "inactive",
@@ -69,7 +69,7 @@
     "supabase": "B",
     "vllm_project": "B",
     "huggingface_hub": "inactive",
-    "nvidia": "A",
+    "nvidia": "B",
     "AMD": "B",
     "Intel": "B",
     "SKhynix": "B",
@@ -99,7 +99,7 @@
     "aiexplained": "inactive",
     "aipubcast": "inactive",
     "lexfridman": "A",
-    "hubermanlab": "A",
-    "swyx": "A"
+    "hubermanlab": "B",
+    "swyx": "B"
   }
 }
