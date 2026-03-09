@@ -77,7 +77,7 @@
     "magicleap": "B",
     "NathieVR": "B",
     "PalmerLuckey": "A",
-    "ID_AA_Carmack": "B",
+    "ID_AA_Carmack": "A",
     "boz": "B",
     "rabovitz": "B",
     "htcvive": "B",
@@ -85,7 +85,7 @@
     "RayBan": "inactive",
     "MetaQuestVR": "B",
     "PatrickMoorhead": "B",
-    "jeffdean": "B",
+    "jeffdean": "A",
     "chrmanning": "B",
     "hardmaru": "A",
     "goodfellow_ian": "A",
@@ -100,6 +100,6 @@
     "aipubcast": "inactive",
     "lexfridman": "A",
     "hubermanlab": "A",
-    "swyx": "B"
+    "swyx": "A"
   }
 }
