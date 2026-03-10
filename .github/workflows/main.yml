@@ -1,0 +1,73 @@
+name: Test LLM Endpoints
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run-diagnostics:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Network & DNS checks (help diagnose OpenRouter DNS issues)
+        run: |
+          set -eux
+          sudo apt-get update -y
+          sudo apt-get install -y dnsutils curl
+          echo "=== DNS: api.openrouter.ai ==="
+          dig +short api.openrouter.ai || true
+          echo "=== DNS: openrouter.ai ==="
+          dig +short openrouter.ai || true
+          echo "=== curl openrouter.ai (HEAD) ==="
+          curl -vI https://openrouter.ai/ || true
+          echo "=== curl api.openrouter.ai (HEAD) ==="
+          curl -vI https://api.openrouter.ai/ || true
+          echo "=== python getaddrinfo test ==="
+          python3 - <<'PY'
+import socket
+for host in ("api.openrouter.ai","openrouter.ai"):
+    try:
+        addrs = socket.getaddrinfo(host, 443)
+        print(host, "->", len(addrs), "addrs")
+    except Exception as e:
+        print(host, "ERR", e)
+PY
+
+      - name: Run test_llm_endpoints.py (with OPENROUTER_ENDPOINTS preferring openrouter.ai)
+        env:
+          KIMI_API_KEY: ${{ secrets.KIMI_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENROUTER_MODEL: ${{ secrets.OPENROUTER_MODEL }}
+          # Priority: try openrouter.ai first, then api.openrouter.ai
+          OPENROUTER_ENDPOINTS: "https://openrouter.ai/api/v1/chat/completions,https://api.openrouter.ai/v1/chat/completions"
+          KIMI_TEMPERATURE: ${{ secrets.KIMI_TEMPERATURE }}
+        run: |
+          set -eux
+          export PYTHONUTF8=1
+          echo "OPENROUTER_ENDPOINTS=$OPENROUTER_ENDPOINTS"
+          echo "Using prompt source: data/2026-03-10 (script will choose newest readable file inside)"
+          python3 test_llm_endpoints.py --prompt-file data/2026-03-10 --kmax 3000 --cmax 3000 --save-json
+          echo "=== After script run: listing debug_outputs ==="
+          ls -la debug_outputs || true
+          if [ -f debug_outputs/summary.json ]; then
+            echo "=== content of debug_outputs/summary.json ==="
+            cat debug_outputs/summary.json
+          fi
+
+      - name: Upload debug outputs (always upload for inspection)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: llm-debug-outputs
+          path: debug_outputs/
