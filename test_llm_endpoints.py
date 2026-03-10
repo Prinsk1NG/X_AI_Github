@@ -82,6 +82,12 @@ def safe_print_request_info(prefix: str, url: str, headers: Dict[str, Any], payl
     print(f"[DEBUG] {prefix} -> headers: {redact_headers(headers)}")
     print(f"[DEBUG] {prefix} -> payload chars: {payload_chars}, est tokens: {est_tokens}")
 
+def _get_proxies_from_env() -> Optional[Dict[str, str]]:
+    proxy_url = os.getenv("HTTPS_PROXY") or os.getenv("https_proxy") or os.getenv("HTTP_PROXY") or os.getenv("http_proxy")
+    if proxy_url:
+        return {"https": proxy_url, "http": proxy_url}
+    return None
+
 def send_post_with_capture(name: str, url: str, headers: Dict[str, Any], json_payload: Dict[str, Any], timeout: int = 300,
                            max_retries: int = 4, backoff_base: float = 1.0) -> Dict[str, Any]:
     """
@@ -92,6 +98,7 @@ def send_post_with_capture(name: str, url: str, headers: Dict[str, Any], json_pa
 
     Retries on network errors and on retryable status codes (429, 502, 503, 504).
     Exponential backoff with jitter is used.
+    Honors HTTPS proxy environment variables if present.
     """
     out: Dict[str, Any] = {
         "service": name,
@@ -99,6 +106,8 @@ def send_post_with_capture(name: str, url: str, headers: Dict[str, Any], json_pa
         "timestamp_utc": datetime.utcnow().isoformat() + "Z",
         "request_headers": redact_headers(headers),
     }
+
+    proxies = _get_proxies_from_env()
 
     # metadata about attempts
     attempts = []
@@ -112,7 +121,12 @@ def send_post_with_capture(name: str, url: str, headers: Dict[str, Any], json_pa
             out["request_est_tokens"] = estimate_tokens(json.dumps(json_payload, ensure_ascii=False))
             safe_print_request_info(name, url, headers, json_payload)
 
-            resp = requests.post(url, headers=headers, json=json_payload, timeout=timeout)
+            # perform request (respect proxies if set)
+            if proxies:
+                resp = requests.post(url, headers=headers, json=json_payload, timeout=timeout, proxies=proxies)
+            else:
+                resp = requests.post(url, headers=headers, json=json_payload, timeout=timeout)
+
             attempt_meta["status_code"] = resp.status_code
             body_text = safe_decode_content(resp)
             attempt_meta["response_snippet"] = body_text[:500]
@@ -138,7 +152,7 @@ def send_post_with_capture(name: str, url: str, headers: Dict[str, Any], json_pa
             # Retryable status codes
             if resp.status_code in (429, 502, 503, 504):
                 print(f"[WARN] {name} -> attempt {attempt} received retryable status {resp.status_code}.")
-                # fall through to retry logic below
+                # fall through to retry logic
 
             else:
                 # Non-retryable error (e.g., 400) — return immediately with response content
@@ -200,19 +214,12 @@ def send_post_with_capture(name: str, url: str, headers: Dict[str, Any], json_pa
 def build_prompt_from_file_or_default(prompt_file: Optional[str]) -> str:
     """
     Load prompt text from a given path or fall back to existing data/ files or a built-in prompt.
-
-    Behavior:
-    - If prompt_file is None or empty: try to pick a recent file from data/.
-    - If prompt_file exists and is a file: read it (with encoding fallback).
-    - If prompt_file exists and is a directory: pick the newest readable file inside it.
-    - If anything fails, fall back to a built-in small prompt.
     """
     if prompt_file:
         p = Path(prompt_file)
         if not p.exists():
             print(f"[WARN] prompt path {prompt_file} not found, falling back to built-in prompt.")
         elif p.is_dir():
-            # If passed a directory, choose newest readable file inside
             files = sorted(p.glob("*"), key=lambda x: x.stat().st_mtime, reverse=True)
             for f in files:
                 if f.is_file():
@@ -225,7 +232,6 @@ def build_prompt_from_file_or_default(prompt_file: Optional[str]) -> str:
                         continue
             print(f"[WARN] prompt directory {prompt_file} contains no readable files, falling back to built-in prompt.")
         else:
-            # Passed a file: read safely
             try:
                 txt = p.read_text(encoding="utf-8")
                 print(f"[INFO] Using prompt file: {p}")
@@ -238,7 +244,6 @@ def build_prompt_from_file_or_default(prompt_file: Optional[str]) -> str:
                 except Exception:
                     print(f"[WARN] Failed to read prompt file {prompt_file}, falling back to built-in prompt.")
 
-    # Try to use existing combined data if present (data/*)
     candidate = Path("data")
     if candidate.exists() and candidate.is_dir():
         files = sorted(candidate.glob("*"), key=lambda x: x.stat().st_mtime, reverse=True)
@@ -248,11 +253,10 @@ def build_prompt_from_file_or_default(prompt_file: Optional[str]) -> str:
                     txt = f.read_text(encoding="utf-8")
                     if len(txt) > 200:
                         print(f"[INFO] Using prompt from data file: {f}")
-                        return txt[:20000]  # cap to avoid huge payloads
+                        return txt[:20000]
                 except Exception:
                     continue
 
-    # fallback prompt
     print("[INFO] Using built-in fallback prompt.")
     return "测试: 请基于以下示例数据生成三行简短输出。\n" + ("这是一个测试行。\n" * 50)
 
@@ -289,18 +293,22 @@ def run_kimi(prompt: str, max_output_tokens: int):
 def run_claude(prompt: str, max_output_tokens: int, x_title_safe: str = "AI_Daily_Report"):
     """
     Send request to OpenRouter (Claude).
-    Attempt a list of possible endpoints for resilience against DNS/server differences.
+    Attempt endpoints from OPENROUTER_ENDPOINTS env or default list for resilience.
     """
     if not OPENROUTER_API_KEY:
         print("[Claude] OPENROUTER_API_KEY not set in environment; skipping Claude test.")
         return None
 
     openrouter_model = os.getenv("OPENROUTER_MODEL", "claude-2.1")
-    # Try endpoints in order; some environments resolve one but not the other
-    endpoints = [
-        "https://api.openrouter.ai/v1/chat/completions",
-        "https://openrouter.ai/api/v1/chat/completions",  # fallback if api host fails
-    ]
+    env_eps = os.getenv("OPENROUTER_ENDPOINTS")
+    if env_eps:
+        endpoints = [e.strip() for e in env_eps.split(",") if e.strip()]
+    else:
+        endpoints = [
+            "https://openrouter.ai/api/v1/chat/completions",
+            "https://api.openrouter.ai/v1/chat/completions",
+        ]
+
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         "Content-Type": "application/json",
@@ -319,19 +327,18 @@ def run_claude(prompt: str, max_output_tokens: int, x_title_safe: str = "AI_Dail
         print(f"[INFO] Claude_OpenRouter -> trying endpoint: {ep}")
         resp = send_post_with_capture("Claude_OpenRouter", ep, headers, payload, timeout=300, max_retries=3, backoff_base=1.0)
         last_resp = resp
-        # If network-level exception present, try next endpoint
-        if resp.get("exception") or ("response_status" not in resp and resp.get("response_json") is None):
+        # If network-level exception present or no response_status, try next endpoint
+        if resp.get("exception") or (resp.get("response_status") is None and not resp.get("response_json")):
             print(f"[WARN] Claude_OpenRouter -> attempt to {ep} failed (see dump). Trying next endpoint if any.")
             continue
-        # If we got a retryable status recorded in response_status that is network-like, try next
         status = resp.get("response_status")
         if status and status >= 500:
             print(f"[WARN] Claude_OpenRouter -> server error {status} at {ep}, trying next endpoint if any.")
             continue
-        # success or client error (400-series), stop trying further endpoints
+        # success or client error (400-series) -> stop further attempts
         break
 
-    # If last_resp indicates model-not-found (404 with specific message), log hint
+    # If last_resp indicates model-not-found, log hint
     try:
         err = (last_resp.get("response_json") or {})
         if isinstance(err, dict):
@@ -353,7 +360,7 @@ def list_openrouter_models():
     url = "https://api.openrouter.ai/v1/models"
     headers = {"Authorization": f"Bearer {OPENROUTER_API_KEY}"}
     try:
-        r = requests.get(url, headers=headers, timeout=30)
+        r = requests.get(url, headers=headers, timeout=30, proxies=_get_proxies_from_env())
         info = {
             "service": "OpenRouter_ListModels",
             "url": url,
