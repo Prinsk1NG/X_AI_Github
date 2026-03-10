@@ -627,28 +627,13 @@ def run_grok_batch(context, accounts: list, prompt_builder, label: str,
 
 
 # ════════════════════════════════════════════════════════════════════════════
-# LLM summarisation (Claude Sonnet 4.6 via OpenRouter, fallback to Kimi)
+# LLM summarisation – Kimi 2.5 (primary) + Claude Sonnet 4.6 via OpenRouter (secondary)
+# Both models run independently; each pushes its own report to Feishu.
 # ════════════════════════════════════════════════════════════════════════════
-def llm_summarize(combined_jsonl: str, today_str: str):
-    """
-    Send combined JSON Lines to Claude via OpenRouter for full analysis and
-    daily-report generation.  Falls back to Kimi moonshot-v1-32k if OpenRouter
-    is unavailable.
-    Returns (report_text, cover_title, cover_prompt, cover_insight).
-    """
-    if not OPENROUTER_API_KEY and not KIMI_API_KEY:
-        print("[LLM] ⚠️ No API key configured (OPENROUTER_API_KEY / KIMI_API_KEY)", flush=True)
-        return "", "", "", ""
 
-    # Claude has 1M token context – no need to truncate even large payloads.
-    # Keep a generous safety cap just in case.
-    max_data_chars = 200000
-    if len(combined_jsonl) > max_data_chars:
-        print(f"[LLM] ⚠️ Data truncated from {len(combined_jsonl)} "
-              f"to {max_data_chars} chars", flush=True)
-        combined_jsonl = combined_jsonl[:max_data_chars]
-
-    prompt = f"""你是硅谷AI圈资深分析师，精通Twitter/X内容分析和吃瓜日报写作。以下是今天从X平台采集的原始JSON Lines数据：
+def _build_llm_prompt(combined_jsonl: str, today_str: str) -> str:
+    """Return the shared prompt sent to both LLMs."""
+    return f"""你是硅谷AI圈资深分析师，精通Twitter/X内容分析和吃瓜日报写作。以下是今天从X平台采集的原始JSON Lines数据：
 
 {combined_jsonl}
 
@@ -661,13 +646,17 @@ def llm_summarize(combined_jsonl: str, today_str: str):
 
 请完成以下任务：
 1. **时间过滤**：只保留最近48小时内的帖子（t字段MMDD与今天比较）；超过48小时但点赞>10000的帖子也保留
-2. **价值识别**：筛选10-15条最有价值的帖子，按类别分组
+2. **价值识别**：筛选10-15条最有价值的帖子，按类别分组（称为"十大热点话题"）
 3. **转发链分析**：有qt字段的帖子分析引用者态度；有replies字段的帖子还原完整对话链
-4. **输出结构化JSON**（严格遵守以下格式，在@@@START@@@和@@@END@@@之间输出纯JSON，不加任何其他文字）：
+4. **热门精选**：从所有抓取内容中额外选出10条互动最高、最有传播价值的推文（可与热点话题有重叠）
+5. **中国视角**：扫描所有内容中与中国相关的部分，总结中美AI重大分歧、非共识、技术差距
+6. **输出结构化JSON**（严格遵守以下格式，在@@@START@@@和@@@END@@@之间输出纯JSON，不加任何其他文字）：
 
 @@@START@@@
 {{
   "date": "{today_str}",
+  "title": "今日最大热点主标题（中文，15-30字，极度抓眼球）",
+  "subtitle_insight": "对标题事件的深度解读（200字以内，行业影响或投资启发）",
   "topics": [
     {{
       "category": "巨头宫斗",
@@ -683,6 +672,22 @@ def llm_summarize(combined_jsonl: str, today_str: str):
       "capital": "🎯 资本风向标：商业趋势研判2-3点，每点以\\n- 开头"
     }}
   ],
+  "hot_tweets": [
+    {{
+      "account": "账号（不含@）",
+      "real_name": "真实姓名",
+      "translation": "推文中文翻译，不含URL",
+      "likes": "点赞数（同上格式）",
+      "comments": "评论数（同上格式）",
+      "publish_time": "发布时间（格式：YYYY-MM-DD HH:MM PT）"
+    }}
+  ],
+  "china_perspective": {{
+    "summary": "中国视角总结（200-300字，聚焦中国AI发展与全球AI的交汇和碰撞）",
+    "divergences": ["与美国/其他国家的重大分歧1", "分歧2"],
+    "non_consensus": ["重大非共识1（各方观点截然不同的议题）", "非共识2"],
+    "gaps": ["技术/产业差距1", "差距2"]
+  }},
   "cover_title": "中文封面标题（15-30字，极度抓眼球）",
   "cover_prompt": "English image generation prompt (American comic book style, two forces confronting, <=150 words)",
   "cover_insight": "深度解读（100字以内，行业影响或投资启发或日常生活启发）"
@@ -690,66 +695,8 @@ def llm_summarize(combined_jsonl: str, today_str: str):
 @@@END@@@
 
 category字段只能是以下5种之一：巨头宫斗 / 开源生态 / 芯片硬件 / 资本市场 / 学术前沿
-topics数组不少于10条，按category分组排列"""
-
-    # ── Try OpenRouter + Claude sonnet-4.6 first ────────────────────────────
-    if OPENROUTER_API_KEY:
-        for attempt in range(1, 4):
-            try:
-                print(f"[LLM] Calling Claude Sonnet 4.6 via OpenRouter "
-                      f"(data: {len(combined_jsonl)} chars, attempt {attempt}/3)...", flush=True)
-                resp = requests.post(
-                    "https://openrouter.ai/api/v1/chat/completions",
-                    headers={
-                        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                        "Content-Type": "application/json",
-                        "HTTP-Referer": "https://github.com/Prinsk1NG/X_AI_Github",
-                        "X-Title": "AI吃瓜日报",
-                    },
-                    json={
-                        "model": "anthropic/claude-sonnet-4-6",
-                        "messages": [{"role": "user", "content": prompt}],
-                        "temperature": 0.7,
-                        "max_tokens": 16000,
-                    },
-                    timeout=180,
-                )
-                resp.raise_for_status()
-                result = resp.json()["choices"][0]["message"]["content"].strip()
-                print(f"[LLM] ✅ Claude response received ({len(result)} chars)", flush=True)
-                return _parse_llm_result(result)
-            except Exception as e:
-                print(f"[LLM] ❌ OpenRouter attempt {attempt}/3: {e}", flush=True)
-                if attempt < 3:
-                    wait = 2 ** attempt
-                    print(f"[LLM] Retrying in {wait}s...", flush=True)
-                    time.sleep(wait)
-
-    # ── Fallback to Kimi moonshot-v1-8k ─────────────────────────────────────
-    if KIMI_API_KEY:
-        try:
-            print(f"[LLM] Falling back to Kimi moonshot-v1-8k "
-                  f"(data: {len(combined_jsonl)} chars)...", flush=True)
-            resp = requests.post(
-                "https://api.moonshot.cn/v1/chat/completions",
-                headers={"Authorization": f"Bearer {KIMI_API_KEY}",
-                         "Content-Type": "application/json"},
-                json={
-                    "model": "moonshot-v1-32k",
-                    "messages": [{"role": "user", "content": prompt}],
-                    "temperature": 0.7,
-                    "max_tokens": 8000,
-                },
-                timeout=180,
-            )
-            resp.raise_for_status()
-            result = resp.json()["choices"][0]["message"]["content"].strip()
-            print(f"[LLM] ✅ Kimi fallback response received ({len(result)} chars)", flush=True)
-            return _parse_llm_result(result)
-        except Exception as e:
-            print(f"[LLM] ❌ Kimi fallback error: {e}", flush=True)
-
-    return "", "", "", ""
+topics数组不少于10条，按category分组排列
+hot_tweets数组恰好10条，选互动最高的"""
 
 
 def _parse_llm_result(result: str):
@@ -781,9 +728,111 @@ def _parse_llm_result(result: str):
     return report_text, cover_title, cover_prompt, cover_insight
 
 
+def llm_call_kimi(combined_jsonl: str, today_str: str):
+    """
+    Call Kimi 2.5 (kimi-k2.5) via Moonshot API for full analysis.
+    Returns (report_text, cover_title, cover_prompt, cover_insight).
+    """
+    if not KIMI_API_KEY:
+        print("[LLM/Kimi] ⚠️ KIMI_API_KEY not configured", flush=True)
+        return "", "", "", ""
+
+    max_data_chars = 200000
+    data = combined_jsonl
+    if len(data) > max_data_chars:
+        print(f"[LLM/Kimi] ⚠️ Data truncated from {len(data)} to {max_data_chars} chars",
+              flush=True)
+        data = data[:max_data_chars]
+
+    prompt = _build_llm_prompt(data, today_str)
+
+    for attempt in range(1, 4):
+        try:
+            print(f"[LLM/Kimi] Calling kimi-k2.5 "
+                  f"(data: {len(data)} chars, attempt {attempt}/3)...", flush=True)
+            resp = requests.post(
+                "https://api.moonshot.cn/v1/chat/completions",
+                headers={"Authorization": f"Bearer {KIMI_API_KEY}",
+                         "Content-Type": "application/json"},
+                json={
+                    "model": "kimi-k2.5",
+                    "messages": [{"role": "user", "content": prompt}],
+                    "temperature": 0.7,
+                    "max_tokens": 16000,
+                },
+                timeout=300,
+            )
+            resp.raise_for_status()
+            result = resp.json()["choices"][0]["message"]["content"].strip()
+            print(f"[LLM/Kimi] ✅ kimi-k2.5 response received ({len(result)} chars)",
+                  flush=True)
+            return _parse_llm_result(result)
+        except Exception as e:
+            print(f"[LLM/Kimi] ❌ attempt {attempt}/3: {e}", flush=True)
+            if attempt < 3:
+                wait = 2 ** attempt
+                print(f"[LLM/Kimi] Retrying in {wait}s...", flush=True)
+                time.sleep(wait)
+
+    print("[LLM/Kimi] ❌ All attempts failed", flush=True)
+    return "", "", "", ""
+
+
+def llm_call_claude(combined_jsonl: str, today_str: str):
+    """
+    Call Claude Sonnet 4.6 via OpenRouter for full analysis.
+    Returns (report_text, cover_title, cover_prompt, cover_insight).
+    """
+    if not OPENROUTER_API_KEY:
+        print("[LLM/Claude] ⚠️ OPENROUTER_API_KEY not configured", flush=True)
+        return "", "", "", ""
+
+    max_data_chars = 200000
+    data = combined_jsonl
+    if len(data) > max_data_chars:
+        print(f"[LLM/Claude] ⚠️ Data truncated from {len(data)} to {max_data_chars} chars",
+              flush=True)
+        data = data[:max_data_chars]
+
+    prompt = _build_llm_prompt(data, today_str)
+
+    for attempt in range(1, 4):
+        try:
+            print(f"[LLM/Claude] Calling Claude Sonnet 4.6 via OpenRouter "
+                  f"(data: {len(data)} chars, attempt {attempt}/3)...", flush=True)
+            resp = requests.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                    "Content-Type": "application/json",
+                    "HTTP-Referer": "https://github.com/Prinsk1NG/X_AI_Github",
+                    "X-Title": "AI吃瓜日报",
+                },
+                json={
+                    "model": "anthropic/claude-sonnet-4-6",
+                    "messages": [{"role": "user", "content": prompt}],
+                    "temperature": 0.7,
+                    "max_tokens": 16000,
+                },
+                timeout=300,
+            )
+            resp.raise_for_status()
+            result = resp.json()["choices"][0]["message"]["content"].strip()
+            print(f"[LLM/Claude] ✅ Claude response received ({len(result)} chars)", flush=True)
+            return _parse_llm_result(result)
+        except Exception as e:
+            print(f"[LLM/Claude] ❌ attempt {attempt}/3: {e}", flush=True)
+            if attempt < 3:
+                wait = 2 ** attempt
+                print(f"[LLM/Claude] Retrying in {wait}s...", flush=True)
+                time.sleep(wait)
+
+    print("[LLM/Claude] ❌ All attempts failed", flush=True)
+    return "", "", "", ""
+
+
 # ════════════════════════════════════════════════════════════════════════════
-# LLM fallback (TITLE / PROMPT / INSIGHT only)
-# Tries OpenRouter + Claude Sonnet 4.6, then Kimi moonshot-v1-8k as last resort.
+# LLM fallback (TITLE / PROMPT / INSIGHT only, for cover image metadata)
 # ════════════════════════════════════════════════════════════════════════════
 def llm_fallback(raw_b_text):
     if not raw_b_text or len(raw_b_text) < 100:
@@ -804,7 +853,26 @@ def llm_fallback(raw_b_text):
             insight_m.group(1).strip() if insight_m else "",
         )
 
-    # Try OpenRouter first
+    # Try Kimi 2.5 first
+    if KIMI_API_KEY:
+        try:
+            resp = requests.post(
+                "https://api.moonshot.cn/v1/chat/completions",
+                headers={"Authorization": f"Bearer {KIMI_API_KEY}",
+                         "Content-Type": "application/json"},
+                json={
+                    "model": "kimi-k2.5",
+                    "messages": [{"role": "user", "content": fallback_prompt}],
+                    "temperature": 0.7, "max_tokens": 1000,
+                },
+                timeout=60,
+            )
+            resp.raise_for_status()
+            return _extract(resp.json()["choices"][0]["message"]["content"].strip())
+        except Exception as e:
+            print(f"[LLM] ❌ Kimi fallback error: {e}", flush=True)
+
+    # Try OpenRouter Claude as last resort
     if OPENROUTER_API_KEY:
         for attempt in range(1, 4):
             try:
@@ -832,26 +900,44 @@ def llm_fallback(raw_b_text):
                     wait = 2 ** attempt
                     time.sleep(wait)
 
-    # Last resort: Kimi moonshot-v1-8k
-    if KIMI_API_KEY:
-        try:
-            resp = requests.post(
-                "https://api.moonshot.cn/v1/chat/completions",
-                headers={"Authorization": f"Bearer {KIMI_API_KEY}",
-                         "Content-Type": "application/json"},
-                json={
-                    "model": "moonshot-v1-8k",
-                    "messages": [{"role": "user", "content": fallback_prompt}],
-                    "temperature": 0.7, "max_tokens": 1000,
-                },
-                timeout=60,
-            )
-            resp.raise_for_status()
-            return _extract(resp.json()["choices"][0]["message"]["content"].strip())
-        except Exception:
-            pass
-
     return "", "", ""
+
+
+def send_feishu_error_alert(error_msg: str, post_count: int, today_str: str):
+    """Send an error alert card to Feishu when all LLMs fail."""
+    webhooks = get_feishu_webhooks()
+    if not webhooks:
+        return
+    card = {
+        "msg_type": "interactive",
+        "card": {
+            "config": {"wide_screen_mode": True},
+            "header": {
+                "title": {"tag": "plain_text", "content": "🚨 AI吃瓜日报 LLM 生成失败"},
+                "template": "red",
+            },
+            "elements": [
+                {
+                    "tag": "div",
+                    "text": {
+                        "tag": "lark_md",
+                        "content": (
+                            f"**⚠️ {today_str} 日报 LLM 总结环节全部失败**\n\n"
+                            f"- 📊 Grok 搜索成功采集 **{post_count}** 条帖子\n"
+                            f"- ❌ Kimi 2.5 和 Claude Sonnet 4.6 均调用失败\n"
+                            f"- 🔍 错误详情：{error_msg}\n\n"
+                            f"原始数据已保存至 `data/{today_str}/` 目录，可手动重新处理。"
+                        ),
+                    },
+                },
+            ],
+        },
+    }
+    for url in webhooks:
+        try:
+            requests.post(url, json=card, timeout=30)
+        except Exception as e:
+            print(f"[Alert] Feishu error alert send failed: {e}", flush=True)
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -929,7 +1015,8 @@ def _category_color(text: str):
     return None
 
 
-def build_feishu_cards(text: str, title: str, insight: str = "") -> list:
+def build_feishu_cards(text: str, title: str, insight: str = "",
+                       model_name: str = "") -> list:
     """
     Build Feishu interactive card payload(s) from the LLM report.
 
@@ -941,12 +1028,12 @@ def build_feishu_cards(text: str, title: str, insight: str = "") -> list:
     # ── Attempt JSON parsing (new structured format) ─────────────────────────
     try:
         data = json.loads(text)
-        return _build_feishu_cards_json(data)
+        return _build_feishu_cards_json(data, model_name=model_name)
     except (json.JSONDecodeError, TypeError, ValueError):
         pass
 
     # ── Legacy markdown fallback ──────────────────────────────────────────────
-    return _build_feishu_cards_legacy(text, title, insight)
+    return _build_feishu_cards_legacy(text, title, insight, model_name=model_name)
 
 
 # Category → section icon mapping
@@ -959,12 +1046,34 @@ _CATEGORY_SECTION_ICONS = {
 }
 
 
-def _build_feishu_cards_json(data: dict) -> list:
+def _build_feishu_cards_json(data: dict, model_name: str = "") -> list:
     """Build the new-format Feishu card from parsed JSON topic data."""
-    date_str = data.get("date", "")
-    topics = data.get("topics", [])
+    date_str        = data.get("date", "")
+    report_title    = data.get("title", "昨晚，X上硅谷AI圈在聊啥")
+    subtitle_insight = data.get("subtitle_insight", "")
+    topics          = data.get("topics", [])
+    hot_tweets      = data.get("hot_tweets", [])
+    china           = data.get("china_perspective", {})
+
+    # Format date as Chinese style for subtitle, e.g. 2026年03月07日
+    try:
+        d = datetime.strptime(date_str, "%Y-%m-%d")
+        date_cn = d.strftime("%Y年%m月%d日")
+    except Exception:
+        date_cn = date_str
 
     elements = []
+
+    # ── Subtitle insight block ─────────────────────────────────────────────
+    if subtitle_insight:
+        elements.append({
+            "tag": "div",
+            "text": {
+                "tag": "lark_md",
+                "content": f"🐍 *昨晚，X 上的硅谷 AI 社区在聊啥 | {date_cn}*\n\n{subtitle_insight}",
+            },
+        })
+        elements.append({"tag": "hr"})
 
     # ── Banner ────────────────────────────────────────────────────────────────
     elements.append({
@@ -978,7 +1087,6 @@ def _build_feishu_cards_json(data: dict) -> list:
     elements.append({"tag": "hr"})
 
     # ── Topics grouped by category ────────────────────────────────────────────
-    # Preserve insertion order (Python 3.7+)
     seen_categories: list = []
     category_groups: dict = {}
     for t in topics:
@@ -995,7 +1103,7 @@ def _build_feishu_cards_json(data: dict) -> list:
         # Section header
         elements.append({
             "tag": "div",
-            "text": {"tag": "lark_md", "content": f"# {icon} {cat}板块"},
+            "text": {"tag": "lark_md", "content": f"# {icon} {cat}"},
         })
         elements.append({"tag": "hr"})
 
@@ -1017,13 +1125,13 @@ def _build_feishu_cards_json(data: dict) -> list:
                 "tag": "div",
                 "text": {
                     "tag": "lark_md",
-                    "content": f"## 🍉 {topic_num}号事件 | {topic_title}",
+                    "content": f"## 🍉 头条事件 | {topic_title}",
                 },
             })
 
-            # Quote note (blue background)
+            # Quote note (blue background) – 极客原声态
             note_content = (
-                f" **🗣️ 极客原声态 | 一手信源** \n"
+                f" **🗣️ 极客原声态** \n"
                 f"> **@{account} | {real_name}** (❤️ {likes}赞 | 💬 {comments}评)\n"
                 f"> \"{translation}\"\n"
                 f"> *原文发布于 {pub_time}*"
@@ -1088,17 +1196,112 @@ def _build_feishu_cards_json(data: dict) -> list:
                 ],
             })
 
+    # ── Hot Tweets section ────────────────────────────────────────────────────
+    if hot_tweets:
+        elements.append({"tag": "hr"})
+        elements.append({
+            "tag": "div",
+            "text": {"tag": "lark_md", "content": "# 🔥 热门推特精选 TOP 10"},
+        })
+        elements.append({"tag": "hr"})
+        for i, tw in enumerate(hot_tweets[:10], 1):
+            tw_account  = tw.get("account", "")
+            tw_name     = tw.get("real_name", "")
+            tw_likes    = tw.get("likes", "-")
+            tw_comments = tw.get("comments", "-")
+            tw_trans    = tw.get("translation", "")
+            tw_time     = tw.get("publish_time", "")
+            elements.append({
+                "tag": "div",
+                "text": {
+                    "tag": "lark_md",
+                    "content": (
+                        f"**{i}. @{tw_account} | {tw_name}** "
+                        f"(❤️ {tw_likes} | 💬 {tw_comments})\n"
+                        f"{tw_trans}\n"
+                        f"*{tw_time}*"
+                    ),
+                },
+            })
+
+    # ── China Perspective section ─────────────────────────────────────────────
+    if china:
+        elements.append({"tag": "hr"})
+        elements.append({
+            "tag": "div",
+            "text": {"tag": "lark_md", "content": "# 🇨🇳 中国视角 | 全球AI格局中的中国位置"},
+        })
+        elements.append({"tag": "hr"})
+
+        summary = china.get("summary", "")
+        if summary:
+            elements.append({
+                "tag": "div",
+                "text": {"tag": "lark_md", "content": summary},
+            })
+
+        divergences  = china.get("divergences", [])
+        non_consensus = china.get("non_consensus", [])
+        gaps         = china.get("gaps", [])
+
+        if divergences or non_consensus or gaps:
+            col_parts = []
+            if divergences:
+                div_text = " **⚡ 重大分歧** \n" + "\n".join(f"- {d}" for d in divergences)
+                col_parts.append({
+                    "tag": "column",
+                    "width": "weighted",
+                    "weight": 1,
+                    "vertical_align": "top",
+                    "elements": [{
+                        "tag": "div",
+                        "text": {"tag": "lark_md", "content": div_text},
+                    }],
+                })
+            if non_consensus:
+                nc_text = " **🤔 重大非共识** \n" + "\n".join(f"- {n}" for n in non_consensus)
+                col_parts.append({
+                    "tag": "column",
+                    "width": "weighted",
+                    "weight": 1,
+                    "vertical_align": "top",
+                    "elements": [{
+                        "tag": "div",
+                        "text": {"tag": "lark_md", "content": nc_text},
+                    }],
+                })
+            if gaps:
+                gap_text = " **📉 技术/产业差距** \n" + "\n".join(f"- {g}" for g in gaps)
+                col_parts.append({
+                    "tag": "column",
+                    "width": "weighted",
+                    "weight": 1,
+                    "vertical_align": "top",
+                    "elements": [{
+                        "tag": "div",
+                        "text": {"tag": "lark_md", "content": gap_text},
+                    }],
+                })
+
+            if col_parts:
+                elements.append({
+                    "tag": "column_set",
+                    "flex_mode": "bisect",
+                    "background_style": "default",
+                    "columns": col_parts,
+                })
+
     # ── Footer ────────────────────────────────────────────────────────────────
     elements.append({"tag": "hr"})
+    footer_text = (
+        "*📅 本日报每日早8点更新，内容均来自X平台公开信源，"
+        "解读仅代表行业观察，不构成任何投资建议*"
+    )
+    if model_name:
+        footer_text += f"\n\n📌 本报告由 **{model_name}** 生成"
     elements.append({
         "tag": "div",
-        "text": {
-            "tag": "lark_md",
-            "content": (
-                "*📅 本日报每日早8点更新，内容均来自X平台公开信源，"
-                "解读仅代表行业观察，不构成任何投资建议*"
-            ),
-        },
+        "text": {"tag": "lark_md", "content": footer_text},
     })
     elements.append({
         "tag": "action",
@@ -1133,11 +1336,11 @@ def _build_feishu_cards_json(data: dict) -> list:
             "header": {
                 "title": {
                     "tag": "plain_text",
-                    "content": "🌍 昨晚，X上硅谷AI圈在聊啥",
+                    "content": f"🌍 {report_title}",
                 },
                 "subtitle": {
                     "tag": "plain_text",
-                    "content": f"📡 AI圈极客吃瓜日报 | {date_str}",
+                    "content": f"🐍 昨晚，X 上的硅谷 AI 社区在聊啥 | {date_cn}",
                 },
                 "template": "blue",
                 "ud_icon": {
@@ -1150,7 +1353,8 @@ def _build_feishu_cards_json(data: dict) -> list:
     }]
 
 
-def _build_feishu_cards_legacy(text: str, title: str, insight: str = "") -> list:
+def _build_feishu_cards_legacy(text: str, title: str, insight: str = "",
+                               model_name: str = "") -> list:
     """Legacy markdown-based card builder (fallback for non-JSON LLM output)."""
     text = clean_format(text)
     cards = []
@@ -1270,6 +1474,26 @@ def _build_feishu_cards_legacy(text: str, title: str, insight: str = "") -> list
                 "elements": [{
                     "tag": "div",
                     "text": {"tag": "lark_md", "content": part[:4000]},
+                }],
+            },
+        })
+
+    # ── Model attribution footer card ─────────────────────────────────────────
+    if model_name:
+        cards.append({
+            "msg_type": "interactive",
+            "card": {
+                "config": {"wide_screen_mode": True},
+                "header": {
+                    "title": {"tag": "plain_text", "content": "📌 报告信息"},
+                    "template": "grey",
+                },
+                "elements": [{
+                    "tag": "div",
+                    "text": {
+                        "tag": "lark_md",
+                        "content": f"📌 本报告由 **{model_name}** 生成",
+                    },
                 }],
             },
         })
@@ -1420,6 +1644,26 @@ def save_daily_data(today_str: str, post_objects: list, meta_results: dict,
         if obj.get("type") != "meta"
     )
     (data_dir / "combined.txt").write_text(combined_txt, encoding="utf-8")
+
+    # raw_grok_results.json – structured JSON with metadata for reprocessing
+    post_only = [obj for obj in post_objects if obj.get("type") != "meta"]
+    raw_json = {
+        "saved_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "date": today_str,
+        "total_posts": len(post_only),
+        "total_accounts": len(meta_results),
+        "search_params": {
+            "accounts_tracked": len(ALL_ACCOUNTS),
+            "phase1_limit": 3,
+            "phase2_s_limit": 10,
+            "phase2_a_limit": 5,
+        },
+        "posts": post_only,
+        "meta": meta_results,
+    }
+    (data_dir / "raw_grok_results.json").write_text(
+        json.dumps(raw_json, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
 
     # meta.json – per-account metadata
     (data_dir / "meta.json").write_text(
@@ -1631,45 +1875,58 @@ def main():
     save_daily_data(today_str, all_post_objects, meta_results, "", classification)
 
     # ════════════════════════════════════════════════════════════════════════
-    # LLM summarisation
+    # LLM summarisation – Kimi 2.5 + Claude run independently
     # ════════════════════════════════════════════════════════════════════════
     print("\n" + "=" * 50, flush=True)
-    print("🤖 LLM: Generating daily report...", flush=True)
+    print("🤖 LLM: Generating daily report with Kimi 2.5 + Claude...", flush=True)
     print("=" * 50, flush=True)
 
-    report_text, cover_title, cover_prompt, cover_insight = llm_summarize(
-        combined_jsonl, today_str
-    )
+    kimi_report, kimi_cover_title, kimi_cover_prompt, kimi_cover_insight = \
+        llm_call_kimi(combined_jsonl, today_str)
+    claude_report, claude_cover_title, claude_cover_prompt, claude_cover_insight = \
+        llm_call_claude(combined_jsonl, today_str)
 
-    # Fallback if LLM report is insufficient
-    if not is_valid_content(report_text):
-        print("[LLM] ⚠️ Report quality check failed, trying fallback...", flush=True)
-        if not cover_title and not cover_prompt:
-            cover_title, cover_prompt, cover_insight = llm_fallback(combined_jsonl[:6000])
-        if not report_text:
-            report_text = (
-                f"@@@START@@@\n"
-                f"📡 硅谷AI圈大事扫描 | {today_str}\n\n"
-                f"【数据看板】\n"
-                f"跟踪大V总数: 100 | 有动态的大V: {len(combined_posts)} | "
-                f"重点高价值动态: - | 热点趋势: -\n\n"
-                f"【执行摘要】\n"
-                f"**{today_str}**\n\n"
-                f"【动态详情】\n\n"
-                f"🍉 数据采集完成，共 {len(all_post_objects)} 条帖子。\n"
-                f"@@@END@@@"
-            )
+    kimi_valid   = is_valid_content(kimi_report)
+    claude_valid = is_valid_content(claude_report)
 
-    # Persist final report
-    if report_text:
-        report_path = Path(f"data/{today_str}/daily_report.txt")
-        report_path.parent.mkdir(parents=True, exist_ok=True)
-        report_path.write_text(report_text, encoding="utf-8")
+    print(f"[LLM] Kimi valid: {kimi_valid} | Claude valid: {claude_valid}", flush=True)
+
+    # ── If both failed: send error alert and stop ────────────────────────────
+    if not kimi_valid and not claude_valid:
+        error_details = "Kimi 2.5 和 Claude Sonnet 4.6 响应均无效或为空"
+        print(f"[LLM] ❌ Both LLMs failed: {error_details}", flush=True)
+        send_feishu_error_alert(error_details, len(all_post_objects), today_str)
+        # Save raw data so we can reprocess later
+        save_daily_data(today_str, all_post_objects, meta_results, "", classification)
+        print("\n⚠️  All LLMs failed – raw data saved, error alert sent to Feishu.", flush=True)
+        return
+
+    # ── Pick the best report for cover image (Kimi preferred) ───────────────
+    primary_report  = kimi_report  if kimi_valid  else claude_report
+    primary_title   = kimi_cover_title  if kimi_valid else claude_cover_title
+    primary_prompt  = kimi_cover_prompt if kimi_valid else claude_cover_prompt
+    primary_insight = kimi_cover_insight if kimi_valid else claude_cover_insight
+
+    # Try fallback for cover metadata if missing from primary
+    if not primary_title and not primary_prompt:
+        primary_title, primary_prompt, primary_insight = llm_fallback(
+            combined_jsonl[:6000]
+        )
+
+    # Persist final reports
+    data_dir = Path(f"data/{today_str}")
+    data_dir.mkdir(parents=True, exist_ok=True)
+    if kimi_valid:
+        (data_dir / "daily_report_kimi.txt").write_text(kimi_report, encoding="utf-8")
+    if claude_valid:
+        (data_dir / "daily_report_claude.txt").write_text(claude_report, encoding="utf-8")
+    if primary_report:
+        (data_dir / "daily_report.txt").write_text(primary_report, encoding="utf-8")
 
     # ════════════════════════════════════════════════════════════════════════
     # Cover image generation
     # ════════════════════════════════════════════════════════════════════════
-    cover_url = generate_cover_image(cover_prompt)
+    cover_url = generate_cover_image(primary_prompt)
     if cover_url:
         import urllib.request
         try:
@@ -1678,29 +1935,46 @@ def main():
             pass
 
     # Determine display title
-    if cover_title and not _is_placeholder(cover_title):
-        title = cover_title
+    if primary_title and not _is_placeholder(primary_title):
+        title = primary_title
     else:
-        m = re.search(r"📡.*?[|\n]", report_text or "")
+        m = re.search(r"📡.*?[|\n]", primary_report or "")
         title = m.group(0).strip("📡| \n") if m else "AI圈极客大事扫描"
     print(f"\nFinal title: {title}", flush=True)
 
-    imgbb_url      = upload_to_imgbb("cover.png")
+    imgbb_url       = upload_to_imgbb("cover.png")
     final_cover_url = imgbb_url if imgbb_url else cover_url
 
-    final_markdown = extract_markdown_block(report_text) or report_text or ""
-    final_markdown = clean_format(final_markdown)
-
     # ════════════════════════════════════════════════════════════════════════
-    # Push to Feishu + WeChat
+    # Push to Feishu – Kimi report first, then Claude report
+    # Each model pushes independently; failure of one doesn't block the other
     # ════════════════════════════════════════════════════════════════════════
-    print("\n[Push] Sending to Feishu (multi-card layout)...", flush=True)
-    push_to_feishu(
-        build_feishu_cards(final_markdown, title, cover_insight)
-    )
+    print("\n[Push] Sending to Feishu...", flush=True)
 
+    if kimi_valid:
+        print("[Push] Pushing Kimi 2.5 report to Feishu...", flush=True)
+        kimi_markdown = extract_markdown_block(kimi_report) or kimi_report
+        kimi_markdown = clean_format(kimi_markdown)
+        push_to_feishu(
+            build_feishu_cards(kimi_markdown, title, kimi_cover_insight,
+                               model_name="Kimi 2.5")
+        )
+        time.sleep(1)  # avoid webhook rate-limits between two reports
+
+    if claude_valid:
+        print("[Push] Pushing Claude Sonnet 4.6 report to Feishu...", flush=True)
+        claude_markdown = extract_markdown_block(claude_report) or claude_report
+        claude_markdown = clean_format(claude_markdown)
+        push_to_feishu(
+            build_feishu_cards(claude_markdown, title, claude_cover_insight,
+                               model_name="Claude Sonnet 4.6")
+        )
+
+    # ── WeChat: use primary report ────────────────────────────────────────────
+    primary_markdown = extract_markdown_block(primary_report) or primary_report
+    primary_markdown = clean_format(primary_markdown)
     push_to_jijyun(
-        build_wechat_html(final_markdown, final_cover_url, cover_insight),
+        build_wechat_html(primary_markdown, final_cover_url, primary_insight),
         title, final_cover_url,
     )
 
