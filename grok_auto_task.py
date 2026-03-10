@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-grok_auto_task.py  v3.1
+grok_auto_task.py  v3.0
 Architecture: Grok (pure search, per-account) + Kimi-k2.5 / Claude (analyse & summarise)
 
 Phase 1 – Tiered scan:
@@ -12,8 +12,8 @@ Phase 2 – Differential collection + report:
   S-tier (~5-8):  10 posts + x_thread_fetch for likes >5000
   A-tier (~20-25): 5 posts, qt field for retweets
   B-tier (rest):   reuse Phase 1 data (3 posts)
-  Kimi-k2.5 AND Claude each generate one version of the daily report independently.
-  Both versions pushed to Feishu (interactive card), each labelled with the model name.
+  Kimi-k2.5 generates the daily report (fallback to Claude via OpenRouter).
+  Push to Feishu (interactive card) + WeChat.
 """
 
 import os
@@ -33,39 +33,34 @@ JIJYUN_WEBHOOK_URL  = os.getenv("JIJYUN_WEBHOOK_URL", "")
 SF_API_KEY          = os.getenv("SF_API_KEY", "")
 KIMI_API_KEY        = os.getenv("KIMI_API_KEY", "")
 OPENROUTER_API_KEY  = os.getenv("OPENROUTER_API_KEY", "")
-GROK_COOKIES_JSON  = os.getenv("SUPER_GROK_COOKIES", "")   # unified all-caps
+GROK_COOKIES_JSON  = os.getenv("SUPER_GROK_COOKIES", "")
 PAT_FOR_SECRETS    = os.getenv("PAT_FOR_SECRETS", "")
 GITHUB_REPOSITORY  = os.getenv("GITHUB_REPOSITORY", "")
 
 # ── Global timeout tracking ──────────────────────────────────────────────────
 _START_TIME      = time.time()
-PHASE1_DEADLINE  = 20 * 60   # 20 min → trigger degradation (skip remaining batches)
-GLOBAL_DEADLINE  = 45 * 60   # 45 min → stop Grok, hand off to Kimi
+PHASE1_DEADLINE  = 20 * 60
+GLOBAL_DEADLINE  = 45 * 60
 
-# ── 100 accounts – ordered high-value first so degradation truncates B-tier ──
+# ── 100 accounts ─────────────────────────────────────────────────────────────
 ALL_ACCOUNTS = [
-    # ── Tier-1 giants (likely S / A after classification) ──────────────────
     "elonmusk", "sama", "karpathy", "demishassabis", "darioamodei",
     "OpenAI", "AnthropicAI", "GoogleDeepMind", "xAI", "AIatMeta",
     "GoogleAI", "MSFTResearch", "IlyaSutskever", "gregbrockman",
     "GaryMarcus", "rowancheung", "clmcleod", "bindureddy",
-    # ── Chinese KOL / VC / Media (likely A / B) ────────────────────────────
     "dotey", "oran_ge", "vista8", "imxiaohu", "Sxsyer",
     "K_O_D_A_D_A", "tualatrix", "linyunqiu", "garywong", "web3buidl",
     "AI_Era", "AIGC_News", "jiangjiang", "hw_star", "mranti", "nishuang",
     "a16z", "ycombinator", "lightspeedvp", "sequoia", "foundersfund",
     "eladgil", "pmarca", "bchesky", "chamath", "paulg",
     "TheInformation", "TechCrunch", "verge", "WIRED", "Scobleizer", "bentossell",
-    # ── Open source + infrastructure ──────────────────────────────────────
     "HuggingFace", "MistralAI", "Perplexity_AI", "GroqInc", "Cohere",
     "TogetherCompute", "runwayml", "Midjourney", "StabilityAI", "Scale_AI",
     "CerebrasSystems", "tenstorrent", "weights_biases", "langchainai", "llama_index",
     "supabase", "vllm_project", "huggingface_hub",
-    # ── Hardware / spatial computing ──────────────────────────────────────
     "nvidia", "AMD", "Intel", "SKhynix", "tsmc",
     "magicleap", "NathieVR", "PalmerLuckey", "ID_AA_Carmack", "boz",
     "rabovitz", "htcvive", "XREAL_Global", "RayBan", "MetaQuestVR", "PatrickMoorhead",
-    # ── Researchers / niche – placed last for graceful degradation ─────────
     "jeffdean", "chrmanning", "hardmaru", "goodfellow_ian", "feifeili",
     "_akhaliq", "promptengineer", "AI_News_Tech", "siliconvalley", "aithread",
     "aibreakdown", "aiexplained", "aipubcast", "lexfridman", "hubermanlab", "swyx",
@@ -86,7 +81,7 @@ def get_feishu_webhooks() -> list:
 
 # ════════════════════════════════════════════════════════════════════════════
 # Date utilities
-# ════════════════════════════════════════════════════════════════════════════
+# ═══════════════════════════���════════════════════════════════════════════════
 def get_dates() -> tuple:
     tz = timezone(timedelta(hours=8))
     today = datetime.now(tz)
@@ -95,14 +90,9 @@ def get_dates() -> tuple:
 
 
 # ════════════════════════════════════════════════════════════════════════════
-# Session management: load + auto-renew
+# Session management
 # ════════════════════════════════════════════════════════════════════════════
 def prepare_session_file() -> bool:
-    """
-    Write SUPER_GROK_COOKIES to local session_state.json.
-    Returns True  = Playwright storage-state format (post-renewal)
-    Returns False = raw Cookie-Editor array (first-time manual import)
-    """
     if not GROK_COOKIES_JSON:
         print("[Session] ⚠️ SUPER_GROK_COOKIES not configured", flush=True)
         return False
@@ -122,7 +112,6 @@ def prepare_session_file() -> bool:
 
 
 def load_raw_cookies(context):
-    """Cookie-Editor array → inject into Playwright context (first-time use)."""
     try:
         cookies = json.loads(GROK_COOKIES_JSON)
         formatted = []
@@ -146,10 +135,6 @@ def load_raw_cookies(context):
 
 
 def save_and_renew_session(context):
-    """
-    Save current Playwright storage-state locally, then write back to
-    the SUPER_GROK_COOKIES GitHub secret via API (session renewal).
-    """
     try:
         context.storage_state(path="session_state.json")
         print("[Session] ✅ Storage state saved locally", flush=True)
@@ -397,10 +382,9 @@ def wait_and_extract(page, label, screenshot_prefix,
 
 
 # ════════════════════════════════════════════════════════════════════════════
-# JSON Lines parser (tolerates non-JSON lines in Grok output)
+# JSON Lines parser
 # ════════════════════════════════════════════════════════════════════════════
 def parse_jsonlines(text: str) -> list:
-    """Return list of dicts parsed from valid JSON Lines in text."""
     results = []
     for line in text.splitlines():
         line = line.strip()
@@ -414,7 +398,7 @@ def parse_jsonlines(text: str) -> list:
 
 
 # ════════════════════════════════════════════════════════════════════════════
-# Phase 1 prompt: metadata scan (all accounts, B-level strategy)
+# Phase 1 prompt
 # ════════════════════════════════════════════════════════════════════════════
 def build_phase1_prompt(accounts: list) -> str:
     rounds = [accounts[i:i+3] for i in range(0, len(accounts), 3)]
@@ -445,7 +429,7 @@ def build_phase1_prompt(accounts: list) -> str:
 
 
 # ════════════════════════════════════════════════════════════════════════════
-# Phase 2 prompts: tier-specific collection
+# Phase 2 prompts
 # ════════════════════════════════════════════════════════════════════════════
 def build_phase2_s_prompt(accounts: list) -> str:
     rounds = [accounts[i:i+3] for i in range(0, len(accounts), 3)]
@@ -502,7 +486,7 @@ def build_phase2_a_prompt(accounts: list) -> str:
 
 # ════════════════════════════════════════════════════════════════════════════
 # Account classification
-# ════════════════════════════════════════════════════════════════════════════
+# ════════════════════════════════��═══════════════════════════════════════════
 def classify_accounts(meta_results: dict) -> dict:
     tz = timezone(timedelta(hours=8))
     today = datetime.now(tz)
@@ -540,7 +524,7 @@ def classify_accounts(meta_results: dict) -> dict:
 
 
 # ════════════════════════════════════════════════════════════════════════════
-# Open a new Grok conversation page
+# Grok page helpers
 # ════════════════════════════════════════════════════════════════════════════
 def open_grok_page(context):
     page = context.new_page()
@@ -562,9 +546,6 @@ def open_grok_page(context):
         return None
 
 
-# ════════════════════════════════════════════════════════════════════════════
-# Run one Grok batch conversation
-# ════════════════════════════════════════════════════════════════════════════
 def run_grok_batch(context, accounts: list, prompt_builder, label: str,
                    initial_wait: int = 60) -> list:
     if not accounts:
@@ -643,10 +624,25 @@ def _build_llm_prompt(combined_jsonl: str, today_str: str) -> str:
 
 ---
 
-## 🔗 原始来源索引 (Top Sources)
-挑选 3-5 条今日"必读"的推文原始链接（格式：[推文简述](链接)）。
+## 📣 今日精选推文 (Top 5 Picks)
+
+从今日数据中精选 5 条最具代表性的原始推文，格式严格如下（不得偏离）：
+
+- **@账号** · 姓名 · 身份标签
+  > 「中文译文，限 60 字内，保留原文语气」
+
+示例：
+- **@sama** · Sam Altman · OpenAI CEO
+  > 「GPT-5 的能力终于让金融圈承认 AI 是真的——他们开始用它跑 Excel 了。」
+
+选取标准：优先选点赞数最高、投资参考价值最大的推文，覆盖不同账号。
 
 # Constraints
+- **格式纪律（严格遵守）：**
+  - 只允许使用 ## 二级标题，禁止出现 ### 三级标题
+  - 每个要点用 `- ` 开头的短 bullet，单条不超过 80 个汉字（约两行）
+  - 禁止出现超过 3 行的连续正文段落，超长内容必须拆成多条 bullet
+  - 每个 ## 段落之间不加多余空行
 - **禁止技术堆砌：** 不要解释算法原理，只需说该技术如何影响商业竞争或降低成本。
 - **投资视角：** 重点关注"钱的流向"和"估值逻辑的变化"。
 - **语言风格：** 专业、干脆、利落，适合在飞书移动端快速扫读。
@@ -663,7 +659,6 @@ def _build_llm_prompt(combined_jsonl: str, today_str: str) -> str:
 # LLM 辅助工具函数
 # ════════════════════════════════════════════════════════════════════════════
 def _get_proxies_from_env():
-    """从系统环境变量获取代理配置"""
     proxy_url = (os.getenv("HTTPS_PROXY") or os.getenv("https_proxy")
                  or os.getenv("HTTP_PROXY") or os.getenv("http_proxy"))
     if proxy_url:
@@ -672,20 +667,34 @@ def _get_proxies_from_env():
 
 
 def _get_openrouter_endpoints() -> list:
-    """获取 OpenRouter 的 API 端点（支持多个备份地址）"""
     env_eps = os.getenv("OPENROUTER_ENDPOINTS")
     if env_eps:
         return [e.strip() for e in env_eps.split(",") if e.strip()]
     return [
         "https://openrouter.ai/api/v1/chat/completions",
-        "https://api.openrouter.ai/v1/chat/completions",
     ]
 
 
-def extract_markdown_block(text: str) -> str:
-    """从 LLM 输出中提取 ```markdown 或 ```json 代码块内容"""
-    m = re.search(r'```(?:markdown|json)?\s*([\s\S]+?)```', text)
-    return m.group(1).strip() if m else ""
+def _openrouter_post(endpoint: str, payload: dict, timeout: int = 300,
+                     proxies: dict = None):
+    """
+    OpenRouter POST 封装。
+    手动序列化为 UTF-8 bytes + data= 发送，
+    避免 requests 用 latin-1 编码含中文的请求体导致 UnicodeEncodeError。
+    """
+    json_bytes = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+    return requests.post(
+        endpoint,
+        headers={
+            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+            "Content-Type": "application/json; charset=utf-8",
+            "HTTP-Referer": "https://github.com/Prinsk1NG/X_AI_Github",
+            "X-Title": "AI-Daily-Report",
+        },
+        data=json_bytes,
+        timeout=timeout,
+        proxies=proxies,
+    )
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -735,7 +744,7 @@ def llm_call_kimi(combined_jsonl: str, today_str: str):
 
 
 # ════════════════════════════════════════════════════════════════════════════
-# Claude 模型调用逻辑 (OpenRouter API) – 多端点 + 代理 + DNS 容错
+# Claude 模型调用逻辑 (OpenRouter API)
 # ════════════════════════════════════════════════════════════════════════════
 def llm_call_claude(combined_jsonl: str, today_str: str):
     if not OPENROUTER_API_KEY:
@@ -754,23 +763,13 @@ def llm_call_claude(combined_jsonl: str, today_str: str):
         for attempt in range(1, 4):
             try:
                 print(f"[LLM/Claude] POST to {ep} (attempt {attempt}/3)", flush=True)
-                resp = requests.post(
-                    ep,
-                    headers={
-                        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                        "Content-Type": "application/json",
-                        "HTTP-Referer": "https://github.com/Prinsk1NG/X_AI_Github",
-                        "X-Title": "AI吃瓜日报",
-                    },
-                    json={
-                        "model": os.getenv("OPENROUTER_MODEL", "anthropic/claude-sonnet-4-6"),
-                        "messages": [{"role": "user", "content": prompt}],
-                        "temperature": 0.7,
-                        "max_tokens": 16000,
-                    },
-                    timeout=300,
-                    proxies=proxies,
-                )
+                payload = {
+                    "model": os.getenv("OPENROUTER_MODEL", "anthropic/claude-sonnet-4-6"),
+                    "messages": [{"role": "user", "content": prompt}],
+                    "temperature": 0.7,
+                    "max_tokens": 16000,
+                }
+                resp = _openrouter_post(ep, payload, timeout=300, proxies=proxies)
                 resp.raise_for_status()
                 result = resp.json()["choices"][0]["message"]["content"].strip()
                 print(f"[LLM/Claude] ✅ Response received ({len(result)} chars)", flush=True)
@@ -790,7 +789,6 @@ def llm_call_claude(combined_jsonl: str, today_str: str):
 # LLM result parser
 # ════════════════════════════════════════════════════════════════════════════
 def _parse_llm_result(result: str):
-    """Extract report text and cover metadata from raw LLM output."""
     report_text = extract_markdown_block(result) or result
 
     try:
@@ -825,7 +823,7 @@ def llm_fallback(raw_b_text):
 
     fallback_prompt = (
         "根据以下内容生成三行结果：\n" + raw_b_text[:6000] +
-        "\nTITLE: <标题>\nPROMPT: <英文提示词>\nINSIGHT: <100字以内解读>"
+        "\nTITLE: <标题>\nPROMPT: <���文提示词>\nINSIGHT: <100字以内解读>"
     )
 
     def _extract(text):
@@ -844,23 +842,13 @@ def llm_fallback(raw_b_text):
         for ep in endpoints:
             for attempt in range(1, 4):
                 try:
-                    resp = requests.post(
-                        ep,
-                        headers={
-                            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                            "Content-Type": "application/json",
-                            "HTTP-Referer": "https://github.com/Prinsk1NG/X_AI_Github",
-                            "X-Title": "AI吃瓜日报",
-                        },
-                        json={
-                            "model": os.getenv("OPENROUTER_MODEL", "anthropic/claude-sonnet-4-6"),
-                            "messages": [{"role": "user", "content": fallback_prompt}],
-                            "temperature": 0.7,
-                            "max_tokens": 2000,
-                        },
-                        timeout=60,
-                        proxies=proxies,
-                    )
+                    payload = {
+                        "model": os.getenv("OPENROUTER_MODEL", "anthropic/claude-sonnet-4-6"),
+                        "messages": [{"role": "user", "content": fallback_prompt}],
+                        "temperature": 0.7,
+                        "max_tokens": 2000,
+                    }
+                    resp = _openrouter_post(ep, payload, timeout=60, proxies=proxies)
                     resp.raise_for_status()
                     return _extract(resp.json()["choices"][0]["message"]["content"].strip())
                 except Exception as e:
@@ -949,20 +937,43 @@ def upload_to_imgbb(image_path):
 
 
 # ════════════════════════════════════════════════════════════════════════════
-# ✅ 【已修改】飞书交互式卡片推送 – 新增 model_label 参数
+# 🌟 飞书交互式卡片推送（优化样式版）
 # ════════════════════════════════════════════════════════════════════════════
+def _preprocess_md(content_md: str) -> str:
+    """预处理 Markdown 使其适配飞书卡片渲染"""
+    # 三级标题 → 加粗文本（飞书卡片不支持 ###）
+    content_md = re.sub(r'^###\s+(.+)$', r'**\1**', content_md, flags=re.MULTILINE)
+    # 二级标题前加分割线（用真实换行符）
+    content_md = re.sub(r'^##\s+', '\n---\n## ', content_md, flags=re.MULTILINE)
+    # 清理连续超过 2 个空行
+    content_md = re.sub(r'\n{3,}', '\n\n', content_md)
+    return content_md.strip()
+
+
+def _split_to_elements(content_md: str) -> list:
+    """按 ## 标题将内容拆分为多个飞书 element，每段独立渲染"""
+    sections = re.split(r'\n(?=---\n## )', content_md)
+    elements = []
+    for section in sections:
+        section = section.strip()
+        if not section:
+            continue
+        elements.append({
+            "tag": "markdown",
+            "content": section[:4000],
+        })
+    return elements
+
+
 def send_to_feishu_card(content_md: str, today_str: str, model_label: str = "Kimi-k2.5"):
-    """
-    将 LLM 生成的 Markdown 转换为飞书交互式卡片并发送。
-    model_label: 标注生成该版本的模型名称，显示在卡片底部备注及卡片标题中。
-    """
+    """将 LLM 生成的 Markdown 转换为飞书交互式卡片并发送"""
     webhooks = get_feishu_webhooks()
     if not webhooks:
-        print(f"[Push/{model_label}] ⚠️ No Feishu webhooks found.")
+        print("[Push] ⚠️ No Feishu webhooks found.")
         return
 
-    # 样式预处理：在每一个二级标题前增加分割线
-    formatted_content = content_md.replace("## ", "\n---\n**## ")
+    formatted_content = _preprocess_md(content_md)
+    content_elements = _split_to_elements(formatted_content)
 
     card_payload = {
         "msg_type": "interactive",
@@ -973,23 +984,18 @@ def send_to_feishu_card(content_md: str, today_str: str, model_label: str = "Kim
             },
             "header": {
                 "title": {
-                    # ✅ 标题中加入模型标识，方便在消息列表直接区分
-                    "content": f"🚀 AI 投资人内参 [{model_label}] | {today_str}",
+                    "content": f"🚀 AI 投资人内参 | {today_str}",
                     "tag": "plain_text",
                 },
                 "template": "blue",
             },
-            "elements": [
-                {
-                    "tag": "markdown",
-                    "content": formatted_content,
-                },
+            "elements": content_elements + [
+                {"tag": "hr"},
                 {
                     "tag": "note",
                     "elements": [
                         {
                             "tag": "plain_text",
-                            # ✅ 底部备注动态显示模型名
                             "content": f"💡 此内参由 Grok 实时抓取并经 {model_label} 深度提炼",
                         }
                     ],
@@ -1002,434 +1008,206 @@ def send_to_feishu_card(content_md: str, today_str: str, model_label: str = "Kim
         try:
             resp = requests.post(url, json=card_payload, timeout=20)
             resp.raise_for_status()
-            print(f"[Push/{model_label}] ✅ Card sent to Feishu: {url.split('/')[-1][:8]}...")
+            print(f"[Push/{model_label}] ✅ Card sent to Feishu: {url.split('/')[-1][:8]}...",
+                  flush=True)
         except Exception as e:
-            print(f"[Push/{model_label}] ❌ Failed to send card: {e}")
+            print(f"[Push/{model_label}] ❌ Failed to send card: {e}", flush=True)
 
 
 # ════════════════════════════════════════════════════════════════════════════
-# Legacy Feishu multi-card builder (保留兼容)
+# Utility helpers
 # ════════════════════════════════════════════════════════════════════════════
-
-_CATEGORY_COLORS = {
-    "巨头宫斗": "indigo", "宫斗": "indigo",
-    "中文圈":   "orange",
-    "开源基建": "green",  "开源": "green", "基建": "green",
-    "硬件":     "purple", "空间计算": "purple",
-    "投资":     "blue",
-    "研究员":   "grey",   "研究": "grey",
-}
+def extract_markdown_block(text):
+    start = text.find("@@@START@@@")
+    end   = text.find("@@@END@@@")
+    if start == -1:
+        return ""
+    cs = start + len("@@@START@@@")
+    return text[cs:end].strip() if (end != -1 and end > start) else text[cs:].strip()
 
 
-def _category_color(text: str):
-    for kw, color in _CATEGORY_COLORS.items():
-        if kw in text:
-            return color
-    return None
+def _is_placeholder(text):
+    return not text or (text.startswith("<") and text.endswith(">"))
 
 
-def build_feishu_cards(text: str, title: str, insight: str = "") -> list:
-    try:
-        data = json.loads(text)
-        return _build_feishu_cards_json(data)
-    except (json.JSONDecodeError, TypeError, ValueError):
-        pass
-    return _build_feishu_cards_legacy(text, title, insight)
+# ════════════════════════════════════════════════════════════════════════════
+# WeChat HTML push
+# ════════════════════════════════════════════════════════════════════════════
+def _md_to_html(text):
+    text = re.sub(r"\*\*([^*]+?)\*\*", r"<b>\1</b>", text)
+    return text.replace("\n", "<br/>")
 
 
-_CATEGORY_SECTION_ICONS = {
-    "巨头宫斗": "🏰",
-    "开源生态": "🌳",
-    "芯片硬件": "💾",
-    "资本市场": "💰",
-    "学术前沿": "🔬",
-}
-
-
-def _build_feishu_cards_json(data: dict) -> list:
-    date_str = data.get("date", "")
-    topics = data.get("topics", [])
-    elements = []
-
-    elements.append({
-        "tag": "div",
-        "text": {
-            "tag": "lark_md",
-            "content": " **⚠️ 每日早8点准时更新 | 全网一手信源 | 深度行业解码 | 无广告无引流** ",
-        },
-        "icon": {"tag": "standard_icon", "token": "time_outlined", "color": "blue"},
-    })
-    elements.append({"tag": "hr"})
-
-    seen_categories: list = []
-    category_groups: dict = {}
-    for t in topics:
-        cat = t.get("category", "其他")
-        if cat not in category_groups:
-            seen_categories.append(cat)
-            category_groups[cat] = []
-        category_groups[cat].append(t)
-
-    topic_num = 0
-    for cat in seen_categories:
-        icon = _CATEGORY_SECTION_ICONS.get(cat, "📌")
-        elements.append({
-            "tag": "div",
-            "text": {"tag": "lark_md", "content": f"# {icon} {cat}板块"},
-        })
-        elements.append({"tag": "hr"})
-
-        for t in category_groups[cat]:
-            topic_num += 1
-            topic_title = t.get("title", "话题")
-            account     = t.get("account", "")
-            real_name   = t.get("real_name", "")
-            likes       = t.get("likes", "-")
-            comments    = t.get("comments", "-")
-            translation = t.get("translation", "")
-            pub_time    = t.get("publish_time", "")
-            facts       = t.get("facts", "-")
-            strategy    = t.get("strategy", "-")
-            capital     = t.get("capital", "-")
-
-            elements.append({
-                "tag": "div",
-                "text": {
-                    "tag": "lark_md",
-                    "content": f"## 🍉 {topic_num}号事件 | {topic_title}",
-                },
-            })
-
-            note_content = (
-                f" **🗣️ 极客原声态 | 一手信源** \n"
-                f"> **@{account} | {real_name}** (❤️ {likes}赞 | 💬 {comments}评)\n"
-                f"> \"{translation}\"\n"
-                f"> *原文发布于 {pub_time}*"
-            )
-            elements.append({
-                "tag": "note",
-                "elements": [{"tag": "lark_md", "content": note_content}],
-                "background_color": "blue",
-            })
-
-            elements.append({
-                "tag": "div",
-                "text": {"tag": "lark_md", "content": " **📝 深度解码** "},
-            })
-
-            elements.append({
-                "tag": "column_set",
-                "flex_mode": "bisect",
-                "background_style": "default",
-                "columns": [
-                    {
-                        "tag": "column", "width": "weighted", "weight": 1,
-                        "vertical_align": "top",
-                        "elements": [{"tag": "div", "text": {
-                            "tag": "lark_md",
-                            "content": f" **📌 增量事实 | 客观中立补充** \n{facts}",
-                        }}],
-                    },
-                    {
-                        "tag": "column", "width": "weighted", "weight": 1,
-                        "vertical_align": "top",
-                        "elements": [{"tag": "div", "text": {
-                            "tag": "lark_md",
-                            "content": f" **🧠 隐性博弈 | 行业暗战剖析** \n{strategy}",
-                        }}],
-                    },
-                    {
-                        "tag": "column", "width": "weighted", "weight": 1,
-                        "vertical_align": "top",
-                        "elements": [{"tag": "div", "text": {
-                            "tag": "lark_md",
-                            "content": f" **🎯 资本风向标 | 商业趋势研判** \n{capital}",
-                        }}],
-                    },
-                ],
-            })
-
-    elements.append({"tag": "hr"})
-    elements.append({
-        "tag": "div",
-        "text": {
-            "tag": "lark_md",
-            "content": (
-                "*📅 本日报每日早8点更新，内容均来自X平台公开信源，"
-                "解读仅代表行业观察，不构成任何投资建议*"
-            ),
-        },
-    })
-    elements.append({
-        "tag": "action",
-        "actions": [
-            {
-                "tag": "button",
-                "text": {"tag": "plain_text", "content": "查看往期日报"},
-                "type": "default", "complex_interaction": True,
-                "width": "default", "size": "medium",
-            },
-            {
-                "tag": "button",
-                "text": {"tag": "plain_text", "content": "话题投稿"},
-                "type": "primary", "complex_interaction": True,
-                "width": "default", "size": "medium",
-            },
-        ],
-    })
-
-    return [{
-        "msg_type": "interactive",
-        "card": {
-            "config": {"wide_screen_mode": True, "enable_forward": True, "update_multi": False},
-            "header": {
-                "title":    {"tag": "plain_text", "content": "🌍 昨晚，X上硅谷AI圈在聊啥"},
-                "subtitle": {"tag": "plain_text", "content": f"📡 AI圈极客吃瓜日报 | {date_str}"},
-                "template": "blue",
-                "ud_icon":  {"tag": "standard_icon", "token": "chat-forbidden_outlined"},
-            },
-            "elements": elements,
-        },
-    }]
-
-
-def _build_feishu_cards_legacy(text: str, title: str, insight: str = "") -> list:
-    text = clean_format(text)
-    cards = []
-    elements = []
-
-    if insight:
-        elements.append({
-            "tag": "div",
-            "text": {"tag": "lark_md",
-                     "content": f"<font color='orange'>**💡 Insight**</font>\n{insight}"}
-        })
-        elements.append({"tag": "hr"})
-
-    data_panel_match = re.search(r"【数据看板】\s*([\s\S]*?)(?=【执行摘要】)", text)
-    if data_panel_match:
-        data_str = data_panel_match.group(1).replace('\n', '')
-        parts = [p.strip() for p in data_str.split('|')]
-        fields = []
-        for p in parts:
-            if ':' in p or '：' in p:
-                k, v = re.split(r'[:：]', p, 1)
-                fields.append({
-                    "is_short": True,
-                    "text": {
-                        "tag": "lark_md",
-                        "content": f"**{k.strip()}**\n<font color='grey'>{v.strip()}</font>"
-                    }
-                })
-        if fields:
-            elements.append({"tag": "div", "fields": fields})
-            elements.append({"tag": "hr"})
-
-    section_pattern = re.compile(
-        r"【(.*?)】\s*([\s\S]*?)(?=【|\Z)", re.MULTILINE
+def build_wechat_html(text, cover_url="", insight=""):
+    cover_block = (
+        f'<p style="text-align:center;margin:0 0 16px 0;">'
+        f'<img src="{cover_url}" style="max-width:100%;border-radius:8px;" /></p>'
+        if cover_url else ""
     )
-    for m in section_pattern.finditer(text):
-        section_title = m.group(1).strip()
-        section_body  = m.group(2).strip()
-        if not section_body or section_title == "数据看板":
-            continue
-        color = _category_color(section_title)
-        header_content = (
-            f"<font color='{color}'>**{section_title}**</font>"
-            if color else f"**{section_title}**"
+    insight_block = (
+        f'<div style="border-radius:8px;background:#FFF7E6;padding:12px 14px;'
+        f'margin:0 0 16px 0;"><div style="font-weight:bold;margin-bottom:6px;">'
+        f'🔍 深度解读</div><div>{insight.replace(chr(10), "<br/>")}</div></div>'
+        if insight else ""
+    )
+    text = clean_format(text)
+    return cover_block + insight_block + _md_to_html(text)
+
+
+def push_to_jijyun(html_content, title, cover_url=""):
+    if not JIJYUN_WEBHOOK_URL:
+        return
+    try:
+        resp = requests.post(
+            JIJYUN_WEBHOOK_URL,
+            json={"title": title, "author": "大尉Prinski",
+                  "html_content": html_content, "cover_jpg": cover_url},
+            timeout=30,
         )
-        elements.append({
-            "tag": "div",
-            "text": {"tag": "lark_md", "content": header_content},
-        })
-        elements.append({
-            "tag": "div",
-            "text": {"tag": "lark_md", "content": section_body},
-        })
-        elements.append({"tag": "hr"})
-
-        if len(elements) >= 40:
-            cards.append(_wrap_legacy_card(elements, title))
-            elements = []
-
-    if elements:
-        cards.append(_wrap_legacy_card(elements, title))
-
-    return cards if cards else [_wrap_legacy_card(
-        [{"tag": "div", "text": {"tag": "lark_md", "content": text}}], title
-    )]
-
-
-def _wrap_legacy_card(elements: list, title: str) -> dict:
-    return {
-        "msg_type": "interactive",
-        "card": {
-            "config": {"wide_screen_mode": True, "enable_forward": True},
-            "header": {
-                "title": {"tag": "plain_text", "content": title or "📡 AI吃瓜日报"},
-                "template": "blue",
-            },
-            "elements": elements,
-        },
-    }
+        print(f"WeChat push: {resp.status_code} | {resp.text[:120]}", flush=True)
+    except Exception as e:
+        print(f"WeChat push error: {e}", flush=True)
 
 
 # ════════════════════════════════════════════════════════════════════════════
+# Save daily data to data/ directory
+# ════════════════════════════════════════════════════════════════════════════
+def save_daily_data(today_str: str, post_objects: list, meta_results: dict,
+                    report_text: str, classification: dict):
+    data_dir = Path(f"data/{today_str}")
+    data_dir.mkdir(parents=True, exist_ok=True)
+
+    combined_txt = "\n".join(
+        json.dumps(obj, ensure_ascii=False)
+        for obj in post_objects
+        if obj.get("type") != "meta"
+    )
+    (data_dir / "combined.txt").write_text(combined_txt, encoding="utf-8")
+
+    (data_dir / "meta.json").write_text(
+        json.dumps(meta_results, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+
+    if report_text:
+        (data_dir / "daily_report.txt").write_text(report_text, encoding="utf-8")
+
+    cls_path = Path("data/classification.json")
+    cls_path.write_text(
+        json.dumps({"date": today_str, "classification": classification},
+                   ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+
+    print(
+        f"[Data] ✅ Saved to {data_dir} "
+        f"({sum(1 for o in post_objects if o.get('type') != 'meta')} posts, "
+        f"{len(meta_results)} accounts)",
+        flush=True,
+    )
+
+
+# ══════════════════════════════════════════════════��═════════════════════════
 # Main
 # ════════════════════════════════════════════════════════════════════════════
 def main():
-    today_str, yesterday_str = get_dates()
-    print(f"\n{'='*60}", flush=True)
-    print(f"  grok_auto_task.py v3.1  |  {today_str}", flush=True)
-    print(f"{'='*60}\n", flush=True)
+    print("=" * 60, flush=True)
+    print("🚀 AI投资人内参 v3.0（Grok搜索 + Kimi/Claude 总结）", flush=True)
+    print("=" * 60, flush=True)
 
     check_cookie_expiry()
-
     is_storage_state = prepare_session_file()
+    today_str, _ = get_dates()
 
-    all_raw_results: list = []
+    Path("data").mkdir(exist_ok=True)
+
+    meta_results  = {}
+    phase1_posts  = {}
+    phase2_posts  = {}
 
     with sync_playwright() as pw:
-        browser = pw.chromium.launch(headless=True, args=["--no-sandbox"])
+        browser = pw.chromium.launch(
+            headless=True,
+            args=[
+                "--no-sandbox", "--disable-setuid-sandbox",
+                "--disable-dev-shm-usage", "--disable-gpu",
+                "--disable-blink-features=AutomationControlled",
+                "--window-size=1280,800",
+            ],
+        )
 
+        ctx_opts = {
+            "viewport":   {"width": 1280, "height": 800},
+            "user_agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/122.0.0.0 Safari/537.36"
+            ),
+            "locale": "zh-CN",
+        }
         if is_storage_state:
-            context = browser.new_context(storage_state="session_state.json")
-        else:
-            context = browser.new_context()
+            ctx_opts["storage_state"] = "session_state.json"
+
+        context = browser.new_context(**ctx_opts)
+        if not is_storage_state:
             load_raw_cookies(context)
 
-        # ── Phase 1: metadata scan ──────────────────────────────────────────
-        elapsed = time.time() - _START_TIME
-        accounts_for_p1 = ALL_ACCOUNTS
-        if elapsed > PHASE1_DEADLINE:
-            print(f"[Main] ⚠️ Already past Phase1 deadline ({elapsed:.0f}s), skipping Phase1", flush=True)
-            phase1_results = []
-        else:
-            phase1_results = run_grok_batch(
-                context, accounts_for_p1,
-                build_phase1_prompt, "Phase1-Scan",
-                initial_wait=90,
-            )
+        verify_page = context.new_page()
+        verify_page.goto("https://grok.com", wait_until="domcontentloaded", timeout=60000)
+        time.sleep(3)
+        if "sign" in verify_page.url.lower() or "login" in verify_page.url.lower():
+            print("❌ Not logged in – Cookie/Session expired. "
+                  "Please update SUPER_GROK_COOKIES.", flush=True)
+            browser.close()
+            raise SystemExit(1)
+        print("✅ Logged in to Grok", flush=True)
+        verify_page.close()
 
-        # Extract meta rows and post rows
-        meta_results: dict = {}
-        post_rows: list = []
-        for row in phase1_results:
-            if row.get("type") == "meta":
-                meta_results[row["a"]] = row
-            else:
-                post_rows.append(row)
+        # ── Phase 1 ──
+        print("\n" + "=" * 50, flush=True)
+        print("📊 Phase 1: Tiered scan – all accounts", flush=True)
+        print("=" * 50, flush=True)
 
-        all_raw_results.extend(post_rows)
+        BATCH_SIZE = 24
 
-        # ── Classify accounts ───────────────────────────────────────────────
+        for batch_num, batch_start in enumerate(
+                range(0, len(ALL_ACCOUNTS), BATCH_SIZE), start=1):
+
+            elapsed = time.time() - _START_TIME
+            if elapsed > PHASE1_DEADLINE:
+                remaining = ALL_ACCOUNTS[batch_start:]
+                print(
+                    f"\n[Phase 1] ⚠️ Timeout ({elapsed:.0f}s > {PHASE1_DEADLINE}s), "
+                    f"skipping {len(remaining)} remaining accounts (B-tier degradation).",
+                    flush=True,
+                )
+                break
+
+            batch   = ALL_ACCOUNTS[batch_start:batch_start + BATCH_SIZE]
+            label   = f"Phase1-Batch{batch_num}"
+            results = run_grok_batch(context, batch, build_phase1_prompt, label)
+
+            for obj in results:
+                account = obj.get("a", "").lstrip("@")
+                if not account:
+                    continue
+                if obj.get("type") == "meta":
+                    meta_results[account] = {
+                        "total":  obj.get("total", 0),
+                        "max_l":  obj.get("max_l", 0),
+                        "latest": obj.get("latest", "NA"),
+                    }
+                else:
+                    phase1_posts.setdefault(account, []).append(obj)
+
+        print(
+            f"\n[Phase 1] Done: {len(meta_results)} metadata rows, "
+            f"{len(phase1_posts)} accounts with posts.",
+            flush=True,
+        )
+
+        # ── Classification ──
         classification = classify_accounts(meta_results)
         s_accounts = [a for a, t in classification.items() if t == "S"]
         a_accounts = [a for a, t in classification.items() if t == "A"]
         b_accounts = [a for a, t in classification.items() if t == "B"]
-
-        print(f"\n[Main] Classification: S={len(s_accounts)}, A={len(a_accounts)}, "
-              f"B={len(b_accounts)}, inactive={sum(1 for t in classification.values() if t=='inactive')}",
-              flush=True)
-
-        elapsed = time.time() - _START_TIME
-
-        # ── Phase 2-S ───────────────────────────────────────────────────────
-        if s_accounts and elapsed < GLOBAL_DEADLINE:
-            s_results = run_grok_batch(
-                context, s_accounts,
-                build_phase2_s_prompt, "Phase2-S",
-                initial_wait=60,
-            )
-            all_raw_results.extend(s_results)
-        else:
-            print("[Main] ⚠️ Skipping Phase2-S (timeout or no S accounts)", flush=True)
-
-        elapsed = time.time() - _START_TIME
-
-        # ── Phase 2-A ───────────────────────────────────────────────────────
-        if a_accounts and elapsed < GLOBAL_DEADLINE:
-            a_results = run_grok_batch(
-                context, a_accounts,
-                build_phase2_a_prompt, "Phase2-A",
-                initial_wait=60,
-            )
-            all_raw_results.extend(a_results)
-        else:
-            print("[Main] ⚠️ Skipping Phase2-A (timeout or no A accounts)", flush=True)
-
-        # B-tier: reuse Phase1 data (already in all_raw_results)
-        print(f"[Main] B-tier ({len(b_accounts)} accounts): reusing Phase1 data", flush=True)
-
-        save_and_renew_session(context)
-        browser.close()
-
-    # ── Build combined JSONL ────────────────────────────────────────────────
-    combined_jsonl = "\n".join(json.dumps(r, ensure_ascii=False) for r in all_raw_results)
-    print(f"\n[Main] Total raw rows collected: {len(all_raw_results)}", flush=True)
-    print(f"[Main] Combined JSONL size: {len(combined_jsonl)} chars", flush=True)
-
-    if not combined_jsonl.strip():
-        print("[Main] ❌ No data collected, aborting LLM step", flush=True)
-        return
-
-    # ════════════════════════════════════════════════════════════════════════
-    # ✅ 【核心改动】Kimi 和 Claude 各自独立生成一版，均推送飞书
-    # ════════════════════════════════════════════════════════════════════════
-    print("\n[LLM] 🚀 同时调用 Kimi 和 Claude 各自生成一版内参...", flush=True)
-
-    # — Kimi 版 —
-    kimi_report, kimi_title, kimi_cover_prompt, kimi_insight = llm_call_kimi(
-        combined_jsonl, today_str
-    )
-
-    # — Claude 版 —
-    claude_report, claude_title, claude_cover_prompt, claude_insight = llm_call_claude(
-        combined_jsonl, today_str
-    )
-
-    # — 推送 Kimi 版到飞书 —
-    if kimi_report:
-        kimi_report_labeled = (
-            kimi_report
-            + "\n\n---\n> 🤖 *本版内参由 **Kimi-k2.5** 生成*"
-        )
-        print("[LLM] 📤 推送 Kimi 版到飞书...", flush=True)
-        send_to_feishu_card(kimi_report_labeled, today_str, model_label="Kimi-k2.5")
-    else:
-        print("[LLM] ⚠️ Kimi 未返回内容，跳过推送", flush=True)
-
-    # — 推送 Claude 版到飞书 —
-    if claude_report:
-        claude_model_name = os.getenv("OPENROUTER_MODEL", "anthropic/claude-sonnet-4-6").split("/")[-1]
-        claude_report_labeled = (
-            claude_report
-            + f"\n\n---\n> 🤖 *本版内参由 **{claude_model_name}** 生成*"
-        )
-        print("[LLM] 📤 推送 Claude 版到飞书...", flush=True)
-        send_to_feishu_card(claude_report_labeled, today_str, model_label=claude_model_name)
-    else:
-        print("[LLM] ⚠️ Claude 未返回内容，跳过推送", flush=True)
-
-    # — 两者均失败时的兜底提示 —
-    if not kimi_report and not claude_report:
-        print("[LLM] ❌ Kimi 和 Claude 均未返回内容，本次无法生成内参", flush=True)
-
-    # — 封面图生成（优先用 Kimi 的 cover_prompt，其次 Claude）—
-    cover_prompt  = kimi_cover_prompt  or claude_cover_prompt
-    cover_title   = kimi_title         or claude_title
-    cover_insight = kimi_insight       or claude_insight
-
-    if cover_prompt:
-        print(f"\n[Cover] Generating cover image...", flush=True)
-        cover_url = generate_cover_image(cover_prompt)
-        if cover_url:
-            print(f"[Cover] ✅ Cover image URL: {cover_url}", flush=True)
-        else:
-            print("[Cover] ⚠️ Cover image generation failed", flush=True)
-
-    print(f"\n[Main] ✅ All done | {today_str}", flush=True)
-
-
-if __name__ == "__main__":
-    main()
+        inactive   = [a for a, t in classification.items() if t == "inactive"]
