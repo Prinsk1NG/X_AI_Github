@@ -1,19 +1,31 @@
 # -*- coding: utf-8 -*-
 """
-grok_auto_task.py  v3.0
+grok_auto_task.py  v3.1
 Architecture: Grok (pure search, per-account) + Kimi-k2.5 / Claude (analyse & summarise)
 
-Phase 1 – Tiered scan:
+Phase 1 - Tiered scan:
   All 100 accounts searched individually (from:account, limit=10, mode=Latest).
   Collect 3 newest posts + 1 metadata row per account.
   Auto-classify accounts into S / A / B / inactive.
 
-Phase 2 – Differential collection + report:
+Phase 2 - Differential collection + report:
   S-tier (~5-8):  10 posts + x_thread_fetch for likes >5000
   A-tier (~20-25): 5 posts, qt field for retweets
   B-tier (rest):   reuse Phase 1 data (3 posts)
   Kimi-k2.5 generates the daily report (fallback to Claude via OpenRouter).
   Push to Feishu (interactive card) + WeChat.
+
+v3.1 changelog:
+  - Fix UTF-8 corruption in separator comments
+  - Fix Claude OpenRouter latin-1 encoding error (X-Title + UTF-8 body)
+  - Fix _parse_llm_result to work with freeform Markdown prompt output
+  - Fix save_daily_data: flatten dict to list before passing
+  - Fix login detection: catch x.com/oauth redirects
+  - Fix Feishu card: preprocess ### -> bold, split by ## sections, real newlines
+  - Fix _split_to_elements: smart re-split for sections > 4000 chars
+  - Fix send_prompt: add clipboard API fallback for execCommand deprecation
+  - Fix check_cookie_expiry: check sso / auth_token / ct0
+  - Prompt: add format discipline, replace source links with Top 5 Picks
 """
 
 import os
@@ -28,21 +40,21 @@ import requests
 from requests.exceptions import ConnectionError, Timeout
 from playwright.sync_api import sync_playwright
 
-# ── Environment variables ────────────────────────────────────────────────────
+# -- Environment variables -----------------------------------------------------
 JIJYUN_WEBHOOK_URL  = os.getenv("JIJYUN_WEBHOOK_URL", "")
 SF_API_KEY          = os.getenv("SF_API_KEY", "")
 KIMI_API_KEY        = os.getenv("KIMI_API_KEY", "")
 OPENROUTER_API_KEY  = os.getenv("OPENROUTER_API_KEY", "")
-GROK_COOKIES_JSON  = os.getenv("SUPER_GROK_COOKIES", "")
-PAT_FOR_SECRETS    = os.getenv("PAT_FOR_SECRETS", "")
-GITHUB_REPOSITORY  = os.getenv("GITHUB_REPOSITORY", "")
+GROK_COOKIES_JSON   = os.getenv("SUPER_GROK_COOKIES", "")
+PAT_FOR_SECRETS     = os.getenv("PAT_FOR_SECRETS", "")
+GITHUB_REPOSITORY   = os.getenv("GITHUB_REPOSITORY", "")
 
-# ── Global timeout tracking ──────────────────────────────────────────────────
+# -- Global timeout tracking ---------------------------------------------------
 _START_TIME      = time.time()
 PHASE1_DEADLINE  = 20 * 60
 GLOBAL_DEADLINE  = 45 * 60
 
-# ── 100 accounts ─────────────────────────────────────────────────────────────
+# -- 100 accounts --------------------------------------------------------------
 ALL_ACCOUNTS = [
     "elonmusk", "sama", "karpathy", "demishassabis", "darioamodei",
     "OpenAI", "AnthropicAI", "GoogleDeepMind", "xAI", "AIatMeta",
@@ -67,9 +79,9 @@ ALL_ACCOUNTS = [
 ]
 
 
-# ════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 # Feishu multi-webhook
-# ════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 def get_feishu_webhooks() -> list:
     urls = []
     for suffix in ["", "_1", "_2", "_3"]:
@@ -79,9 +91,9 @@ def get_feishu_webhooks() -> list:
     return urls
 
 
-# ════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 # Date utilities
-# ═══════════════════════════���════════════════════════════════════════════════
+# ==============================================================================
 def get_dates() -> tuple:
     tz = timezone(timedelta(hours=8))
     today = datetime.now(tz)
@@ -89,25 +101,25 @@ def get_dates() -> tuple:
     return today.strftime("%Y-%m-%d"), yesterday.strftime("%Y-%m-%d")
 
 
-# ════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 # Session management
-# ════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 def prepare_session_file() -> bool:
     if not GROK_COOKIES_JSON:
-        print("[Session] ⚠️ SUPER_GROK_COOKIES not configured", flush=True)
+        print("[Session] Warning: SUPER_GROK_COOKIES not configured", flush=True)
         return False
     try:
         data = json.loads(GROK_COOKIES_JSON)
         if isinstance(data, dict) and "cookies" in data:
             with open("session_state.json", "w", encoding="utf-8") as f:
                 json.dump(data, f)
-            print("[Session] ✅ Playwright storage-state format (renewed)", flush=True)
+            print("[Session] OK Playwright storage-state format (renewed)", flush=True)
             return True
         else:
-            print(f"[Session] ✅ Cookie-Editor array format ({len(data)} entries)", flush=True)
+            print(f"[Session] OK Cookie-Editor array format ({len(data)} entries)", flush=True)
             return False
     except Exception as e:
-        print(f"[Session] ❌ Parse failed: {e}", flush=True)
+        print(f"[Session] ERROR Parse failed: {e}", flush=True)
         return False
 
 
@@ -122,28 +134,30 @@ def load_raw_cookies(context):
                 "domain": c.get("domain", ".grok.com"),
                 "path":   c.get("path", "/"),
             }
-            if "httpOnly" in c: cookie["httpOnly"] = c["httpOnly"]
-            if "secure"   in c: cookie["secure"]   = c["secure"]
+            if "httpOnly" in c:
+                cookie["httpOnly"] = c["httpOnly"]
+            if "secure" in c:
+                cookie["secure"] = c["secure"]
             ss = c.get("sameSite", "")
             if ss in ("Strict", "Lax", "None"):
                 cookie["sameSite"] = ss
             formatted.append(cookie)
         context.add_cookies(formatted)
-        print(f"[Session] ✅ Injected {len(formatted)} cookies", flush=True)
+        print(f"[Session] OK Injected {len(formatted)} cookies", flush=True)
     except Exception as e:
-        print(f"[Session] ❌ Cookie injection failed: {e}", flush=True)
+        print(f"[Session] ERROR Cookie injection failed: {e}", flush=True)
 
 
 def save_and_renew_session(context):
     try:
         context.storage_state(path="session_state.json")
-        print("[Session] ✅ Storage state saved locally", flush=True)
+        print("[Session] OK Storage state saved locally", flush=True)
     except Exception as e:
-        print(f"[Session] ❌ Save storage state failed: {e}", flush=True)
+        print(f"[Session] ERROR Save storage state failed: {e}", flush=True)
         return
 
     if not PAT_FOR_SECRETS or not GITHUB_REPOSITORY:
-        print("[Session] ⚠️ PAT_FOR_SECRETS or GITHUB_REPOSITORY not configured, skip renewal",
+        print("[Session] Warning: PAT_FOR_SECRETS or GITHUB_REPOSITORY not configured, skip renewal",
               flush=True)
         return
 
@@ -176,27 +190,30 @@ def save_and_renew_session(context):
             timeout=30,
         )
         put_resp.raise_for_status()
-        print("[Session] ✅ GitHub Secret SUPER_GROK_COOKIES auto-renewed", flush=True)
+        print("[Session] OK GitHub Secret SUPER_GROK_COOKIES auto-renewed", flush=True)
 
     except ImportError:
-        print("[Session] ⚠️ PyNaCl not installed, skip renewal", flush=True)
+        print("[Session] Warning: PyNaCl not installed, skip renewal", flush=True)
     except Exception as e:
-        print(f"[Session] ❌ Secret renewal failed: {e}", flush=True)
+        print(f"[Session] ERROR Secret renewal failed: {e}", flush=True)
 
 
 def check_cookie_expiry():
+    """Check expiry for sso / auth_token / ct0 cookies and alert if < 5 days."""
     if not GROK_COOKIES_JSON:
         return
     try:
         data = json.loads(GROK_COOKIES_JSON)
         if not isinstance(data, list):
             return
+        watched_names = {"sso", "auth_token", "ct0"}
         for c in data:
-            if c.get("name") == "sso" and c.get("expirationDate"):
+            cname = c.get("name", "")
+            if cname in watched_names and c.get("expirationDate"):
                 exp = datetime.fromtimestamp(c["expirationDate"], tz=timezone.utc)
                 days_left = (exp - datetime.now(timezone.utc)).days
                 if days_left <= 5:
-                    msg = (f"⚠️ Grok Cookie expires in {days_left} days, "
+                    msg = (f"Warning: Grok Cookie '{cname}' expires in {days_left} days, "
                            f"please update SUPER_GROK_COOKIES!")
                     print(f"[Cookie] {msg}", flush=True)
                     for url in get_feishu_webhooks():
@@ -210,15 +227,14 @@ def check_cookie_expiry():
         pass
 
 
-# ════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 # Model selection: enable Grok 4.20 Beta Toggle
-# ════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 def enable_grok4_beta(page):
     print("\n[Model] Enabling Grok 4.20 Beta Toggle...", flush=True)
     try:
         model_btn = page.wait_for_selector(
-            "button:has-text('快速模式'), button:has-text('Fast'), "
-            "button:has-text('自动模式'), button:has-text('Auto')",
+            "button:has-text('Fast'), button:has-text('Auto')",
             timeout=15000,
         )
         model_btn.click()
@@ -236,23 +252,24 @@ def enable_grok4_beta(page):
         }""")
         if not is_on:
             toggle.click()
-            print("[Model] ✅ Toggle enabled", flush=True)
+            print("[Model] OK Toggle enabled", flush=True)
             time.sleep(1)
         else:
-            print("[Model] ✅ Already enabled", flush=True)
+            print("[Model] OK Already enabled", flush=True)
         page.keyboard.press("Escape")
         time.sleep(0.5)
     except Exception as e:
-        print(f"[Model] ⚠️ Failed, using current model: {e}", flush=True)
+        print(f"[Model] Warning: Failed, using current model: {e}", flush=True)
 
 
-# ════════════════════════════════════════════════════════════════════════════
-# Send prompt
-# ════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
+# Send prompt (with clipboard API fallback for execCommand deprecation)
+# ==============================================================================
 def send_prompt(page, prompt_text, label, screenshot_prefix):
     print(f"\n[{label}] Filling prompt ({len(prompt_text)} chars)...", flush=True)
     page.wait_for_selector("div[contenteditable='true'], textarea", timeout=30000)
 
+    # Method 1: execCommand (legacy but widely supported)
     ok = page.evaluate("""(text) => {
         const el = document.querySelector("div[contenteditable='true']")
                 || document.querySelector("textarea");
@@ -261,10 +278,39 @@ def send_prompt(page, prompt_text, label, screenshot_prefix):
         document.execCommand('selectAll', false, null);
         document.execCommand('delete', false, null);
         document.execCommand('insertText', false, text);
-        return true;
+        return el.textContent.length > 0 || el.value?.length > 0;
     }""", prompt_text)
 
+    # Method 2: clipboard API fallback
     if not ok:
+        print(f"[{label}] execCommand failed, trying clipboard API...", flush=True)
+        try:
+            inp = page.query_selector("div[contenteditable='true'], textarea")
+            if inp:
+                inp.click()
+                page.keyboard.press("Control+a")
+                page.keyboard.press("Backspace")
+                # Use evaluate to set via clipboard
+                page.evaluate("""async (text) => {
+                    const el = document.querySelector("div[contenteditable='true']")
+                            || document.querySelector("textarea");
+                    if (!el) return;
+                    el.focus();
+                    if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') {
+                        el.value = text;
+                        el.dispatchEvent(new Event('input', {bubbles: true}));
+                    } else {
+                        el.textContent = text;
+                        el.dispatchEvent(new Event('input', {bubbles: true}));
+                    }
+                }""", prompt_text)
+                ok = True
+        except Exception as e2:
+            print(f"[{label}] Clipboard API also failed: {e2}", flush=True)
+
+    # Method 3: character-by-character typing (slowest fallback)
+    if not ok:
+        print(f"[{label}] Falling back to keyboard typing...", flush=True)
         inp = page.query_selector("div[contenteditable='true'], textarea")
         if inp:
             inp.click()
@@ -295,7 +341,7 @@ def send_prompt(page, prompt_text, label, screenshot_prefix):
         send_btn.click()
         clicked = True
     except Exception as e:
-        print(f"[{label}] ⚠️ Normal click failed ({e}), trying JS...", flush=True)
+        print(f"[{label}] Warning: Normal click failed ({e}), trying JS...", flush=True)
 
     if not clicked:
         result = page.evaluate("""() => {
@@ -306,17 +352,17 @@ def send_prompt(page, prompt_text, label, screenshot_prefix):
             return false;
         }""")
         if result:
-            print(f"[{label}] ✅ JS fallback click succeeded", flush=True)
+            print(f"[{label}] OK JS fallback click succeeded", flush=True)
         else:
-            raise RuntimeError(f"[{label}] ❌ Submit button not found, aborting")
+            raise RuntimeError(f"[{label}] ERROR Submit button not found, aborting")
 
-    print(f"[{label}] ✅ Sent", flush=True)
+    print(f"[{label}] OK Sent", flush=True)
     time.sleep(5)
 
 
-# ════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 # Wait for Grok to finish generating
-# ════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 def _get_last_msg(page):
     return page.evaluate("""() => {
         const msgs = document.querySelectorAll(
@@ -341,7 +387,7 @@ def wait_and_extract(page, label, screenshot_prefix,
         try:
             text = _get_last_msg(page)
         except Exception as e:
-            print(f"[{label}] ⚠️ Page error: {e}", flush=True)
+            print(f"[{label}] Warning: Page error: {e}", flush=True)
             return last_text.strip()
         last_text = text
         cur_len = len(text.strip())
@@ -350,17 +396,20 @@ def wait_and_extract(page, label, screenshot_prefix,
         if cur_len == last_len and cur_len >= min_len:
             stable += 1
             if stable >= stable_rounds:
-                print(f"[{label}] ✅ Done ({cur_len} chars)", flush=True)
+                print(f"[{label}] OK Done ({cur_len} chars)", flush=True)
                 return text.strip()
         else:
             stable   = 0
             last_len = cur_len
 
     if extend_if_growing:
-        print(f"[{label}] ⏳ Extending wait (up to 300s)...", flush=True)
-        prev_len = last_len; prev_text = last_text; ext = 0
+        print(f"[{label}] Extending wait (up to 300s)...", flush=True)
+        prev_len = last_len
+        prev_text = last_text
+        ext = 0
         while ext < 300:
-            time.sleep(5); ext += 5
+            time.sleep(5)
+            ext += 5
             try:
                 text = _get_last_msg(page)
             except Exception:
@@ -369,7 +418,8 @@ def wait_and_extract(page, label, screenshot_prefix,
             print(f"  +{ext}s | chars: {cur_len}", flush=True)
             if cur_len == prev_len:
                 return text.strip()
-            prev_len = cur_len; prev_text = text
+            prev_len = cur_len
+            prev_text = text
         try:
             return _get_last_msg(page).strip()
         except Exception:
@@ -381,9 +431,9 @@ def wait_and_extract(page, label, screenshot_prefix,
             return last_text.strip()
 
 
-# ════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 # JSON Lines parser
-# ════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 def parse_jsonlines(text: str) -> list:
     results = []
     for line in text.splitlines():
@@ -397,96 +447,99 @@ def parse_jsonlines(text: str) -> list:
     return results
 
 
-# ════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 # Phase 1 prompt
-# ════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 def build_phase1_prompt(accounts: list) -> str:
     rounds = [accounts[i:i+3] for i in range(0, len(accounts), 3)]
     rounds_text = "\n".join(
-        f"第{i+1}轮：{' | '.join(r)}"
+        f"Round {i+1}: {' | '.join(r)}"
         for i, r in enumerate(rounds)
     )
     return (
-        "你是X平台数据采集工具。执行以下账号搜索，输出纯JSON Lines格式。\n\n"
-        "【搜索规则】\n"
-        "1. 每个账号单独调用 x_keyword_search：query=from:账号名，mode=Latest，limit=10\n"
-        "2. 按轮次并行执行（每轮同时搜索3个账号）\n"
-        "3. 不加任何关键词，不加 since 时间参数\n"
-        "4. 每个账号输出：最新3条帖子 + 1行元数据\n\n"
-        f"【账号列表（共{len(accounts)}个，按轮次执行）】\n"
+        "You are an X/Twitter data collection tool. Search the following accounts "
+        "and output pure JSON Lines format.\n\n"
+        "[Search Rules]\n"
+        "1. Search each account individually: x_keyword_search query=from:AccountName, mode=Latest, limit=10\n"
+        "2. Execute in parallel rounds (3 accounts per round)\n"
+        "3. No additional keywords, no since parameter\n"
+        "4. Per account output: newest 3 posts + 1 metadata row\n\n"
+        f"[Account List ({len(accounts)} accounts, by round)]\n"
         f"{rounds_text}\n\n"
-        "【输出格式（只输出JSON Lines，严禁输出任何其他文字）】\n"
-        '帖子行：{"a":"账号名","l":点赞数,"t":"MMDD","s":"英文原文摘要50词内","tag":"raw"}\n'
-        '元数据行：{"a":"账号名","type":"meta","total":返回总条数,"max_l":最高点赞数,"latest":"MMDD"}\n'
-        '不活跃账号：{"a":"账号名","type":"meta","total":0,"max_l":0,"latest":"NA"}\n\n'
-        "【严格限制】\n"
-        "- 账号名不带@符号，与from:查询中的账号名完全一致\n"
-        "- t字段格式MMDD（如0309=3月9日）\n"
-        "- 每个账号先输出帖子行（最多3行），再输出1行元数据行\n"
-        "- 不翻译、不解释、不总结、不过滤\n"
-        "- 第一行到最后一行全部是JSON"
+        "[Output Format (JSON Lines ONLY, no other text)]\n"
+        '  Post:     {"a":"AccountName","l":likes,"t":"MMDD","s":"English summary under 50 words","tag":"raw"}\n'
+        '  Metadata: {"a":"AccountName","type":"meta","total":count,"max_l":max_likes,"latest":"MMDD"}\n'
+        '  Inactive: {"a":"AccountName","type":"meta","total":0,"max_l":0,"latest":"NA"}\n\n'
+        "[Strict Rules]\n"
+        "- Account names without @, exactly matching the from: query\n"
+        "- t field format MMDD (e.g. 0309 = March 9)\n"
+        "- Per account: post rows first (max 3), then 1 metadata row\n"
+        "- No translation, no explanation, no summary, no filtering\n"
+        "- First line to last line must all be JSON"
     )
 
 
-# ════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 # Phase 2 prompts
-# ════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 def build_phase2_s_prompt(accounts: list) -> str:
     rounds = [accounts[i:i+3] for i in range(0, len(accounts), 3)]
     rounds_text = "\n".join(
-        f"第{i+1}轮：{' | '.join(r)}"
+        f"Round {i+1}: {' | '.join(r)}"
         for i, r in enumerate(rounds)
     )
     return (
-        "你是X平台数据采集工具。执行以下S级账号深度采集，输出纯JSON Lines格式。\n\n"
-        "【S级规则】\n"
-        "1. 每个账号调用 x_keyword_search：query=from:账号名，mode=Latest，limit=10\n"
-        "2. 输出全部10条帖子（不截断）\n"
-        "3. 对点赞>5000的帖子，额外调用 x_thread_fetch 获取完整线程（每账号最多5次）\n"
-        "4. 转发/引用帖（RT或QT）：在qt字段记录被引用原帖的作者和内容摘要\n"
-        "5. 每轮并行3个账号\n\n"
-        f"【S级账号（共{len(accounts)}个）】\n"
+        "You are an X/Twitter data collection tool. Deep-collect S-tier accounts, "
+        "output pure JSON Lines.\n\n"
+        "[S-tier Rules]\n"
+        "1. x_keyword_search query=from:AccountName, mode=Latest, limit=10\n"
+        "2. Output all 10 posts (no truncation)\n"
+        "3. For posts with likes>5000, call x_thread_fetch for full thread (max 5 per account)\n"
+        "4. Retweets/quotes: record original author and summary in qt field\n"
+        "5. 3 accounts per parallel round\n\n"
+        f"[S-tier Accounts ({len(accounts)})]\n"
         f"{rounds_text}\n\n"
-        "【输出格式（只输出JSON Lines）】\n"
-        '普通帖：{"a":"账号名","l":点赞数,"t":"MMDD","s":"英文摘要50词内","tag":"raw"}\n'
-        '引用帖：{"a":"账号名","l":点赞数,"t":"MMDD","s":"评论内容摘要","qt":"@原作者: 原帖摘要","tag":"raw"}\n'
-        '线程帖：{"a":"账号名","l":点赞数,"t":"MMDD","s":"原文摘要","tag":"raw",'
-        '"replies":[{"from":"回复者账号","text":"回复内容","l":点赞数}]}\n\n'
-        "【严格限制】\n"
-        "- 账号名不带@，与from:查询完全一致\n"
-        "- 不翻译、不解释，只输出JSON\n"
-        "- s字段用英文"
+        "[Output Format (JSON Lines ONLY)]\n"
+        '  Normal:  {"a":"Name","l":likes,"t":"MMDD","s":"English summary","tag":"raw"}\n'
+        '  Quote:   {"a":"Name","l":likes,"t":"MMDD","s":"comment summary","qt":"@orig: summary","tag":"raw"}\n'
+        '  Thread:  {"a":"Name","l":likes,"t":"MMDD","s":"summary","tag":"raw",'
+        '"replies":[{"from":"replier","text":"content","l":likes}]}\n\n'
+        "[Strict Rules]\n"
+        "- No @, exact account name match\n"
+        "- No translation, JSON only\n"
+        "- s field in English"
     )
 
 
 def build_phase2_a_prompt(accounts: list) -> str:
     rounds = [accounts[i:i+3] for i in range(0, len(accounts), 3)]
     rounds_text = "\n".join(
-        f"第{i+1}轮：{' | '.join(r)}"
+        f"Round {i+1}: {' | '.join(r)}"
         for i, r in enumerate(rounds)
     )
     return (
-        "你是X平台数据采集工具。执行以下A级账号采集，输出纯JSON Lines格式。\n\n"
-        "【A级规则】\n"
-        "1. 每个账号调用 x_keyword_search：query=from:账号名，mode=Latest，limit=10\n"
-        "2. 只输出最新5条帖子\n"
-        "3. 转发/引用帖（RT或QT）：在qt字段记录被引用原帖的作者和内容摘要\n"
-        "4. 每轮并行3个账号\n\n"
-        f"【A级账号（共{len(accounts)}个）】\n"
+        "You are an X/Twitter data collection tool. Collect A-tier accounts, "
+        "output pure JSON Lines.\n\n"
+        "[A-tier Rules]\n"
+        "1. x_keyword_search query=from:AccountName, mode=Latest, limit=10\n"
+        "2. Output newest 5 posts only\n"
+        "3. Retweets/quotes: record original author and summary in qt field\n"
+        "4. 3 accounts per parallel round\n\n"
+        f"[A-tier Accounts ({len(accounts)})]\n"
         f"{rounds_text}\n\n"
-        "【输出格式（只输出JSON Lines）】\n"
-        '普通帖：{"a":"账号名","l":点赞数,"t":"MMDD","s":"英文摘要50词内","tag":"raw"}\n'
-        '引用帖：{"a":"账号名","l":点赞数,"t":"MMDD","s":"评论内容摘要","qt":"@原作者: 原帖摘要","tag":"raw"}\n\n'
-        "【严格限制】\n"
-        "- 账号名不带@，与from:查询完全一致\n"
-        "- 不翻译、不解释，只输出JSON\n"
-        "- s字段用英文"
+        "[Output Format (JSON Lines ONLY)]\n"
+        '  Normal:  {"a":"Name","l":likes,"t":"MMDD","s":"English summary","tag":"raw"}\n'
+        '  Quote:   {"a":"Name","l":likes,"t":"MMDD","s":"comment summary","qt":"@orig: summary","tag":"raw"}\n\n'
+        "[Strict Rules]\n"
+        "- No @, exact account name match\n"
+        "- No translation, JSON only\n"
+        "- s field in English"
     )
 
 
-# ════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 # Account classification
-# ════════════════════════════════��═══════════════════════════════════════════
+# ==============================================================================
 def classify_accounts(meta_results: dict) -> dict:
     tz = timezone(timedelta(hours=8))
     today = datetime.now(tz)
@@ -523,22 +576,28 @@ def classify_accounts(meta_results: dict) -> dict:
     return classification
 
 
-# ════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 # Grok page helpers
-# ════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
+def _is_login_page(url: str) -> bool:
+    """Robust login detection: catches x.com redirects, oauth, sign-in pages."""
+    lower = url.lower()
+    return any(kw in lower for kw in ("sign", "login", "oauth", "x.com/i/flow"))
+
+
 def open_grok_page(context):
     page = context.new_page()
     try:
         page.goto("https://grok.com", wait_until="domcontentloaded", timeout=60000)
         time.sleep(3)
-        if "sign" in page.url.lower() or "login" in page.url.lower():
-            print("❌ Not logged in – session expired", flush=True)
+        if _is_login_page(page.url):
+            print("ERROR: Not logged in - session expired", flush=True)
             page.close()
             return None
         enable_grok4_beta(page)
         return page
     except Exception as e:
-        print(f"❌ Failed to open Grok page: {e}", flush=True)
+        print(f"ERROR: Failed to open Grok page: {e}", flush=True)
         try:
             page.close()
         except Exception:
@@ -563,7 +622,7 @@ def run_grok_batch(context, accounts: list, prompt_builder, label: str,
         prompt = prompt_builder(accounts)
         send_prompt(page, prompt, label, label.lower().replace(" ", "_"))
 
-        print(f"[{label}] ⏳ Waiting {initial_wait}s for Grok to start...", flush=True)
+        print(f"[{label}] Waiting {initial_wait}s for Grok to start...", flush=True)
         time.sleep(initial_wait)
 
         raw_text = wait_and_extract(
@@ -572,11 +631,11 @@ def run_grok_batch(context, accounts: list, prompt_builder, label: str,
             extend_if_growing=True, min_len=50,
         )
         results = parse_jsonlines(raw_text)
-        print(f"[{label}] ✅ Parsed {len(results)} JSON objects", flush=True)
+        print(f"[{label}] OK Parsed {len(results)} JSON objects", flush=True)
         return results
 
     except Exception as e:
-        print(f"[{label}] ❌ Error: {e}", flush=True)
+        print(f"[{label}] ERROR: {e}", flush=True)
         return []
     finally:
         try:
@@ -585,19 +644,21 @@ def run_grok_batch(context, accounts: list, prompt_builder, label: str,
             pass
 
 
-# ════════════════════════════════════════════════════════════════════════════
-# LLM Prompt Builder (投资分析师版)
-# ════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
+# LLM Prompt Builder
+# ==============================================================================
 def _build_llm_prompt(combined_jsonl: str, today_str: str) -> str:
     return f"""
 # Role
-你是一位拥有 10 年经验的顶级 AI 行业一级市场投资分析师，专门为高级合伙人撰写"每日内参"，同时这份每日内参还有一份事实相同，语言风格更风趣幽默、富有网感的个人公众号版本。
+You are a top-tier AI industry primary market investment analyst with 10 years of experience. You write a "daily briefing" for senior partners, and simultaneously produce a public WeChat account version with the same facts but a wittier, more internet-savvy tone.
+
+Reply entirely in Chinese.
 
 # Task
-分析过去 24 小时 X 平台上的 60+ 位科技领袖、投资人及硬件专家的推文数据（数据见文末 JSONL 部分）。
-你需要过滤掉琐碎的技术参数和日常社交噪音，提炼出具有"投资参考价值"的深度内参，以公众号版本输出。
+Analyze tweets from 60+ tech leaders, investors, and hardware experts on X over the past 24 hours (data in JSONL at the end).
+Filter out trivial technical parameters and social noise; distill insights with "investment reference value" and output the public account version.
 
-# Output Structure (必须严格遵守 Markdown 格式)
+# Output Structure (strictly follow Markdown format)
 
 ## ⚡️ 今日看板 (The Pulse)
 > 用一句话总结今日最核心的 1-2 个行业定调信号。
@@ -655,9 +716,9 @@ def _build_llm_prompt(combined_jsonl: str, today_str: str) -> str:
 """
 
 
-# ════════════════════════════════════════════════════════════════════════════
-# LLM 辅助工具函数
-# ════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
+# LLM helper functions
+# ==============================================================================
 def _get_proxies_from_env():
     proxy_url = (os.getenv("HTTPS_PROXY") or os.getenv("https_proxy")
                  or os.getenv("HTTP_PROXY") or os.getenv("http_proxy"))
@@ -678,9 +739,10 @@ def _get_openrouter_endpoints() -> list:
 def _openrouter_post(endpoint: str, payload: dict, timeout: int = 300,
                      proxies: dict = None):
     """
-    OpenRouter POST 封装。
-    手动序列化为 UTF-8 bytes + data= 发送，
-    避免 requests 用 latin-1 编码含中文的请求体导致 UnicodeEncodeError。
+    OpenRouter POST wrapper.
+    Manually serialize JSON to UTF-8 bytes + send via data=,
+    to avoid requests encoding Chinese chars with latin-1 (UnicodeEncodeError).
+    X-Title uses pure ASCII to avoid header encoding issues.
     """
     json_bytes = json.dumps(payload, ensure_ascii=False).encode("utf-8")
     return requests.post(
@@ -697,12 +759,12 @@ def _openrouter_post(endpoint: str, payload: dict, timeout: int = 300,
     )
 
 
-# ════════════════════════════════════════════════════════════════════════════
-# Kimi 模型调用逻辑 (Moonshot API) – kimi-k2.5
-# ════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
+# Kimi (Moonshot API) - kimi-k2.5
+# ==============================================================================
 def llm_call_kimi(combined_jsonl: str, today_str: str):
     if not KIMI_API_KEY:
-        print("[LLM/Kimi] ⚠️ KIMI_API_KEY not configured", flush=True)
+        print("[LLM/Kimi] Warning: KIMI_API_KEY not configured", flush=True)
         return "", "", "", ""
 
     max_data_chars = 200000
@@ -734,7 +796,7 @@ def llm_call_kimi(combined_jsonl: str, today_str: str):
             )
             resp.raise_for_status()
             result = resp.json()["choices"][0]["message"]["content"].strip()
-            print(f"[LLM/Kimi] ✅ Response received ({len(result)} chars)", flush=True)
+            print(f"[LLM/Kimi] OK Response received ({len(result)} chars)", flush=True)
             return _parse_llm_result(result)
         except Exception as e:
             print(f"[LLM/Kimi] attempt {attempt} failed: {e}", flush=True)
@@ -743,12 +805,12 @@ def llm_call_kimi(combined_jsonl: str, today_str: str):
     return "", "", "", ""
 
 
-# ════════════════════════════════════════════════════════════════════════════
-# Claude 模型调用逻辑 (OpenRouter API)
-# ════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
+# Claude (OpenRouter API) - UTF-8 safe
+# ==============================================================================
 def llm_call_claude(combined_jsonl: str, today_str: str):
     if not OPENROUTER_API_KEY:
-        print("[LLM/Claude] ⚠️ OPENROUTER_API_KEY not configured", flush=True)
+        print("[LLM/Claude] Warning: OPENROUTER_API_KEY not configured", flush=True)
         return "", "", "", ""
 
     max_data_chars = 200000
@@ -772,7 +834,7 @@ def llm_call_claude(combined_jsonl: str, today_str: str):
                 resp = _openrouter_post(ep, payload, timeout=300, proxies=proxies)
                 resp.raise_for_status()
                 result = resp.json()["choices"][0]["message"]["content"].strip()
-                print(f"[LLM/Claude] ✅ Response received ({len(result)} chars)", flush=True)
+                print(f"[LLM/Claude] OK Response received ({len(result)} chars)", flush=True)
                 return _parse_llm_result(result)
             except Exception as e:
                 print(f"[LLM/Claude] attempt {attempt} at {ep} failed: {e}", flush=True)
@@ -785,27 +847,38 @@ def llm_call_claude(combined_jsonl: str, today_str: str):
     return "", "", "", ""
 
 
-# ════════════════════════════════════════════════════════════════════════════
-# LLM result parser
-# ════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
+# LLM result parser (compatible with freeform Markdown output)
+# ==============================================================================
 def _parse_llm_result(result: str):
-    report_text = extract_markdown_block(result) or result
+    """
+    Parse LLM output. The prompt produces freeform Markdown, so we:
+    1. Check for @@@START@@@/@@@END@@@ markers (legacy structured output)
+    2. Try JSON parse (legacy structured output)
+    3. Try TITLE:/PROMPT:/INSIGHT: extraction (legacy metadata)
+    4. Fallback: return result as-is (normal case for current prompt)
+    """
+    # Check for @@@START@@@/@@@END@@@ markers
+    report_text = _extract_markdown_block(result) or result
 
+    # Try JSON (legacy structured output)
     try:
         data = json.loads(report_text)
-        return (
-            report_text,
-            data.get("cover_title", ""),
-            data.get("cover_prompt", ""),
-            data.get("cover_insight", ""),
-        )
+        if isinstance(data, dict):
+            return (
+                report_text,
+                data.get("cover_title", ""),
+                data.get("cover_prompt", ""),
+                data.get("cover_insight", ""),
+            )
     except (json.JSONDecodeError, TypeError, ValueError):
         pass
 
-    after_end = result[result.find("@@@END@@@") + 9:] if "@@@END@@@" in result else result
-    title_m   = re.search(r"TITLE[:：]\s*(.+)", after_end)
-    prompt_m  = re.search(r"PROMPT[:：]\s*([\s\S]+?)(?=INSIGHT[:：]|$)", after_end)
-    insight_m = re.search(r"INSIGHT[:：]\s*([\s\S]+)", after_end)
+    # Try TITLE/PROMPT/INSIGHT extraction (legacy metadata after @@@END@@@)
+    search_text = result[result.find("@@@END@@@") + 9:] if "@@@END@@@" in result else ""
+    title_m   = re.search(r"TITLE[:：]\s*(.+)", search_text) if search_text else None
+    prompt_m  = re.search(r"PROMPT[:：]\s*([\s\S]+?)(?=INSIGHT[:：]|$)", search_text) if search_text else None
+    insight_m = re.search(r"INSIGHT[:：]\s*([\s\S]+)", search_text) if search_text else None
 
     cover_title   = title_m.group(1).strip()   if title_m   else ""
     cover_prompt  = prompt_m.group(1).strip()  if prompt_m  else ""
@@ -814,16 +887,26 @@ def _parse_llm_result(result: str):
     return report_text, cover_title, cover_prompt, cover_insight
 
 
-# ════════════════════════════════════════════════════════════════════════════
+def _extract_markdown_block(text):
+    """Extract content between @@@START@@@ and @@@END@@@ markers."""
+    start = text.find("@@@START@@@")
+    end   = text.find("@@@END@@@")
+    if start == -1:
+        return ""
+    cs = start + len("@@@START@@@")
+    return text[cs:end].strip() if (end != -1 and end > start) else text[cs:].strip()
+
+
+# ==============================================================================
 # LLM fallback (TITLE / PROMPT / INSIGHT only)
-# ════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 def llm_fallback(raw_b_text):
     if not raw_b_text or len(raw_b_text) < 100:
         return "", "", ""
 
     fallback_prompt = (
-        "根据以下内容生成三行结果：\n" + raw_b_text[:6000] +
-        "\nTITLE: <标题>\nPROMPT: <���文提示词>\nINSIGHT: <100字以内解读>"
+        "Based on the following content, generate three lines:\n" + raw_b_text[:6000] +
+        "\nTITLE: <title>\nPROMPT: <English image prompt>\nINSIGHT: <100 chars max insight>"
     )
 
     def _extract(text):
@@ -852,7 +935,7 @@ def llm_fallback(raw_b_text):
                     resp.raise_for_status()
                     return _extract(resp.json()["choices"][0]["message"]["content"].strip())
                 except Exception as e:
-                    print(f"[LLM] ❌ OpenRouter fallback attempt {attempt}/3 at {ep}: {e}", flush=True)
+                    print(f"[LLM] ERROR OpenRouter fallback attempt {attempt}/3 at {ep}: {e}", flush=True)
                     if attempt < 3:
                         time.sleep(2 ** attempt)
                     else:
@@ -885,16 +968,13 @@ def llm_fallback(raw_b_text):
     return "", "", ""
 
 
-# ════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 # Format cleanup
-# ════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 def clean_format(text: str) -> str:
     text = re.sub(r'(@\S[^\n]*)\n\n+(> )', r'\1\n\2', text)
-    text = re.sub(r'(> "[^\n]*"[^\n]*)\n\n+(\*\*📝)', r'\1\n\2', text)
-    text = re.sub(r'(• [^\n]+)\n\n+(• )', r'\1\n\2', text)
-    text = re.sub(r'(• 📌 )涨姿势：\s*', r'\1', text)
-    text = re.sub(r'(• 🧠 )猜博弈：\s*', r'\1', text)
-    text = re.sub(r'(• 🎯 )识风向：\s*', r'\1', text)
+    text = re.sub(r'(> "[^\n]*"[^\n]*)\n\n+(\*\*)', r'\1\n\2', text)
+    text = re.sub(r'(- [^\n]+)\n\n+(- )', r'\1\n\2', text)
     return text
 
 
@@ -936,40 +1016,51 @@ def upload_to_imgbb(image_path):
         return ""
 
 
-# ════════════════════════════════════════════════════════════════════════════
-# 🌟 飞书交互式卡片推送（优化样式版）
-# ════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
+# Feishu interactive card push (optimized formatting)
+# ==============================================================================
 def _preprocess_md(content_md: str) -> str:
-    """预处理 Markdown 使其适配飞书卡片渲染"""
-    # 三级标题 → 加粗文本（飞书卡片不支持 ###）
+    """Preprocess Markdown for Feishu card rendering."""
+    # ### headings -> bold text (Feishu cards don't support ###)
     content_md = re.sub(r'^###\s+(.+)$', r'**\1**', content_md, flags=re.MULTILINE)
-    # 二级标题前加分割线（用真实换行符）
+    # Add --- separator before each ## heading (real newlines)
     content_md = re.sub(r'^##\s+', '\n---\n## ', content_md, flags=re.MULTILINE)
-    # 清理连续超过 2 个空行
+    # Clean up 3+ consecutive blank lines
     content_md = re.sub(r'\n{3,}', '\n\n', content_md)
     return content_md.strip()
 
 
 def _split_to_elements(content_md: str) -> list:
-    """按 ## 标题将内容拆分为多个飞书 element，每段独立渲染"""
+    """Split content by ## sections into separate Feishu elements.
+    Sections exceeding 4000 chars are further split by paragraph."""
     sections = re.split(r'\n(?=---\n## )', content_md)
     elements = []
     for section in sections:
         section = section.strip()
         if not section:
             continue
-        elements.append({
-            "tag": "markdown",
-            "content": section[:4000],
-        })
+        if len(section) <= 4000:
+            elements.append({"tag": "markdown", "content": section})
+        else:
+            # Smart re-split: break by double-newline paragraphs
+            paragraphs = section.split('\n\n')
+            chunk = ""
+            for para in paragraphs:
+                if len(chunk) + len(para) + 2 > 3800 and chunk:
+                    elements.append({"tag": "markdown", "content": chunk.strip()})
+                    chunk = para
+                else:
+                    chunk = chunk + "\n\n" + para if chunk else para
+            if chunk.strip():
+                elements.append({"tag": "markdown", "content": chunk.strip()})
     return elements
 
 
 def send_to_feishu_card(content_md: str, today_str: str, model_label: str = "Kimi-k2.5"):
-    """将 LLM 生成的 Markdown 转换为飞书交互式卡片并发送"""
+    """Convert LLM Markdown output to Feishu interactive card and send."""
     webhooks = get_feishu_webhooks()
     if not webhooks:
-        print("[Push] ⚠️ No Feishu webhooks found.")
+        print("[Push] Warning: No Feishu webhooks found.")
         return
 
     formatted_content = _preprocess_md(content_md)
@@ -984,7 +1075,7 @@ def send_to_feishu_card(content_md: str, today_str: str, model_label: str = "Kim
             },
             "header": {
                 "title": {
-                    "content": f"🚀 AI 投资人内参 | {today_str}",
+                    "content": f"AI Investment Briefing | {today_str}",
                     "tag": "plain_text",
                 },
                 "template": "blue",
@@ -996,7 +1087,7 @@ def send_to_feishu_card(content_md: str, today_str: str, model_label: str = "Kim
                     "elements": [
                         {
                             "tag": "plain_text",
-                            "content": f"💡 此内参由 Grok 实时抓取并经 {model_label} 深度提炼",
+                            "content": f"Powered by Grok + {model_label}",
                         }
                     ],
                 },
@@ -1008,31 +1099,15 @@ def send_to_feishu_card(content_md: str, today_str: str, model_label: str = "Kim
         try:
             resp = requests.post(url, json=card_payload, timeout=20)
             resp.raise_for_status()
-            print(f"[Push/{model_label}] ✅ Card sent to Feishu: {url.split('/')[-1][:8]}...",
+            print(f"[Push/{model_label}] OK Card sent to Feishu: {url.split('/')[-1][:8]}...",
                   flush=True)
         except Exception as e:
-            print(f"[Push/{model_label}] ❌ Failed to send card: {e}", flush=True)
+            print(f"[Push/{model_label}] ERROR Failed to send card: {e}", flush=True)
 
 
-# ════════════════════════════════════════════════════════════════════════════
-# Utility helpers
-# ════════════════════════════════════════════════════════════════════════════
-def extract_markdown_block(text):
-    start = text.find("@@@START@@@")
-    end   = text.find("@@@END@@@")
-    if start == -1:
-        return ""
-    cs = start + len("@@@START@@@")
-    return text[cs:end].strip() if (end != -1 and end > start) else text[cs:].strip()
-
-
-def _is_placeholder(text):
-    return not text or (text.startswith("<") and text.endswith(">"))
-
-
-# ════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 # WeChat HTML push
-# ════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 def _md_to_html(text):
     text = re.sub(r"\*\*([^*]+?)\*\*", r"<b>\1</b>", text)
     return text.replace("\n", "<br/>")
@@ -1047,7 +1122,7 @@ def build_wechat_html(text, cover_url="", insight=""):
     insight_block = (
         f'<div style="border-radius:8px;background:#FFF7E6;padding:12px 14px;'
         f'margin:0 0 16px 0;"><div style="font-weight:bold;margin-bottom:6px;">'
-        f'🔍 深度解读</div><div>{insight.replace(chr(10), "<br/>")}</div></div>'
+        f'Insight</div><div>{insight.replace(chr(10), "<br/>")}</div></div>'
         if insight else ""
     )
     text = clean_format(text)
@@ -1060,7 +1135,7 @@ def push_to_jijyun(html_content, title, cover_url=""):
     try:
         resp = requests.post(
             JIJYUN_WEBHOOK_URL,
-            json={"title": title, "author": "大尉Prinski",
+            json={"title": title, "author": "Prinski",
                   "html_content": html_content, "cover_jpg": cover_url},
             timeout=30,
         )
@@ -1069,9 +1144,9 @@ def push_to_jijyun(html_content, title, cover_url=""):
         print(f"WeChat push error: {e}", flush=True)
 
 
-# ════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 # Save daily data to data/ directory
-# ════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 def save_daily_data(today_str: str, post_objects: list, meta_results: dict,
                     report_text: str, classification: dict):
     data_dir = Path(f"data/{today_str}")
@@ -1098,20 +1173,20 @@ def save_daily_data(today_str: str, post_objects: list, meta_results: dict,
         encoding="utf-8",
     )
 
+    post_count = sum(1 for o in post_objects if o.get("type") != "meta")
     print(
-        f"[Data] ✅ Saved to {data_dir} "
-        f"({sum(1 for o in post_objects if o.get('type') != 'meta')} posts, "
-        f"{len(meta_results)} accounts)",
+        f"[Data] OK Saved to {data_dir} "
+        f"({post_count} posts, {len(meta_results)} accounts)",
         flush=True,
     )
 
 
-# ══════════════════════════════════════════════════��═════════════════════════
+# ==============================================================================
 # Main
-# ════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 def main():
     print("=" * 60, flush=True)
-    print("🚀 AI投资人内参 v3.0（Grok搜索 + Kimi/Claude 总结）", flush=True)
+    print("AI Investment Briefing v3.1 (Grok search + Kimi/Claude summary)", flush=True)
     print("=" * 60, flush=True)
 
     check_cookie_expiry()
@@ -1121,8 +1196,8 @@ def main():
     Path("data").mkdir(exist_ok=True)
 
     meta_results  = {}
-    phase1_posts  = {}
-    phase2_posts  = {}
+    phase1_posts  = {}   # dict: account -> [post_obj, ...]
+    phase2_posts  = {}   # dict: account -> [post_obj, ...]
 
     with sync_playwright() as pw:
         browser = pw.chromium.launch(
@@ -1151,20 +1226,21 @@ def main():
         if not is_storage_state:
             load_raw_cookies(context)
 
+        # -- Login verification --
         verify_page = context.new_page()
         verify_page.goto("https://grok.com", wait_until="domcontentloaded", timeout=60000)
         time.sleep(3)
-        if "sign" in verify_page.url.lower() or "login" in verify_page.url.lower():
-            print("❌ Not logged in – Cookie/Session expired. "
+        if _is_login_page(verify_page.url):
+            print("ERROR: Not logged in - Cookie/Session expired. "
                   "Please update SUPER_GROK_COOKIES.", flush=True)
             browser.close()
             raise SystemExit(1)
-        print("✅ Logged in to Grok", flush=True)
+        print("OK Logged in to Grok", flush=True)
         verify_page.close()
 
-        # ── Phase 1 ──
+        # -- Phase 1: Tiered scan --
         print("\n" + "=" * 50, flush=True)
-        print("📊 Phase 1: Tiered scan – all accounts", flush=True)
+        print("Phase 1: Tiered scan - all accounts", flush=True)
         print("=" * 50, flush=True)
 
         BATCH_SIZE = 24
@@ -1176,7 +1252,7 @@ def main():
             if elapsed > PHASE1_DEADLINE:
                 remaining = ALL_ACCOUNTS[batch_start:]
                 print(
-                    f"\n[Phase 1] ⚠️ Timeout ({elapsed:.0f}s > {PHASE1_DEADLINE}s), "
+                    f"\n[Phase 1] Warning: Timeout ({elapsed:.0f}s > {PHASE1_DEADLINE}s), "
                     f"skipping {len(remaining)} remaining accounts (B-tier degradation).",
                     flush=True,
                 )
@@ -1205,9 +1281,16 @@ def main():
             flush=True,
         )
 
-        # ── Classification ──
+        # -- Classification --
         classification = classify_accounts(meta_results)
         s_accounts = [a for a, t in classification.items() if t == "S"]
         a_accounts = [a for a, t in classification.items() if t == "A"]
         b_accounts = [a for a, t in classification.items() if t == "B"]
         inactive   = [a for a, t in classification.items() if t == "inactive"]
+
+        print(f"\n[Classification] S={len(s_accounts)} A={len(a_accounts)} "
+              f"B={len(b_accounts)} inactive={len(inactive)}", flush=True)
+        if s_accounts:
+            print(f"  S-tier: {', '.join(s_accounts)}", flush=True)
+        if a_accounts:
+            print(f"  A-tier:
