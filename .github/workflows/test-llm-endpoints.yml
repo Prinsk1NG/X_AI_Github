@@ -24,10 +24,17 @@ jobs:
         env:
           KIMI_API_KEY: ${{ secrets.KIMI_API_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENROUTER_MODEL: ${{ secrets.OPENROUTER_MODEL || 'claude-2.1' }}
         run: |
-          # We pass a directory (data/2026-03-10) on purpose: the script will choose the newest readable file inside.
-          # If you prefer passing a file, change to e.g. --prompt-file data/2026-03-10.jsonl
+          set -eux    # 显示执行的命令并在失败时中止
+          echo "Using prompt source: data/2026-03-10 (script will choose newest readable file inside)"
           python3 test_llm_endpoints.py --prompt-file data/2026-03-10 --kmax 3000 --cmax 3000 --save-json
+          echo "=== After script run: listing debug_outputs ==="
+          ls -la debug_outputs || true
+          if [ -f debug_outputs/summary.json ]; then
+            echo "=== content of debug_outputs/summary.json ==="
+            cat debug_outputs/summary.json
+          fi
 
       - name: Upload debug outputs (optional)
         if: always()
