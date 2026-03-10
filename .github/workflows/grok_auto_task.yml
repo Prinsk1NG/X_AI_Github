@@ -43,7 +43,6 @@ jobs:
           PAT_FOR_SECRETS:      ${{ secrets.PAT_FOR_SECRETS }}
           GITHUB_REPOSITORY:    ${{ github.repository }}
           JIJYUN_WEBHOOK_URL:   ${{ secrets.JIJYUN_WEBHOOK_URL }}
-          # ── 新增：Kimi / Claude 调用参数 ──
           KIMI_TEMPERATURE:     "1.0"
           OPENROUTER_MODEL:     "anthropic/claude-sonnet-4-6"
         run: python grok_auto_task.py
