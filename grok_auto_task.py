@@ -20,11 +20,13 @@ import os
 import re
 import json
 import time
+import random
 import base64
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 import requests
+from requests.exceptions import ConnectionError as RequestsConnectionError, Timeout as RequestsTimeout
 from playwright.sync_api import sync_playwright
 
 # ── Environment variables ────────────────────────────────────────────────────
@@ -728,14 +730,45 @@ def _parse_llm_result(result: str):
     return report_text, cover_title, cover_prompt, cover_insight
 
 
+def _get_openrouter_endpoints() -> list:
+    """Return OpenRouter endpoint list from OPENROUTER_ENDPOINTS env var or defaults."""
+    env_eps = os.getenv("OPENROUTER_ENDPOINTS")
+    if env_eps:
+        return [e.strip() for e in env_eps.split(",") if e.strip()]
+    return [
+        "https://openrouter.ai/api/v1/chat/completions",
+        "https://api.openrouter.ai/v1/chat/completions",
+    ]
+
+
+def _get_openrouter_proxies():
+    """Return proxy dict from HTTPS_PROXY / https_proxy env vars, or None."""
+    proxy_url = os.getenv("HTTPS_PROXY") or os.getenv("https_proxy")
+    return {"https": proxy_url, "http": proxy_url} if proxy_url else None
+
+
+def _get_kimi_temperature() -> float:
+    """Return Kimi temperature from KIMI_TEMPERATURE env var (default 1.0).
+    kimi-k2.5 only accepts temperature=1; allow override via env var with caution.
+    """
+    try:
+        return float(os.getenv("KIMI_TEMPERATURE") or 1.0)
+    except (TypeError, ValueError):
+        return 1.0
+
+
 def llm_call_kimi(combined_jsonl: str, today_str: str):
     """
     Call Kimi 2.5 (kimi-k2.5) via Moonshot API for full analysis.
     Returns (report_text, cover_title, cover_prompt, cover_insight).
+    Note: kimi-k2.5 only accepts temperature=1; use KIMI_TEMPERATURE env var to override.
     """
     if not KIMI_API_KEY:
         print("[LLM/Kimi] ⚠️ KIMI_API_KEY not configured", flush=True)
         return "", "", "", ""
+
+    # kimi-k2.5 requires temperature=1; allow override via env var
+    kimi_temperature = _get_kimi_temperature()
 
     max_data_chars = 200000
     data = combined_jsonl
@@ -757,7 +790,7 @@ def llm_call_kimi(combined_jsonl: str, today_str: str):
                 json={
                     "model": "kimi-k2.5",
                     "messages": [{"role": "user", "content": prompt}],
-                    "temperature": 0.7,
+                    "temperature": kimi_temperature,
                     "max_tokens": 16000,
                 },
                 timeout=300,
@@ -781,6 +814,8 @@ def llm_call_kimi(combined_jsonl: str, today_str: str):
 def llm_call_claude(combined_jsonl: str, today_str: str):
     """
     Call Claude Sonnet 4.6 via OpenRouter for full analysis.
+    Tries endpoints from OPENROUTER_ENDPOINTS env var (comma-separated) in order,
+    falling back to defaults. Respects HTTPS_PROXY / https_proxy env vars.
     Returns (report_text, cover_title, cover_prompt, cover_insight).
     """
     if not OPENROUTER_API_KEY:
@@ -795,39 +830,53 @@ def llm_call_claude(combined_jsonl: str, today_str: str):
         data = data[:max_data_chars]
 
     prompt = _build_llm_prompt(data, today_str)
+    endpoints = _get_openrouter_endpoints()
+    proxies = _get_openrouter_proxies()
+    headers = {
+        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://github.com/Prinsk1NG/X_AI_Github",
+        "X-Title": "AI吃瓜日报",
+    }
+    payload = {
+        "model": "anthropic/claude-sonnet-4-6",
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.7,
+        "max_tokens": 16000,
+    }
 
-    for attempt in range(1, 4):
-        try:
-            print(f"[LLM/Claude] Calling Claude Sonnet 4.6 via OpenRouter "
-                  f"(data: {len(data)} chars, attempt {attempt}/3)...", flush=True)
-            resp = requests.post(
-                "https://openrouter.ai/api/v1/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                    "Content-Type": "application/json",
-                    "HTTP-Referer": "https://github.com/Prinsk1NG/X_AI_Github",
-                    "X-Title": "AI吃瓜日报",
-                },
-                json={
-                    "model": "anthropic/claude-sonnet-4-6",
-                    "messages": [{"role": "user", "content": prompt}],
-                    "temperature": 0.7,
-                    "max_tokens": 16000,
-                },
-                timeout=300,
-            )
-            resp.raise_for_status()
-            result = resp.json()["choices"][0]["message"]["content"].strip()
-            print(f"[LLM/Claude] ✅ Claude response received ({len(result)} chars)", flush=True)
-            return _parse_llm_result(result)
-        except Exception as e:
-            print(f"[LLM/Claude] ❌ attempt {attempt}/3: {e}", flush=True)
-            if attempt < 3:
-                wait = 2 ** attempt
-                print(f"[LLM/Claude] Retrying in {wait}s...", flush=True)
-                time.sleep(wait)
+    for ep in endpoints:
+        for attempt in range(1, 4):
+            try:
+                print(f"[LLM/Claude] Calling Claude Sonnet 4.6 via {ep} "
+                      f"(data: {len(data)} chars, attempt {attempt}/3)...", flush=True)
+                resp = requests.post(ep, headers=headers, json=payload, timeout=300,
+                                     proxies=proxies)
+                if resp.status_code in (429, 502, 503, 504):
+                    wait = (2 ** attempt) + random.uniform(0, 1)
+                    print(f"[LLM/Claude] ⚠️ {resp.status_code} from {ep}, "
+                          f"retrying in {wait:.1f}s...", flush=True)
+                    time.sleep(wait)
+                    continue
+                resp.raise_for_status()
+                result = resp.json()["choices"][0]["message"]["content"].strip()
+                print(f"[LLM/Claude] ✅ Claude response received ({len(result)} chars)",
+                      flush=True)
+                return _parse_llm_result(result)
+            except (RequestsConnectionError, RequestsTimeout) as net_err:
+                print(f"[LLM/Claude] ❌ Network error on {ep} attempt {attempt}/3: {net_err}",
+                      flush=True)
+                print(f"[LLM/Claude] DNS/connectivity failure, skipping to next endpoint...",
+                      flush=True)
+                break  # DNS/connectivity failure — skip to next endpoint immediately
+            except Exception as e:
+                print(f"[LLM/Claude] ❌ attempt {attempt}/3 on {ep}: {e}", flush=True)
+                if attempt < 3:
+                    wait = 2 ** attempt
+                    print(f"[LLM/Claude] Retrying in {wait}s...", flush=True)
+                    time.sleep(wait)
 
-    print("[LLM/Claude] ❌ All attempts failed", flush=True)
+    print("[LLM/Claude] ❌ All endpoints/attempts failed", flush=True)
     return "", "", "", ""
 
 
@@ -863,7 +912,7 @@ def llm_fallback(raw_b_text):
                 json={
                     "model": "kimi-k2.5",
                     "messages": [{"role": "user", "content": fallback_prompt}],
-                    "temperature": 0.7, "max_tokens": 1000,
+                    "temperature": _get_kimi_temperature(), "max_tokens": 1000,
                 },
                 timeout=60,
             )
@@ -874,31 +923,36 @@ def llm_fallback(raw_b_text):
 
     # Try OpenRouter Claude as last resort
     if OPENROUTER_API_KEY:
-        for attempt in range(1, 4):
-            try:
-                resp = requests.post(
-                    "https://openrouter.ai/api/v1/chat/completions",
-                    headers={
-                        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                        "Content-Type": "application/json",
-                        "HTTP-Referer": "https://github.com/Prinsk1NG/X_AI_Github",
-                        "X-Title": "AI吃瓜日报",
-                    },
-                    json={
-                        "model": "anthropic/claude-sonnet-4-6",
-                        "messages": [{"role": "user", "content": fallback_prompt}],
-                        "temperature": 0.7,
-                        "max_tokens": 2000,
-                    },
-                    timeout=60,
-                )
-                resp.raise_for_status()
-                return _extract(resp.json()["choices"][0]["message"]["content"].strip())
-            except Exception as e:
-                print(f"[LLM] ❌ OpenRouter fallback attempt {attempt}/3: {e}", flush=True)
-                if attempt < 3:
-                    wait = 2 ** attempt
-                    time.sleep(wait)
+        endpoints = _get_openrouter_endpoints()
+        proxies = _get_openrouter_proxies()
+        headers = {
+            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://github.com/Prinsk1NG/X_AI_Github",
+            "X-Title": "AI吃瓜日报",
+        }
+        payload = {
+            "model": "anthropic/claude-sonnet-4-6",
+            "messages": [{"role": "user", "content": fallback_prompt}],
+            "temperature": 0.7,
+            "max_tokens": 2000,
+        }
+        for ep in endpoints:
+            for attempt in range(1, 4):
+                try:
+                    resp = requests.post(ep, headers=headers, json=payload, timeout=60,
+                                         proxies=proxies)
+                    resp.raise_for_status()
+                    return _extract(resp.json()["choices"][0]["message"]["content"].strip())
+                except (RequestsConnectionError, RequestsTimeout) as net_err:
+                    print(f"[LLM] ❌ OpenRouter fallback network error on {ep}: {net_err}",
+                          flush=True)
+                    break  # Skip to next endpoint
+                except Exception as e:
+                    print(f"[LLM] ❌ OpenRouter fallback attempt {attempt}/3 on {ep}: {e}",
+                          flush=True)
+                    if attempt < 3:
+                        time.sleep(2 ** attempt)
 
     return "", "", ""
 
