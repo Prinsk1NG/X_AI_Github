@@ -3,32 +3,34 @@
 """
 test_llm_endpoints.py
 
-Diagnostic tool to exercise Kimi (Moonshot) and Claude (OpenRouter) endpoints
-and capture detailed request/response info into debug_outputs/.
+Diagnostic tool to exercise Kimi (Moonshot) and Claude (OpenRouter/Anthropic via OpenRouter)
+endpoints and capture detailed request/response information for debugging.
+
+Usage:
+  python3 test_llm_endpoints.py --help
 """
 from __future__ import annotations
 import os
 import sys
 import json
-import time
-import argparse
 import traceback
+import argparse
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Optional
 
 import requests
 
-# Ensure debug dir exists right away so Actions can collect artifacts even on early exit
-DEBUG_DIR = Path("debug_outputs")
-DEBUG_DIR.mkdir(parents=True, exist_ok=True)
-
-# Environment variable names used by grok_auto_task.py
+# Environment variable names used elsewhere
 KIMI_API_KEY = os.getenv("KIMI_API_KEY", "")
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
 
+DEBUG_DIR = Path("debug_outputs")
+DEBUG_DIR.mkdir(exist_ok=True)
+
 # Heuristic token estimate (rough)
 def estimate_tokens(text: str) -> int:
+    # average 4 chars per token (coarse)
     return max(1, int(len(text) / 4))
 
 def redact_headers(headers: Dict[str, Any]) -> Dict[str, Any]:
@@ -44,6 +46,7 @@ def redact_headers(headers: Dict[str, Any]) -> Dict[str, Any]:
 
 def safe_decode_content(resp: requests.Response) -> str:
     try:
+        # resp.text does decoding; if it fails, use content decode fallback
         return resp.text
     except Exception:
         try:
@@ -77,6 +80,13 @@ def safe_print_request_info(prefix: str, url: str, headers: Dict[str, Any], payl
     print(f"[DEBUG] {prefix} -> payload chars: {payload_chars}, est tokens: {est_tokens}")
 
 def send_post_with_capture(name: str, url: str, headers: Dict[str, Any], json_payload: Dict[str, Any], timeout: int = 300) -> Dict[str, Any]:
+    """
+    Sends POST and returns a dict capturing:
+      - request metadata
+      - response status, headers, body (snippet), parsed JSON (if any)
+      - exception & traceback if raised
+    Also saves full dump into debug_outputs/<service>_response_*.json
+    """
     out: Dict[str, Any] = {
         "service": name,
         "url": url,
@@ -92,16 +102,18 @@ def send_post_with_capture(name: str, url: str, headers: Dict[str, Any], json_pa
         safe_print_request_info(name, url, headers, json_payload)
 
         resp = requests.post(url, headers=headers, json=json_payload, timeout=timeout)
-        out["response_status_code"] = resp.status_code
+        out["response_status"] = resp.status_code
         out["response_headers"] = {k: (v if isinstance(v, str) else str(v)) for k, v in resp.headers.items()}
         body_text = safe_decode_content(resp)
-        out["response_text_snippet"] = body_text[:10000]
+        out["response_text_snippet"] = body_text[:10000]  # keep snippet
+        # Always include full text to help debugging
+        out["response_text_full"] = body_text
+        # attempt JSON parse
         try:
             out["response_json"] = resp.json()
         except Exception as e:
             out["response_json"] = None
             out["response_json_error"] = str(e)
-            out["response_text_full"] = body_text
 
         dump_path = save_response_dump(name, out)
         out["dump_file"] = str(dump_path)
@@ -120,146 +132,223 @@ def send_post_with_capture(name: str, url: str, headers: Dict[str, Any], json_pa
 
 def build_prompt_from_file_or_default(prompt_file: Optional[str]) -> str:
     """
-    Robustly load prompt text from:
-      - an explicit file path
-      - an explicit directory (pick newest readable file inside)
-      - the latest file under data/ if present
-      - fallback built-in small prompt
+    Load prompt text from a given path or fall back to existing data/ files or a built-in prompt.
+
+    Behavior:
+    - If prompt_file is None or empty: try to pick a recent file from data/.
+    - If prompt_file exists and is a file: read it (with encoding fallback).
+    - If prompt_file exists and is a directory: pick the newest readable file inside it.
+    - If anything fails, fall back to a built-in small prompt.
     """
     if prompt_file:
         p = Path(prompt_file)
         if not p.exists():
-            print(f"[WARN] prompt path {prompt_file} not found, falling back to built-in prompt.", flush=True)
-        else:
-            if p.is_dir():
-                files = sorted([f for f in p.iterdir() if f.is_file()], key=lambda x: x.stat().st_mtime, reverse=True)
-                if files:
-                    chosen = files[0]
-                    print(f"[INFO] Prompt source was a directory; using newest file: {chosen}", flush=True)
+            print(f"[WARN] prompt path {prompt_file} not found, falling back to built-in prompt.")
+        elif p.is_dir():
+            # If passed a directory, choose newest readable file inside
+            files = sorted(p.glob("*"), key=lambda x: x.stat().st_mtime, reverse=True)
+            for f in files:
+                if f.is_file():
                     try:
-                        return chosen.read_text(encoding="utf-8", errors="replace")[:20000]
-                    except Exception as e:
-                        print(f"[WARN] Failed to read {chosen}: {e}; falling back.", flush=True)
-                else:
-                    print(f"[WARN] Prompt directory {prompt_file} contains no regular files; falling back.", flush=True)
-            else:
+                        txt = f.read_text(encoding="utf-8")
+                        if txt and len(txt) > 0:
+                            print(f"[INFO] Using prompt from file: {f}")
+                            return txt
+                    except Exception:
+                        continue
+            print(f"[WARN] prompt directory {prompt_file} contains no readable files, falling back to built-in prompt.")
+        else:
+            # Passed a file: read safely
+            try:
+                txt = p.read_text(encoding="utf-8")
+                print(f"[INFO] Using prompt file: {p}")
+                return txt
+            except Exception:
                 try:
                     txt = p.read_text(encoding="utf-8", errors="replace")
-                    print(f"[INFO] Loaded prompt from file: {p} (chars: {len(txt)})", flush=True)
+                    print(f"[WARN] Read prompt file {p} with replacement errors.")
                     return txt
-                except Exception as e:
-                    print(f"[WARN] Failed to read prompt file {prompt_file}: {e}; falling back.", flush=True)
+                except Exception:
+                    print(f"[WARN] Failed to read prompt file {prompt_file}, falling back to built-in prompt.")
 
+    # Try to use existing combined data if present (data/*)
     candidate = Path("data")
     if candidate.exists() and candidate.is_dir():
-        files = sorted([f for f in candidate.glob("*") if f.is_file()], key=lambda x: x.stat().st_mtime, reverse=True)
+        files = sorted(candidate.glob("*"), key=lambda x: x.stat().st_mtime, reverse=True)
         for f in files:
-            try:
-                txt = f.read_text(encoding="utf-8", errors="replace")
-                if len(txt) > 200:
-                    print(f"[INFO] Using latest data file as prompt: {f}", flush=True)
-                    return txt[:20000]
-            except Exception:
-                continue
+            if f.is_file():
+                try:
+                    txt = f.read_text(encoding="utf-8")
+                    if len(txt) > 200:
+                        print(f"[INFO] Using prompt from data file: {f}")
+                        return txt[:20000]  # cap to avoid huge payloads
+                except Exception:
+                    continue
 
-    print("[INFO] Using built-in fallback prompt.", flush=True)
+    # fallback prompt
+    print("[INFO] Using built-in fallback prompt.")
     return "测试: 请基于以下示例数据生成三行简短输出。\n" + ("这是一个测试行。\n" * 50)
 
 def run_kimi(prompt: str, max_output_tokens: int):
+    """
+    Send request to Kimi (Moonshot).
+    Fix: this model only allows temperature = 1; default to 1 but allow override via KIMI_TEMPERATURE env var.
+    """
     if not KIMI_API_KEY:
         print("[Kimi] KIMI_API_KEY not set in environment; skipping Kimi test.")
         return None
     url = "https://api.moonshot.cn/v1/chat/completions"
     headers = {"Authorization": f"Bearer {KIMI_API_KEY}", "Content-Type": "application/json"}
+
+    # Default to 1 (service requires it); allow explicit override via env (use with caution)
+    try:
+        env_temp = os.getenv("KIMI_TEMPERATURE")
+        if env_temp is not None:
+            temperature = float(env_temp)
+        else:
+            temperature = 1
+    except Exception:
+        temperature = 1
+
     payload = {
         "model": "kimi-k2.5",
         "messages": [{"role": "user", "content": prompt}],
-        "temperature": 0.7,
+        "temperature": temperature,
         "max_tokens": max_output_tokens,
     }
     return send_post_with_capture("Kimi_Moonshot", url, headers, payload, timeout=300)
 
 def run_claude(prompt: str, max_output_tokens: int, x_title_safe: str = "AI_Daily_Report"):
+    """
+    Send request to OpenRouter (Claude). Use api.openrouter.ai host.
+    Model alias can be overridden by OPENROUTER_MODEL env var.
+    """
     if not OPENROUTER_API_KEY:
         print("[Claude] OPENROUTER_API_KEY not set in environment; skipping Claude test.")
         return None
-    url = "https://openrouter.ai/api/v1/chat/completions"
+
+    openrouter_model = os.getenv("OPENROUTER_MODEL", "claude-2.1")
+    # Use api.openrouter.ai prefix which is standard
+    url = "https://api.openrouter.ai/v1/chat/completions"
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         "Content-Type": "application/json",
-        "HTTP-Referer": "https://github.com/Prinsk1NG/X_AI_Github",
+        # Helpful metadata for debugging
+        "HTTP-Referer": f"https://github.com/{os.getenv('GITHUB_REPOSITORY', '')}",
         "X-Title": x_title_safe,
     }
     payload = {
-        "model": "anthropic/claude-sonnet-4-6",
+        "model": openrouter_model,
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0.7,
         "max_tokens": max_output_tokens,
     }
-    return send_post_with_capture("Claude_OpenRouter", url, headers, payload, timeout=300)
+
+    resp = send_post_with_capture("Claude_OpenRouter", url, headers, payload, timeout=300)
+
+    # If 404 indicating model not found, suggest listing models
+    try:
+        if resp and resp.get("response_status") == 404:
+            err = resp.get("response_json") or {}
+            msg = None
+            if isinstance(err, dict):
+                msg = err.get("error", {}).get("message") if err.get("error") else err.get("message")
+            if msg and "No endpoints found" in msg:
+                print("[WARN] OpenRouter model not found. Consider running list_openrouter_models() or set OPENROUTER_MODEL to an available alias.")
+    except Exception:
+        pass
+
+    return resp
+
+def list_openrouter_models():
+    """
+    Helper to list OpenRouter models available to your API key and save to debug_outputs/openrouter_models.json.
+    """
+    if not OPENROUTER_API_KEY:
+        print("[ListModels] OPENROUTER_API_KEY not set; cannot list models.")
+        return None
+    url = "https://api.openrouter.ai/v1/models"
+    headers = {"Authorization": f"Bearer {OPENROUTER_API_KEY}"}
+    try:
+        r = requests.get(url, headers=headers, timeout=30)
+        info = {
+            "service": "OpenRouter_ListModels",
+            "url": url,
+            "timestamp_utc": datetime.utcnow().isoformat() + "Z",
+            "response_status": r.status_code,
+        }
+        try:
+            info["response_json"] = r.json()
+        except Exception:
+            info["response_text"] = r.text
+        p = DEBUG_DIR / "openrouter_models.json"
+        safe_dump(info, p)
+        print(f"[INFO] Saved OpenRouter models to {p}")
+        return info
+    except Exception as exc:
+        print("[ERROR] Failed to list OpenRouter models:", exc)
+        return None
 
 def parse_args():
-    p = argparse.ArgumentParser(description="Diagnostic tester for Kimi (Moonshot) and Claude (OpenRouter) endpoints.")
-    p.add_argument("--prompt-file", "-f", help="Path to prompt file (jsonl or text) or directory.")
-    p.add_argument("--prompt", help="Direct prompt string (overrides --prompt-file).")
-    p.add_argument("--kmax", type=int, default=4000, help="max_tokens to request from Kimi (default 4000)")
-    p.add_argument("--cmax", type=int, default=4000, help="max_tokens to request from Claude (default 4000)")
-    p.add_argument("--x-title", default="AI_Daily_Report", help="ASCII-safe X-Title header for OpenRouter")
-    p.add_argument("--save-json", action="store_true", help="Save a small summary JSON in debug_outputs/summary.json")
+    p = argparse.ArgumentParser(description="Test LLM endpoints and capture debug outputs.")
+    p.add_argument("--prompt-file", help="Path to prompt file or directory (if directory, choose newest readable file).", default=None)
+    p.add_argument("--kmax", type=int, help="Kimi max tokens", default=512)
+    p.add_argument("--cmax", type=int, help="Claude max tokens", default=512)
+    p.add_argument("--save-json", action="store_true", help="Save summary JSON to debug_outputs/summary.json")
     return p.parse_args()
 
 def main():
     args = parse_args()
-    if args.prompt:
-        prompt = args.prompt
-    else:
+    try:
         prompt = build_prompt_from_file_or_default(args.prompt_file)
+        print("=" * 60)
+        print("LLM endpoints diagnostic - capturing request/response details")
+        print("=" * 60)
+        print("Timestamp (UTC):", datetime.utcnow().isoformat() + "Z")
+        print()
+        print(f"Prompt chars: {len(prompt)} Estimated tokens: {estimate_tokens(prompt)}")
+        print("KIMI_API_KEY set:", bool(KIMI_API_KEY))
+        print("OPENROUTER_API_KEY set:", bool(OPENROUTER_API_KEY))
+        print()
 
-    print("=" * 60)
-    print("LLM endpoints diagnostic - capturing request/response details")
-    print("Timestamp (UTC):", datetime.utcnow().isoformat() + "Z")
-    print("=" * 60)
-    print("Prompt chars:", len(prompt), "Estimated tokens:", estimate_tokens(prompt))
-    print("KIMI_API_KEY set:", bool(KIMI_API_KEY))
-    print("OPENROUTER_API_KEY set:", bool(OPENROUTER_API_KEY))
-    print()
+        results = {}
 
-    results = {}
-    print("[INFO] Running Kimi (Moonshot) test...")
-    res_kimi = run_kimi(prompt, max_output_tokens=args.kmax)
-    results["kimi"] = res_kimi
+        print("[INFO] Running Kimi (Moonshot) test...")
+        kimi_out = run_kimi(prompt, args.kmax)
+        results["kimi"] = kimi_out
 
-    print("[INFO] Running Claude (OpenRouter) test...")
-    res_claude = run_claude(prompt, max_output_tokens=args.cmax, x_title_safe=args.x_title)
-    results["claude"] = res_claude
+        print("[INFO] Running Claude (OpenRouter) test...")
+        claude_out = run_claude(prompt, args.cmax)
+        results["claude"] = claude_out
 
-    print("\n" + "=" * 40)
-    print("Summary")
-    print("=" * 40)
-    for name, r in results.items():
-        if r is None:
-            print(f"{name}: skipped (missing API key)")
-            continue
-        status = r.get("response_status_code", "EXC")
-        dump = r.get("dump_file", "")
-        print(f"{name}: HTTP {status}, saved: {dump}")
-        snippet = r.get("response_text_snippet") or ""
-        print(f"  snippet (first 500 chars):\n{snippet[:500]}")
-        print("-" * 40)
+        if args.save_json:
+            summary_path = DEBUG_DIR / "summary.json"
+            safe_dump(results, summary_path)
+            print(f"[INFO] Saved summary to {summary_path}")
 
-    if args.save_json:
-        summary_path = DEBUG_DIR / "summary.json"
-        safe_dump(results, summary_path)
-        print(f"Saved summary to {summary_path}")
+        # brief summary print
+        print("\n========================================")
+        print("Summary")
+        print("========================================")
+        for svc, out in results.items():
+            if out is None:
+                print(f"{svc}: skipped")
+            else:
+                status = out.get("response_status") or out.get("exception") or out.get("response_status_code") or "unknown"
+                dump = out.get("dump_file")
+                print(f"{svc}: HTTP {status}, saved: {dump}")
+                snippet = out.get("response_text_snippet", "")
+                if snippet:
+                    print("  snippet (first 500 chars):")
+                    print(snippet[:500])
+                print("----------------------------------------")
 
-    print("\nDone.")
+        print("Done.")
+        return 0
+    except Exception as exc:
+        print("[ERROR] Unhandled exception in main:", exc)
+        print(traceback.format_exc())
+        return 1
 
 if __name__ == "__main__":
-    try:
-        main()
-    except Exception:
-        tb = traceback.format_exc()
-        err_path = DEBUG_DIR / "error.txt"
-        err_path.write_text(tb, encoding="utf-8", errors="replace")
-        print(f"[FATAL] Unhandled exception; traceback written to {err_path}", file=sys.stderr)
-        raise
+    sys.exit(main())
