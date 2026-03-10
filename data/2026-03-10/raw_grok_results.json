@@ -1,0 +1,1971 @@
+{
+  "saved_at": "2026-03-10T03:34:17Z",
+  "date": "2026-03-10",
+  "total_posts": 209,
+  "total_accounts": 97,
+  "search_params": {
+    "accounts_tracked": 100,
+    "phase1_limit": 3,
+    "phase2_s_limit": 10,
+    "phase2_a_limit": 5
+  },
+  "posts": [
+    {
+      "a": "elonmusk",
+      "l": 19632,
+      "t": "0309",
+      "s": "True",
+      "qt": "@XFreeze: SpaceX launches satellites for Starlink competitors on Falcon 9 same terms zero preferential treatment record 165 launches 2025.",
+      "tag": "raw"
+    },
+    {
+      "a": "elonmusk",
+      "l": 4702,
+      "t": "0309",
+      "s": "We are in the Singularity",
+      "tag": "raw"
+    },
+    {
+      "a": "elonmusk",
+      "l": 113489,
+      "t": "0309",
+      "s": "Real picture of @StarbaseTX",
+      "tag": "raw"
+    },
+    {
+      "a": "sama",
+      "l": 11525,
+      "t": "0307",
+      "s": "GPT-5.4 great at coding knowledge work computer use favorite model to talk to with improved personality.",
+      "tag": "raw"
+    },
+    {
+      "a": "sama",
+      "l": 3110,
+      "t": "0307",
+      "s": "Very grateful to Jensen for expanding Nvidia capacity at AWS.",
+      "qt": "@firstadopter: Jensen said Nvidia expanding OpenAI capacity at AWS like mad OpenAI Codex exploding.",
+      "tag": "raw"
+    },
+    {
+      "a": "sama",
+      "l": 1881,
+      "t": "0307",
+      "s": "Wow real range of emotion reading second then third paragraph.",
+      "qt": "@benhylak: Using gpt 5.4 weeks worth trying didnt expect OpenAI pull off.",
+      "tag": "raw"
+    },
+    {
+      "a": "karpathy",
+      "l": 116,
+      "t": "0309",
+      "s": "Explains autoresearch plot rejection for points with lower loss but longer training time.",
+      "tag": "raw"
+    },
+    {
+      "a": "karpathy",
+      "l": 192,
+      "t": "0309",
+      "s": "Agent discovered switching QK Norm and RoPE order works better.",
+      "tag": "raw"
+    },
+    {
+      "a": "karpathy",
+      "l": 364,
+      "t": "0309",
+      "s": "Current LLM agents writing code learning from experiments with internet access far surpass old neural architecture search.",
+      "tag": "raw"
+    },
+    {
+      "a": "demishassabis",
+      "l": 56,
+      "t": "0305",
+      "s": "yes we are, more on that soon.",
+      "tag": "raw"
+    },
+    {
+      "a": "demishassabis",
+      "l": 67,
+      "t": "0305",
+      "s": "Very cool @Scobleizer !",
+      "tag": "raw"
+    },
+    {
+      "a": "demishassabis",
+      "l": 2351,
+      "t": "0305",
+      "s": "Still super underrated what the incredible @NotebookLM can do. It's magical - one of my favourite AI tools.",
+      "qt": "@NotebookLM: Introducing Cinematic Video Overviews, the next evolution of the NotebookLM Studio...",
+      "tag": "raw"
+    },
+    {
+      "a": "demishassabis",
+      "l": 1691,
+      "t": "0304",
+      "s": "small but mighty 💪 - our new Gemini 3.1 Flash-Lite model is incredibly fast and cost-efficient for its performance",
+      "qt": "@GoogleDeepMind: Gemini 3.1 Flash-Lite has landed...",
+      "tag": "raw"
+    },
+    {
+      "a": "demishassabis",
+      "l": 827,
+      "t": "0226",
+      "s": "top 🍌",
+      "qt": "@arena: 🚨BREAKING: Nano Banana 2 debuts at #1 in Image Arena...",
+      "tag": "raw"
+    },
+    {
+      "a": "darioamodei",
+      "l": 6647,
+      "t": "0126",
+      "s": "Essay on AI risks to security economies democracy relevant amid Minnesota events.",
+      "tag": "raw"
+    },
+    {
+      "a": "darioamodei",
+      "l": 2325,
+      "t": "0126",
+      "s": "Companion to previous essay Machines of Loving Grace.",
+      "tag": "raw"
+    },
+    {
+      "a": "darioamodei",
+      "l": 15251,
+      "t": "0126",
+      "s": "The Adolescence of Technology essay on AI risks and defenses.",
+      "tag": "raw"
+    },
+    {
+      "a": "OpenAI",
+      "l": 4128,
+      "t": "0309",
+      "s": "We’re acquiring Promptfoo. Their technology will strengthen agentic security testing and evaluation capabilities in OpenAI Frontier...",
+      "tag": "raw"
+    },
+    {
+      "a": "OpenAI",
+      "l": 2575,
+      "t": "0306",
+      "s": "Codex Security—our application security agent—is now in research preview.",
+      "tag": "raw"
+    },
+    {
+      "a": "OpenAI",
+      "l": 2788,
+      "t": "0305",
+      "s": "We're publishing a new evaluation suite and research paper on Chain-of-Thought (CoT) Controllability...",
+      "tag": "raw"
+    },
+    {
+      "a": "OpenAI",
+      "l": 1722,
+      "t": "0305",
+      "s": "GPT-5.4 Thinking and Pro are rolling out gradually starting today across ChatGPT, the API, and Codex.",
+      "tag": "raw"
+    },
+    {
+      "a": "OpenAI",
+      "l": 23361,
+      "t": "0305",
+      "s": "GPT-5.4 Thinking and GPT-5.4 Pro are rolling out now in ChatGPT. GPT-5.4 is also now available in the API and Codex...",
+      "tag": "raw"
+    },
+    {
+      "a": "AnthropicAI",
+      "l": 3105,
+      "t": "0306",
+      "s": "Claude Opus 4.6 recognized test found decrypted answers in BrowseComp raising eval integrity questions.",
+      "tag": "raw"
+    },
+    {
+      "a": "AnthropicAI",
+      "l": 1146,
+      "t": "0306",
+      "s": "Frontier models world-class vulnerability researchers better at finding than exploiting urge secure software.",
+      "tag": "raw"
+    },
+    {
+      "a": "AnthropicAI",
+      "l": 14970,
+      "t": "0306",
+      "s": "Partnered Mozilla test Claude found 22 Firefox vulnerabilities 14 high-severity.",
+      "tag": "raw"
+    },
+    {
+      "a": "GoogleDeepMind",
+      "l": 412,
+      "t": "0303",
+      "s": "Gemini 3.1 Flash-Lite is rolling out in preview today. Developers can start building via the Gemini API in @GoogleAIStudio...",
+      "tag": "raw"
+    },
+    {
+      "a": "GoogleDeepMind",
+      "l": 603,
+      "t": "0303",
+      "s": "3.1 Flash-Lite outperforms 2.5 Flash with faster performance at a lower price...",
+      "tag": "raw"
+    },
+    {
+      "a": "GoogleDeepMind",
+      "l": 8943,
+      "t": "0303",
+      "s": "Gemini 3.1 Flash-Lite has landed. It’s our most cost-efficient Gemini 3 series model yet...",
+      "tag": "raw"
+    },
+    {
+      "a": "GoogleDeepMind",
+      "l": 54,
+      "t": "0302",
+      "s": "It gives outputs in a range of aspect ratios and can upscale content from 521px to both 2K and 4K...",
+      "tag": "raw"
+    },
+    {
+      "a": "GoogleDeepMind",
+      "l": 77,
+      "t": "0302",
+      "s": "It can include accurate writing directly into images...",
+      "tag": "raw"
+    },
+    {
+      "a": "xAI",
+      "l": 467,
+      "t": "0304",
+      "s": "Will employ thousands of workers from Memphis area.",
+      "tag": "raw"
+    },
+    {
+      "a": "xAI",
+      "l": 769,
+      "t": "0304",
+      "s": "Will build water recycling plant protecting 4.7 billion gallons aquifer.",
+      "tag": "raw"
+    },
+    {
+      "a": "xAI",
+      "l": 278,
+      "t": "0304",
+      "s": "Will build new substations for regional electric grid stability.",
+      "tag": "raw"
+    },
+    {
+      "a": "AIatMeta",
+      "l": 0,
+      "t": "0309",
+      "s": "Incredible body of work from the team 🚀",
+      "tag": "raw"
+    },
+    {
+      "a": "AIatMeta",
+      "l": 2332,
+      "t": "0224",
+      "s": "Meta 🤝 AMD Today we’re announcing a multi-year agreement with @AMD to integrate their latest Instinct GPUs...",
+      "tag": "raw"
+    },
+    {
+      "a": "AIatMeta",
+      "l": 797,
+      "t": "0219",
+      "s": "ICYMI: @alexandr_wang spoke at the India AI Impact Summit...",
+      "tag": "raw"
+    },
+    {
+      "a": "AIatMeta",
+      "l": 129,
+      "t": "0218",
+      "s": "Our Chief AI Officer @alexandr_wang will take the stage at the India AI Impact Summit...",
+      "tag": "raw"
+    },
+    {
+      "a": "GoogleAI",
+      "l": 262,
+      "t": "0306",
+      "s": "Recap of launches including Gemini 3.1 Flash-Lite and NotebookLM features.",
+      "tag": "raw"
+    },
+    {
+      "a": "GoogleAI",
+      "l": 73,
+      "t": "0306",
+      "s": "Nano Banana 2 available via Gemini API and Vertex AI.",
+      "tag": "raw"
+    },
+    {
+      "a": "GoogleAI",
+      "l": 555,
+      "t": "0306",
+      "s": "Ideas for building with Nano Banana 2 like travel apps and UI prototyping.",
+      "tag": "raw"
+    },
+    {
+      "a": "MSFTResearch",
+      "l": 48,
+      "t": "0309",
+      "s": "Multimodal reasoning with Phi-4-reasoning-vision and other new work.",
+      "tag": "raw"
+    },
+    {
+      "a": "MSFTResearch",
+      "l": 72,
+      "t": "0304",
+      "s": "Phi-4-reasoning-vision-15B compact multimodal reasoning model.",
+      "tag": "raw"
+    },
+    {
+      "a": "MSFTResearch",
+      "l": 16,
+      "t": "0226",
+      "s": "CORPGEN for AI agents managing interdependent tasks.",
+      "tag": "raw"
+    },
+    {
+      "a": "gregbrockman",
+      "l": 2,
+      "t": "0308",
+      "s": "Smash!!!",
+      "tag": "raw"
+    },
+    {
+      "a": "gregbrockman",
+      "l": 0,
+      "t": "0118",
+      "s": "Hearts.",
+      "tag": "raw"
+    },
+    {
+      "a": "gregbrockman",
+      "l": 0,
+      "t": "1230",
+      "s": "Cakes!!",
+      "tag": "raw"
+    },
+    {
+      "a": "GaryMarcus",
+      "l": 62,
+      "t": "0310",
+      "s": "OpenAI burning money faster than Anthropic yet valued higher due to hype.",
+      "tag": "raw"
+    },
+    {
+      "a": "GaryMarcus",
+      "l": 4,
+      "t": "0310",
+      "s": "Talking about Jurafsky lab paper.",
+      "tag": "raw"
+    },
+    {
+      "a": "GaryMarcus",
+      "l": 10,
+      "t": "0310",
+      "s": "Social media favors false rumors over corrections.",
+      "tag": "raw"
+    },
+    {
+      "a": "rowancheung",
+      "l": 3,
+      "t": "0308",
+      "s": "We're back 🫡",
+      "tag": "raw"
+    },
+    {
+      "a": "rowancheung",
+      "l": 70,
+      "t": "0308",
+      "s": "Microsoft found out how to etch 5 terabytes of data into a piece of glass... Source: nature.com...",
+      "tag": "raw"
+    },
+    {
+      "a": "rowancheung",
+      "l": 1124,
+      "t": "0308",
+      "s": "Microsoft found out how to etch 5 terabytes of data into a piece of glass and it survives for 10,000 years! Project Silica...",
+      "tag": "raw"
+    },
+    {
+      "a": "rowancheung",
+      "l": 45,
+      "t": "1218",
+      "s": "Exclusive from @theinformation by @steph_palazzolo",
+      "qt": "@steph_palazzolo: New: Brett Adcock... is starting a new AI lab called Hark...",
+      "tag": "raw"
+    },
+    {
+      "a": "clmcleod",
+      "l": 0,
+      "t": "0913",
+      "s": "Snapping turtle or horseshoe crab stays put on floor.",
+      "tag": "raw"
+    },
+    {
+      "a": "clmcleod",
+      "l": 0,
+      "t": "0913",
+      "s": "Got this from Saharah.",
+      "tag": "raw"
+    },
+    {
+      "a": "clmcleod",
+      "l": 0,
+      "t": "0831",
+      "s": "That girl has the class of a groundhog.",
+      "tag": "raw"
+    },
+    {
+      "a": "bindureddy",
+      "l": 3,
+      "t": "0309",
+      "s": "Recommend high In practice x-High expensive check on ChatLLM.",
+      "tag": "raw"
+    },
+    {
+      "a": "bindureddy",
+      "l": 7,
+      "t": "0309",
+      "s": "High practically cheaper and makes sense in many cases.",
+      "tag": "raw"
+    },
+    {
+      "a": "bindureddy",
+      "l": 4,
+      "t": "0309",
+      "s": "This is better.",
+      "tag": "raw"
+    },
+    {
+      "a": "dotey",
+      "l": 1,
+      "t": "0310",
+      "s": "5th one looks familiar.",
+      "tag": "raw"
+    },
+    {
+      "a": "dotey",
+      "l": 1,
+      "t": "0310",
+      "s": "Initial context agent loads more based on diff.",
+      "tag": "raw"
+    },
+    {
+      "a": "dotey",
+      "l": 1,
+      "t": "0309",
+      "s": "Thanks not reporting just reclaiming ownership.",
+      "tag": "raw"
+    },
+    {
+      "a": "oran_ge",
+      "l": 0,
+      "t": "0309",
+      "s": "Like this.",
+      "tag": "raw"
+    },
+    {
+      "a": "oran_ge",
+      "l": 69,
+      "t": "0309",
+      "s": "Enterprise WeChat connection to lobster requires many steps.",
+      "tag": "raw"
+    },
+    {
+      "a": "oran_ge",
+      "l": 473,
+      "t": "0309",
+      "s": "QQ robot integration with lobster is super smooth.",
+      "tag": "raw"
+    },
+    {
+      "a": "vista8",
+      "l": 31,
+      "t": "0309",
+      "s": "Consequences of staying up late skipping breakfast: gallbladder pain surgery tomorrow.",
+      "tag": "raw"
+    },
+    {
+      "a": "vista8",
+      "l": 0,
+      "t": "0308",
+      "s": "Oh need to research.",
+      "tag": "raw"
+    },
+    {
+      "a": "vista8",
+      "l": 3,
+      "t": "0308",
+      "s": "This design logic looks solid.",
+      "tag": "raw"
+    },
+    {
+      "a": "Sxsyer",
+      "l": 0,
+      "t": "0310",
+      "s": "Case value is task-driven output over passive input suggest replicable template.",
+      "tag": "raw"
+    },
+    {
+      "a": "Sxsyer",
+      "l": 0,
+      "t": "0310",
+      "s": "Tool usability issue suggest security boundary checklist.",
+      "tag": "raw"
+    },
+    {
+      "a": "Sxsyer",
+      "l": 0,
+      "t": "0310",
+      "s": "AI portfolio value in compressing production cycle suggest reusable workflow.",
+      "tag": "raw"
+    },
+    {
+      "a": "tualatrix",
+      "l": 1,
+      "t": "0309",
+      "s": "Trying to understand baby language, cherishing the time when she can't speak human words yet.",
+      "tag": "raw"
+    },
+    {
+      "a": "tualatrix",
+      "l": 0,
+      "t": "0309",
+      "s": "Hahaha this is too horrifying.",
+      "tag": "raw"
+    },
+    {
+      "a": "tualatrix",
+      "l": 0,
+      "t": "0309",
+      "s": "Is it also sprayed out from the nostrils?",
+      "tag": "raw"
+    },
+    {
+      "a": "linyunqiu",
+      "l": 0,
+      "t": "0329",
+      "s": "Why is CA856 suddenly cancelled without email update? Requesting options.",
+      "tag": "raw"
+    },
+    {
+      "a": "linyunqiu",
+      "l": 0,
+      "t": "1028",
+      "s": "Hello World",
+      "tag": "raw"
+    },
+    {
+      "a": "garywong",
+      "l": 0,
+      "t": "0415",
+      "s": "11 o'clock lu.",
+      "tag": "raw"
+    },
+    {
+      "a": "garywong",
+      "l": 0,
+      "t": "0415",
+      "s": "Waiting someone.",
+      "tag": "raw"
+    },
+    {
+      "a": "garywong",
+      "l": 0,
+      "t": "0415",
+      "s": "Hello everyone.",
+      "tag": "raw"
+    },
+    {
+      "a": "hw_star",
+      "l": 0,
+      "t": "0316",
+      "s": "Tohoku houses are huge... @ NHK education.",
+      "tag": "raw"
+    },
+    {
+      "a": "hw_star",
+      "l": 0,
+      "t": "0315",
+      "s": "Twitter and 2ch have their own thoughts.",
+      "tag": "raw"
+    },
+    {
+      "a": "hw_star",
+      "l": 0,
+      "t": "0315",
+      "s": "Nostradamus dam suuuuuck.",
+      "tag": "raw"
+    },
+    {
+      "a": "mranti",
+      "l": 7,
+      "t": "0310",
+      "s": "360 software is useless garbage tormenting elderly Windows users; its crayfish launch is a nightmare.",
+      "tag": "raw"
+    },
+    {
+      "a": "mranti",
+      "l": 3,
+      "t": "0310",
+      "s": "Beijing AI education advancing fast with Claude Code expected soon in school contests.",
+      "tag": "raw"
+    },
+    {
+      "a": "mranti",
+      "l": 5,
+      "t": "0310",
+      "s": "Tested OpenClaw has /stop for ESC pause; works well.",
+      "tag": "raw"
+    },
+    {
+      "a": "nishuang",
+      "l": 33,
+      "t": "0409",
+      "s": "APP design with game-like feel vs gamification; CapWords example beats Duolingo by evoking intrinsic joy.",
+      "tag": "raw"
+    },
+    {
+      "a": "nishuang",
+      "l": 1,
+      "t": "0409",
+      "s": "Still missing the point on obstacles in CapWords auto-crop.",
+      "tag": "raw"
+    },
+    {
+      "a": "nishuang",
+      "l": 13,
+      "t": "0409",
+      "s": "Amie 2.0 fully pivots to AI meeting efficiency tool.",
+      "tag": "raw"
+    },
+    {
+      "a": "a16z",
+      "l": 70,
+      "t": "0309",
+      "s": "Digital freedom is the defining US national security battle in AI era.",
+      "tag": "raw"
+    },
+    {
+      "a": "a16z",
+      "l": 128,
+      "t": "0309",
+      "s": "OpenClaw nearing one million daily visits to signup.",
+      "tag": "raw"
+    },
+    {
+      "a": "a16z",
+      "l": 235,
+      "t": "0309",
+      "s": "ChatGPT has over 2.5x paid subscribers than Gemini and Claude combined.",
+      "tag": "raw"
+    },
+    {
+      "a": "ycombinator",
+      "l": 34,
+      "t": "0310",
+      "s": "Samora AI voice agents handle multilingual tasks and escalate to humans.",
+      "tag": "raw"
+    },
+    {
+      "a": "ycombinator",
+      "l": 87,
+      "t": "0309",
+      "s": "LibrarLabs AI librarian boosts reading rates.",
+      "tag": "raw"
+    },
+    {
+      "a": "ycombinator",
+      "l": 84,
+      "t": "0309",
+      "s": "Fenrock AI back-office agents for banks process loans fast.",
+      "tag": "raw"
+    },
+    {
+      "a": "lightspeedvp",
+      "l": 1,
+      "t": "0309",
+      "s": "Axiom Trust Company raises $11.8M to modernize wealth transfer with AI.",
+      "tag": "raw"
+    },
+    {
+      "a": "lightspeedvp",
+      "l": 7,
+      "t": "0309",
+      "s": "The Great Wealth Transfer needs stronger trust infrastructure.",
+      "tag": "raw"
+    },
+    {
+      "a": "lightspeedvp",
+      "l": 0,
+      "t": "0306",
+      "s": "Nominate go-to-market strategists for GTM10 awards.",
+      "tag": "raw"
+    },
+    {
+      "a": "sequoia",
+      "l": 11,
+      "t": "0305",
+      "s": "Full conversation with Ben Horowitz on founder urgency.",
+      "tag": "raw"
+    },
+    {
+      "a": "sequoia",
+      "l": 7,
+      "t": "0203",
+      "s": "2026 year of specialized intelligence.",
+      "tag": "raw"
+    },
+    {
+      "a": "sequoia",
+      "l": 27,
+      "t": "0203",
+      "s": "AI coding solved; bottleneck is clear human intent.",
+      "tag": "raw"
+    },
+    {
+      "a": "foundersfund",
+      "l": 164,
+      "t": "0701",
+      "s": "Part IV: The Kingdom of Founders Fund power.",
+      "tag": "raw"
+    },
+    {
+      "a": "foundersfund",
+      "l": 201,
+      "t": "0626",
+      "s": "Part III: The Gospel of Founders Fund influence.",
+      "tag": "raw"
+    },
+    {
+      "a": "foundersfund",
+      "l": 21,
+      "t": "0624",
+      "s": "Full interview on anti-category investing.",
+      "tag": "raw"
+    },
+    {
+      "a": "eladgil",
+      "l": 241,
+      "t": "0308",
+      "s": "׳We would like our desires to come from our deepest selves... but if it did, it would not be desire...’ -Rene Girard",
+      "tag": "raw"
+    },
+    {
+      "a": "eladgil",
+      "l": 29,
+      "t": "0305",
+      "s": "Lol https://cdn.realfood.gov/DGA.pdf",
+      "tag": "raw"
+    },
+    {
+      "a": "eladgil",
+      "l": 304,
+      "t": "0227",
+      "s": "AI productivity will hit turn arounds, and AI roll ups first",
+      "tag": "raw"
+    },
+    {
+      "a": "pmarca",
+      "l": 677,
+      "t": "0309",
+      "s": "Alpha! on Lenny Rachitsky takeaways.",
+      "tag": "raw"
+    },
+    {
+      "a": "pmarca",
+      "l": 615,
+      "t": "0309",
+      "s": "And 1/4 Substack of course!",
+      "tag": "raw"
+    },
+    {
+      "a": "pmarca",
+      "l": 587,
+      "t": "0309",
+      "s": "Many such cases on historical tech fears.",
+      "tag": "raw"
+    },
+    {
+      "a": "bchesky",
+      "l": 52,
+      "t": "0212",
+      "s": "Airbnb Q4 momentum from innovation blueprint.",
+      "tag": "raw"
+    },
+    {
+      "a": "bchesky",
+      "l": 65,
+      "t": "0212",
+      "s": "AI accelerates but we build knowing app from data.",
+      "tag": "raw"
+    },
+    {
+      "a": "bchesky",
+      "l": 32,
+      "t": "0212",
+      "s": "40% free cash flow margins since IPO.",
+      "tag": "raw"
+    },
+    {
+      "a": "chamath",
+      "l": 17,
+      "t": "0309",
+      "s": "AI CEOs failing to build trust with ulterior motives.",
+      "tag": "raw"
+    },
+    {
+      "a": "chamath",
+      "l": 5,
+      "t": "0309",
+      "s": "This is probably true right now.",
+      "tag": "raw"
+    },
+    {
+      "a": "chamath",
+      "l": 2,
+      "t": "0309",
+      "s": "You don’t invest without expecting return.",
+      "tag": "raw"
+    },
+    {
+      "a": "paulg",
+      "l": 6,
+      "t": "0309",
+      "s": "It's not just that.",
+      "tag": "raw"
+    },
+    {
+      "a": "paulg",
+      "l": 954,
+      "t": "0309",
+      "s": "What worries me is distraction from Epstein files.",
+      "tag": "raw"
+    },
+    {
+      "a": "paulg",
+      "l": 1047,
+      "t": "0309",
+      "s": "No text content image.",
+      "tag": "raw"
+    },
+    {
+      "a": "TheInformation",
+      "l": 1,
+      "t": "0309",
+      "s": "Anthropic customers unaffected by Pentagon supply chain risk.",
+      "tag": "raw"
+    },
+    {
+      "a": "TheInformation",
+      "l": 3,
+      "t": "0309",
+      "s": "ChatGPT users research but not buy; OpenAI shifts strategy.",
+      "tag": "raw"
+    },
+    {
+      "a": "TheInformation",
+      "l": 2,
+      "t": "0309",
+      "s": "Pinterest code red for ad targeting improvement.",
+      "tag": "raw"
+    },
+    {
+      "a": "Scobleizer",
+      "l": 1,
+      "t": "0310",
+      "s": "They are idiots. I know, I have 550,000",
+      "tag": "raw"
+    },
+    {
+      "a": "Scobleizer",
+      "l": 0,
+      "t": "0310",
+      "s": "Nah but that will sell.",
+      "tag": "raw"
+    },
+    {
+      "a": "Scobleizer",
+      "l": 1,
+      "t": "0310",
+      "s": "I was fourth in line at the Danville store and got mine in April. Two years later, it is still my favorite product I've owned in my life.",
+      "tag": "raw"
+    },
+    {
+      "a": "bentossell",
+      "l": 0,
+      "t": "0309",
+      "s": "❤️",
+      "tag": "raw"
+    },
+    {
+      "a": "bentossell",
+      "l": 3,
+      "t": "0309",
+      "s": "~ 0.14s😉",
+      "tag": "raw"
+    },
+    {
+      "a": "bentossell",
+      "l": 173,
+      "t": "0309",
+      "s": "best demo i’ve ever seen",
+      "tag": "raw"
+    },
+    {
+      "a": "HuggingFace",
+      "l": 7,
+      "t": "0309",
+      "s": "thank you for the all the open sourcing 🤗 https://huggingface.co/fal",
+      "tag": "raw"
+    },
+    {
+      "a": "HuggingFace",
+      "l": 3,
+      "t": "0303",
+      "s": "🔥🔥🔥 tokens for all!",
+      "tag": "raw"
+    },
+    {
+      "a": "HuggingFace",
+      "l": 233,
+      "t": "0220",
+      "s": "Thrilled to have GGML with us going forward! 🤗❤️🦙 Read the announcement blog https://huggingface.co/blog/ggml-joins-hf",
+      "tag": "raw"
+    },
+    {
+      "a": "MistralAI",
+      "l": 153,
+      "t": "0210",
+      "s": "https://worldwide-hackathon.mistral.ai/",
+      "tag": "raw"
+    },
+    {
+      "a": "MistralAI",
+      "l": 1583,
+      "t": "0210",
+      "s": "Introducing Mistral AI's biggest hackathon ever! Feb 28 - Mar 1 multiple cities and online 48 hours best hackers $200K prizes.",
+      "tag": "raw"
+    },
+    {
+      "a": "MistralAI",
+      "l": 177,
+      "t": "0204",
+      "s": "Available now. Mini Transcribe 2 via API at $0.003/min. Realtime via API at $0.006/min plus open weights.",
+      "tag": "raw"
+    },
+    {
+      "a": "Perplexity_AI",
+      "l": 1870,
+      "t": "0305",
+      "s": "GPT-5.4 and GPT-5.4 Thinking are now available in Perplexity for Pro and Max subscribers.",
+      "tag": "raw"
+    },
+    {
+      "a": "Perplexity_AI",
+      "l": 4470,
+      "t": "0304",
+      "s": "Introducing Voice Mode in Perplexity Computer. You can now just talk and do things.",
+      "tag": "raw"
+    },
+    {
+      "a": "Perplexity_AI",
+      "l": 134,
+      "t": "0227",
+      "s": "This week we launched Perplexity Computer the most powerful AI product yet. Join us March 11.",
+      "tag": "raw"
+    },
+    {
+      "a": "GroqInc",
+      "l": 308,
+      "t": "0218",
+      "s": "Happy Ramadan!",
+      "tag": "raw"
+    },
+    {
+      "a": "GroqInc",
+      "l": 6,
+      "t": "0216",
+      "s": "Learn more: https://groq.com/blog/groqcloud-expanding-to-meet-demand",
+      "tag": "raw"
+    },
+    {
+      "a": "GroqInc",
+      "l": 32,
+      "t": "0216",
+      "s": "GroqCloud is scaling fast. 3.5M+ developers growing. UK data center live with Equinix low-latency inference Europe.",
+      "tag": "raw"
+    },
+    {
+      "a": "Cohere",
+      "l": 66,
+      "t": "0304",
+      "s": "We’re proud to announce multi-year partnership with Aston Martin F1 team. Access to enterprise models and agentic AI platform.",
+      "tag": "raw"
+    },
+    {
+      "a": "Cohere",
+      "l": 0,
+      "t": "0220",
+      "s": "If you want to become a partner please fill out this application form.",
+      "tag": "raw"
+    },
+    {
+      "a": "Cohere",
+      "l": 205,
+      "t": "0220",
+      "s": "The India AI Impact Summit critical conversations scaling frontier AI responsibly advancing language accessibility Tiny Aya launch.",
+      "tag": "raw"
+    },
+    {
+      "a": "TogetherCompute",
+      "l": 4,
+      "t": "0309",
+      "s": "We’re back at NVIDIAGTC excited lineup. Join sessions leaders Together AI booth 1213 live demos.",
+      "tag": "raw"
+    },
+    {
+      "a": "TogetherCompute",
+      "l": 5,
+      "t": "0307",
+      "s": "Congrats CorelDRAW launch Graphics Suite 2026 new AI-powered tools accelerate ideation streamline workflows.",
+      "tag": "raw"
+    },
+    {
+      "a": "TogetherCompute",
+      "l": 12,
+      "t": "0306",
+      "s": "Huge thanks attendees speakers sponsors AINativeConf defining moment builders researchers founders ship AI-Native products.",
+      "tag": "raw"
+    },
+    {
+      "a": "runwayml",
+      "l": 25,
+      "t": "0309",
+      "s": "Runway Characters available now developer platform. First 30 minutes conversation free.",
+      "tag": "raw"
+    },
+    {
+      "a": "runwayml",
+      "l": 349,
+      "t": "0309",
+      "s": "Introducing Runway Characters real-time intelligent avatars turn internet conversation. Customizable deployable via API.",
+      "tag": "raw"
+    },
+    {
+      "a": "runwayml",
+      "l": 6,
+      "t": "0305",
+      "s": "Learn more: https://academy.runwayml.com/meetups",
+      "tag": "raw"
+    },
+    {
+      "a": "magicleap",
+      "l": 11,
+      "t": "0305",
+      "s": "Magic Leap details precise waveguide manufacturing from imprint lithography to edge finishing for AR performance and quality.",
+      "tag": "raw"
+    },
+    {
+      "a": "magicleap",
+      "l": 19,
+      "t": "0217",
+      "s": "Magic Leap explains optimal field-of-view design in AR for intuitive, comfortable, and context-aware user experiences.",
+      "tag": "raw"
+    },
+    {
+      "a": "magicleap",
+      "l": 11,
+      "t": "0210",
+      "s": "Magic Leap addresses designing AR devices to fit thousands of unique faces using biometrics and human factors.",
+      "tag": "raw"
+    },
+    {
+      "a": "NathieVR",
+      "l": 1,
+      "t": "0310",
+      "s": "NathieVR shares a GIF reaction with no text content.",
+      "tag": "raw"
+    },
+    {
+      "a": "NathieVR",
+      "l": 2,
+      "t": "0310",
+      "s": "NathieVR replies tagging @ToastedShoes.",
+      "tag": "raw"
+    },
+    {
+      "a": "NathieVR",
+      "l": 9,
+      "t": "0310",
+      "s": "NathieVR affirms commitment with 'Since day one!' in reply.",
+      "tag": "raw"
+    },
+    {
+      "a": "PalmerLuckey",
+      "l": 754,
+      "t": "0308",
+      "s": "Palmer Luckey dismisses consent concerns with 'Sorry bro, go give grandma a hug'.",
+      "tag": "raw"
+    },
+    {
+      "a": "PalmerLuckey",
+      "l": 7090,
+      "t": "0308",
+      "s": "Palmer Luckey argues against forcing kids to hug only with enthusiastic consent, urging family affection.",
+      "tag": "raw"
+    },
+    {
+      "a": "PalmerLuckey",
+      "l": 9,
+      "t": "0305",
+      "s": "Palmer Luckey corrects a claim about past statements on pattern recognition.",
+      "tag": "raw"
+    },
+    {
+      "a": "ID_AA_Carmack",
+      "l": 56,
+      "t": "0309",
+      "s": "John Carmack notes realizing midway through a book he had read another by the same author years ago.",
+      "tag": "raw"
+    },
+    {
+      "a": "ID_AA_Carmack",
+      "l": 216,
+      "t": "0309",
+      "s": "John Carmack critiques ethics chapter in Understanding Deep Learning book, questioning 'irrelevant' factors in AI bias examples.",
+      "tag": "raw"
+    },
+    {
+      "a": "ID_AA_Carmack",
+      "l": 164,
+      "t": "0306",
+      "s": "John Carmack corrects estimate of visual cortex information rate, noting it exceeds one bit per video frame.",
+      "tag": "raw"
+    },
+    {
+      "a": "boz",
+      "l": 0,
+      "t": "0305",
+      "s": "Aaron Bosley questions if the law already requires only citizens to vote.",
+      "tag": "raw"
+    },
+    {
+      "a": "boz",
+      "l": 0,
+      "t": "0305",
+      "s": "Aaron Bosley responds 'One day what?' to a prior comment.",
+      "tag": "raw"
+    },
+    {
+      "a": "boz",
+      "l": 0,
+      "t": "0126",
+      "s": "Aaron Bosley comments on bad optics for military standing behind a figure.",
+      "tag": "raw"
+    },
+    {
+      "a": "rabovitz",
+      "l": 7,
+      "t": "0306",
+      "s": "Rony Abovitz states reading great books should always be part of humanity for brain, thinking, and soul.",
+      "tag": "raw"
+    },
+    {
+      "a": "rabovitz",
+      "l": 7,
+      "t": "0306",
+      "s": "Rony Abovitz describes AI/computing space as chaotic blend of Hunger Games, Star Wars, and other epics for founders.",
+      "tag": "raw"
+    },
+    {
+      "a": "rabovitz",
+      "l": 1,
+      "t": "0306",
+      "s": "Rony Abovitz notes the large field of AI/computing has many variants with surprises ahead.",
+      "tag": "raw"
+    },
+    {
+      "a": "htcvive",
+      "l": 7,
+      "t": "0309",
+      "s": "HTC VIVE highlights VIVERSE Spark in Design Week interview on skills-building at Royal College of Art.",
+      "tag": "raw"
+    },
+    {
+      "a": "htcvive",
+      "l": 2,
+      "t": "0309",
+      "s": "HTC VIVE reacts positively to VIVERSE x Open Brush Art Jam announcement.",
+      "tag": "raw"
+    },
+    {
+      "a": "htcvive",
+      "l": 7,
+      "t": "0306",
+      "s": "HTC VIVE promotes Alphaputt mini golf game on VIVERSE with alphabet levels and co-op play.",
+      "tag": "raw"
+    },
+    {
+      "a": "XREAL_Global",
+      "l": 6,
+      "t": "0310",
+      "s": "XREAL recommends specific options in reply to a query.",
+      "tag": "raw"
+    },
+    {
+      "a": "XREAL_Global",
+      "l": 26,
+      "t": "0306",
+      "s": "XREAL announces Platinum Winner at 2026 Pinnacle Awards for Real 3D breakthrough in AR glasses.",
+      "tag": "raw"
+    },
+    {
+      "a": "XREAL_Global",
+      "l": 19,
+      "t": "0304",
+      "s": "XREAL showcases AR use in dentistry with expanding real-world applications.",
+      "tag": "raw"
+    },
+    {
+      "a": "MetaQuestVR",
+      "l": 67,
+      "t": "0218",
+      "s": "Meta Quest launches Spatial Ops Blueprint Combat with arena expansion, map editing, custom rules, and co-op survival.",
+      "tag": "raw"
+    },
+    {
+      "a": "MetaQuestVR",
+      "l": 42,
+      "t": "0206",
+      "s": "Meta Quest promotes NBCUniversal Peacock streaming of 2026 Milan Cortina Olympics on Quest.",
+      "tag": "raw"
+    },
+    {
+      "a": "MetaQuestVR",
+      "l": 41,
+      "t": "0206",
+      "s": "Meta Quest adds Bad Bunny track to Beat Saber, uncensored version available.",
+      "tag": "raw"
+    },
+    {
+      "a": "PatrickMoorhead",
+      "l": 0,
+      "t": "0309",
+      "s": "Patrick Moorhead replies 'You’re welcome.'",
+      "tag": "raw"
+    },
+    {
+      "a": "PatrickMoorhead",
+      "l": 36,
+      "t": "0309",
+      "s": "Patrick Moorhead praises Microsoft Copilot Cowork as right for enterprises.",
+      "tag": "raw"
+    },
+    {
+      "a": "PatrickMoorhead",
+      "l": 11,
+      "t": "0309",
+      "s": "Patrick Moorhead analyzes HPE Q1 FY26 earnings, beat-and-raise with Juniper impact.",
+      "tag": "raw"
+    },
+    {
+      "a": "jeffdean",
+      "l": 759,
+      "t": "0308",
+      "s": "Jeff Dean posts 'Open claw!'",
+      "tag": "raw"
+    },
+    {
+      "a": "jeffdean",
+      "l": 7,
+      "t": "0308",
+      "s": "Jeff Dean asks 'Should we talk kernels?'",
+      "tag": "raw"
+    },
+    {
+      "a": "jeffdean",
+      "l": 185,
+      "t": "0308",
+      "s": "Jeff Dean praises Italy's coffee station in dugout during world championship.",
+      "tag": "raw"
+    },
+    {
+      "a": "chrmanning",
+      "l": 10,
+      "t": "0306",
+      "s": "Christopher Manning recalls past posts on LLM misconceptions.",
+      "tag": "raw"
+    },
+    {
+      "a": "chrmanning",
+      "l": 678,
+      "t": "0306",
+      "s": "Christopher Manning shares article on symbolic representations for action-conditioned world models.",
+      "tag": "raw"
+    },
+    {
+      "a": "chrmanning",
+      "l": 3,
+      "t": "0302",
+      "s": "Christopher Manning confirms another citation in fake journal discussion.",
+      "tag": "raw"
+    },
+    {
+      "a": "hardmaru",
+      "l": 5,
+      "t": "0308",
+      "s": "hardmaru shares Sakana AI software engineer job posting.",
+      "tag": "raw"
+    },
+    {
+      "a": "hardmaru",
+      "l": 5286,
+      "t": "0308",
+      "s": "hardmaru imagines Evangelion GUI designs in alternate timeline instead of CLIs.",
+      "tag": "raw"
+    },
+    {
+      "a": "hardmaru",
+      "l": 8,
+      "t": "0307",
+      "s": "hardmaru congratulates Swallow LLM progress and upcoming NVIDIA internship.",
+      "tag": "raw"
+    },
+    {
+      "a": "goodfellow_ian",
+      "l": 1049,
+      "t": "0306",
+      "s": "Ian Goodfellow shares Moonlake article on their world model building as advisor.",
+      "tag": "raw"
+    },
+    {
+      "a": "goodfellow_ian",
+      "l": 3,
+      "t": "0226",
+      "s": "Ian Goodfellow congratulates on milestones.",
+      "tag": "raw"
+    },
+    {
+      "a": "goodfellow_ian",
+      "l": 1,
+      "t": "0223",
+      "s": "Ian Goodfellow agrees with 'Sure'.",
+      "tag": "raw"
+    },
+    {
+      "a": "feifeili",
+      "l": 3,
+      "t": "1130",
+      "s": "Feifei Li posts 'thinking......'",
+      "tag": "raw"
+    },
+    {
+      "a": "_akhaliq",
+      "l": 35,
+      "t": "0309",
+      "s": "AK shares RoboMME benchmark paper on memory for robotic policies.",
+      "tag": "raw"
+    },
+    {
+      "a": "_akhaliq",
+      "l": 30,
+      "t": "0309",
+      "s": "AK introduces Penguin-VL for efficiency limits of VLM with LLM vision encoders.",
+      "tag": "raw"
+    },
+    {
+      "a": "_akhaliq",
+      "l": 197,
+      "t": "0309",
+      "s": "AK announces MatAnyone 2 scaling video matting with quality evaluator on Hugging Face.",
+      "tag": "raw"
+    },
+    {
+      "a": "AI_News_Tech",
+      "l": 0,
+      "t": "0130",
+      "s": "AI_News_Tech replies '経営者' about business leaders.",
+      "tag": "raw"
+    },
+    {
+      "a": "AI_News_Tech",
+      "l": 0,
+      "t": "0119",
+      "s": "AI_News_Tech summarizes AI education impact in four parts on exam performance.",
+      "tag": "raw"
+    },
+    {
+      "a": "AI_News_Tech",
+      "l": 0,
+      "t": "0119",
+      "s": "AI_News_Tech continues AI education revolution discussion with ChatGPT full scores.",
+      "tag": "raw"
+    },
+    {
+      "a": "aiexplained",
+      "l": 3,
+      "t": "0917",
+      "s": "AIExplained discusses neural networks part II on multilayer perceptrons.",
+      "tag": "raw"
+    },
+    {
+      "a": "aiexplained",
+      "l": 8,
+      "t": "0820",
+      "s": "AIExplained explains the AI revolution.",
+      "tag": "raw"
+    },
+    {
+      "a": "aiexplained",
+      "l": 3,
+      "t": "0818",
+      "s": "AIExplained debunks five common myths about advanced AI.",
+      "tag": "raw"
+    },
+    {
+      "a": "lexfridman",
+      "l": 442,
+      "t": "0304",
+      "s": "Conversation with Peter Steinberger translated and dubbed into German by ElevenLabs. Available on YouTube with audio track switch.",
+      "tag": "raw"
+    },
+    {
+      "a": "lexfridman",
+      "l": 178,
+      "t": "0301",
+      "s": "Shared links for conversation with Rick Beato on YouTube, Spotify, and podcast.",
+      "tag": "raw"
+    },
+    {
+      "a": "lexfridman",
+      "l": 1812,
+      "t": "0301",
+      "s": "Conversation with Rick Beato covering guitar solos, jazz, perfect pitch, AI in music, and greatest rock stars with timestamps.",
+      "tag": "raw"
+    },
+    {
+      "a": "hubermanlab",
+      "l": 1,
+      "t": "0310",
+      "s": "See DM please.",
+      "tag": "raw"
+    },
+    {
+      "a": "hubermanlab",
+      "l": 1,
+      "t": "0310",
+      "s": "Scientists at two major coastal medical schools lobbying against this regarding sleep and circulating biology.",
+      "tag": "raw"
+    },
+    {
+      "a": "hubermanlab",
+      "l": 20,
+      "t": "0310",
+      "s": "Expect more regulation rather than less based on recent months and likely future direction.",
+      "tag": "raw"
+    },
+    {
+      "a": "swyx",
+      "l": 2,
+      "t": "0309",
+      "s": "Another happy listener on the mcp front to sjwhitmore and edwinarbus.",
+      "tag": "raw"
+    },
+    {
+      "a": "swyx",
+      "l": 0,
+      "t": "0309",
+      "s": "Or just use SavvyCal.",
+      "tag": "raw"
+    },
+    {
+      "a": "swyx",
+      "l": 4,
+      "t": "0309",
+      "s": "Observing with eyes and lobster emoji.",
+      "tag": "raw"
+    }
+  ],
+  "meta": {
+    "elonmusk": {
+      "total": 3,
+      "max_l": 110385,
+      "latest": "0309"
+    },
+    "sama": {
+      "total": 3,
+      "max_l": 11525,
+      "latest": "0307"
+    },
+    "karpathy": {
+      "total": 3,
+      "max_l": 364,
+      "latest": "0309"
+    },
+    "demishassabis": {
+      "total": 3,
+      "max_l": 2351,
+      "latest": "0305"
+    },
+    "darioamodei": {
+      "total": 3,
+      "max_l": 15251,
+      "latest": "0126"
+    },
+    "OpenAI": {
+      "total": 3,
+      "max_l": 4111,
+      "latest": "0309"
+    },
+    "AnthropicAI": {
+      "total": 3,
+      "max_l": 14970,
+      "latest": "0306"
+    },
+    "GoogleDeepMind": {
+      "total": 3,
+      "max_l": 8942,
+      "latest": "0303"
+    },
+    "xAI": {
+      "total": 3,
+      "max_l": 769,
+      "latest": "0304"
+    },
+    "AIatMeta": {
+      "total": 3,
+      "max_l": 2332,
+      "latest": "0309"
+    },
+    "GoogleAI": {
+      "total": 3,
+      "max_l": 555,
+      "latest": "0306"
+    },
+    "MSFTResearch": {
+      "total": 3,
+      "max_l": 72,
+      "latest": "0309"
+    },
+    "IlyaSutskever": {
+      "total": 0,
+      "max_l": 0,
+      "latest": "NA"
+    },
+    "gregbrockman": {
+      "total": 3,
+      "max_l": 2,
+      "latest": "0308"
+    },
+    "GaryMarcus": {
+      "total": 3,
+      "max_l": 62,
+      "latest": "0310"
+    },
+    "rowancheung": {
+      "total": 3,
+      "max_l": 1124,
+      "latest": "0308"
+    },
+    "clmcleod": {
+      "total": 3,
+      "max_l": 0,
+      "latest": "0913"
+    },
+    "bindureddy": {
+      "total": 3,
+      "max_l": 7,
+      "latest": "0309"
+    },
+    "dotey": {
+      "total": 3,
+      "max_l": 1,
+      "latest": "0310"
+    },
+    "oran_ge": {
+      "total": 3,
+      "max_l": 473,
+      "latest": "0309"
+    },
+    "vista8": {
+      "total": 3,
+      "max_l": 31,
+      "latest": "0309"
+    },
+    "imxiaohu": {
+      "total": 0,
+      "max_l": 0,
+      "latest": "NA"
+    },
+    "Sxsyer": {
+      "total": 3,
+      "max_l": 0,
+      "latest": "0310"
+    },
+    "K_O_D_A_D_A": {
+      "total": 0,
+      "max_l": 0,
+      "latest": "NA"
+    },
+    "tualatrix": {
+      "total": 10,
+      "max_l": 109,
+      "latest": "0309"
+    },
+    "linyunqiu": {
+      "total": 2,
+      "max_l": 0,
+      "latest": "0329"
+    },
+    "garywong": {
+      "total": 10,
+      "max_l": 0,
+      "latest": "0415"
+    },
+    "web3buidl": {
+      "total": 0,
+      "max_l": 0,
+      "latest": "NA"
+    },
+    "AI_Era": {
+      "total": 0,
+      "max_l": 0,
+      "latest": "NA"
+    },
+    "AIGC_News": {
+      "total": 0,
+      "max_l": 0,
+      "latest": "NA"
+    },
+    "jiangjiang": {
+      "total": 0,
+      "max_l": 0,
+      "latest": "NA"
+    },
+    "hw_star": {
+      "total": 10,
+      "max_l": 0,
+      "latest": "0316"
+    },
+    "mranti": {
+      "total": 10,
+      "max_l": 16,
+      "latest": "0310"
+    },
+    "nishuang": {
+      "total": 8,
+      "max_l": 34,
+      "latest": "0409"
+    },
+    "a16z": {
+      "total": 10,
+      "max_l": 685,
+      "latest": "0309"
+    },
+    "ycombinator": {
+      "total": 10,
+      "max_l": 728,
+      "latest": "0310"
+    },
+    "lightspeedvp": {
+      "total": 10,
+      "max_l": 46,
+      "latest": "0309"
+    },
+    "sequoia": {
+      "total": 10,
+      "max_l": 58,
+      "latest": "0305"
+    },
+    "foundersfund": {
+      "total": 10,
+      "max_l": 651,
+      "latest": "0701"
+    },
+    "eladgil": {
+      "total": 10,
+      "max_l": 1361,
+      "latest": "0308"
+    },
+    "pmarca": {
+      "total": 10,
+      "max_l": 28437,
+      "latest": "0309"
+    },
+    "bchesky": {
+      "total": 10,
+      "max_l": 1187,
+      "latest": "0212"
+    },
+    "chamath": {
+      "total": 10,
+      "max_l": 1143,
+      "latest": "0309"
+    },
+    "paulg": {
+      "total": 10,
+      "max_l": 1047,
+      "latest": "0309"
+    },
+    "TheInformation": {
+      "total": 10,
+      "max_l": 22,
+      "latest": "0309"
+    },
+    "Scobleizer": {
+      "total": 10,
+      "max_l": 26,
+      "latest": "0310"
+    },
+    "bentossell": {
+      "total": 10,
+      "max_l": 173,
+      "latest": "0309"
+    },
+    "HuggingFace": {
+      "total": 10,
+      "max_l": 233,
+      "latest": "0309"
+    },
+    "MistralAI": {
+      "total": 10,
+      "max_l": 3890,
+      "latest": "0210"
+    },
+    "Perplexity_AI": {
+      "total": 10,
+      "max_l": 4470,
+      "latest": "0305"
+    },
+    "GroqInc": {
+      "total": 10,
+      "max_l": 2419,
+      "latest": "0218"
+    },
+    "Cohere": {
+      "total": 10,
+      "max_l": 205,
+      "latest": "0304"
+    },
+    "TogetherCompute": {
+      "total": 10,
+      "max_l": 16,
+      "latest": "0309"
+    },
+    "runwayml": {
+      "total": 10,
+      "max_l": 349,
+      "latest": "0309"
+    },
+    "Midjourney": {
+      "total": 0,
+      "max_l": 0,
+      "latest": "NA"
+    },
+    "StabilityAI": {
+      "total": 0,
+      "max_l": 0,
+      "latest": "NA"
+    },
+    "Scale_AI": {
+      "total": 0,
+      "max_l": 0,
+      "latest": "NA"
+    },
+    "CerebrasSystems": {
+      "total": 0,
+      "max_l": 0,
+      "latest": "NA"
+    },
+    "tenstorrent": {
+      "total": 0,
+      "max_l": 0,
+      "latest": "NA"
+    },
+    "weights_biases": {
+      "total": 0,
+      "max_l": 0,
+      "latest": "NA"
+    },
+    "langchainai": {
+      "total": 0,
+      "max_l": 0,
+      "latest": "NA"
+    },
+    "llama_index": {
+      "total": 0,
+      "max_l": 0,
+      "latest": "NA"
+    },
+    "supabase": {
+      "total": 0,
+      "max_l": 0,
+      "latest": "NA"
+    },
+    "vllm_project": {
+      "total": 0,
+      "max_l": 0,
+      "latest": "NA"
+    },
+    "huggingface_hub": {
+      "total": 0,
+      "max_l": 0,
+      "latest": "NA"
+    },
+    "nvidia": {
+      "total": 0,
+      "max_l": 0,
+      "latest": "NA"
+    },
+    "AMD": {
+      "total": 0,
+      "max_l": 0,
+      "latest": "NA"
+    },
+    "Intel": {
+      "total": 0,
+      "max_l": 0,
+      "latest": "NA"
+    },
+    "SKhynix": {
+      "total": 0,
+      "max_l": 0,
+      "latest": "NA"
+    },
+    "tsmc": {
+      "total": 0,
+      "max_l": 0,
+      "latest": "NA"
+    },
+    "magicleap": {
+      "total": 10,
+      "max_l": 47,
+      "latest": "0305"
+    },
+    "NathieVR": {
+      "total": 10,
+      "max_l": 87,
+      "latest": "0310"
+    },
+    "PalmerLuckey": {
+      "total": 10,
+      "max_l": 7090,
+      "latest": "0308"
+    },
+    "ID_AA_Carmack": {
+      "total": 10,
+      "max_l": 1411,
+      "latest": "0309"
+    },
+    "boz": {
+      "total": 10,
+      "max_l": 1,
+      "latest": "0305"
+    },
+    "rabovitz": {
+      "total": 10,
+      "max_l": 7,
+      "latest": "0306"
+    },
+    "htcvive": {
+      "total": 10,
+      "max_l": 7,
+      "latest": "0309"
+    },
+    "XREAL_Global": {
+      "total": 10,
+      "max_l": 55,
+      "latest": "0310"
+    },
+    "RayBan": {
+      "total": 0,
+      "max_l": 0,
+      "latest": "NA"
+    },
+    "MetaQuestVR": {
+      "total": 10,
+      "max_l": 123,
+      "latest": "0218"
+    },
+    "PatrickMoorhead": {
+      "total": 10,
+      "max_l": 176,
+      "latest": "0309"
+    },
+    "jeffdean": {
+      "total": 10,
+      "max_l": 1646,
+      "latest": "0308"
+    },
+    "chrmanning": {
+      "total": 10,
+      "max_l": 678,
+      "latest": "0306"
+    },
+    "hardmaru": {
+      "total": 10,
+      "max_l": 5286,
+      "latest": "0308"
+    },
+    "goodfellow_ian": {
+      "total": 10,
+      "max_l": 2628,
+      "latest": "0306"
+    },
+    "feifeili": {
+      "total": 1,
+      "max_l": 3,
+      "latest": "1130"
+    },
+    "_akhaliq": {
+      "total": 10,
+      "max_l": 234,
+      "latest": "0309"
+    },
+    "promptengineer": {
+      "total": 0,
+      "max_l": 0,
+      "latest": "NA"
+    },
+    "AI_News_Tech": {
+      "total": 10,
+      "max_l": 0,
+      "latest": "0130"
+    },
+    "siliconvalley": {
+      "total": 0,
+      "max_l": 0,
+      "latest": "NA"
+    },
+    "aithread": {
+      "total": 0,
+      "max_l": 0,
+      "latest": "NA"
+    },
+    "aibreakdown": {
+      "total": 0,
+      "max_l": 0,
+      "latest": "NA"
+    },
+    "aiexplained": {
+      "total": 4,
+      "max_l": 8,
+      "latest": "0917"
+    },
+    "aipubcast": {
+      "total": 0,
+      "max_l": 0,
+      "latest": "NA"
+    },
+    "lexfridman": {
+      "total": 10,
+      "max_l": 4924,
+      "latest": "0304"
+    },
+    "hubermanlab": {
+      "total": 10,
+      "max_l": 251,
+      "latest": "0310"
+    },
+    "swyx": {
+      "total": 10,
+      "max_l": 12,
+      "latest": "0309"
+    }
+  }
+}
