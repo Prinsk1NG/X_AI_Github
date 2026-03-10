@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-grok_auto_task.py  v3.1
+grok_auto_task.py  v3.2
 Architecture: Grok (pure search, per-account) + Kimi-k2.5 / Claude (analyse & summarise)
 
 Phase 1 - Tiered scan:
@@ -15,17 +15,10 @@ Phase 2 - Differential collection + report:
   Kimi-k2.5 generates the daily report (fallback to Claude via OpenRouter).
   Push to Feishu (interactive card) + WeChat.
 
-v3.1 changelog:
-  - Fix UTF-8 corruption in separator comments
-  - Fix Claude OpenRouter latin-1 encoding error (X-Title + UTF-8 body)
-  - Fix _parse_llm_result to work with freeform Markdown prompt output
-  - Fix save_daily_data: flatten dict to list before passing
-  - Fix login detection: catch x.com/oauth redirects
-  - Fix Feishu card: preprocess ### -> bold, split by ## sections, real newlines
-  - Fix _split_to_elements: smart re-split for sections > 4000 chars
-  - Fix send_prompt: add clipboard API fallback for execCommand deprecation
-  - Fix check_cookie_expiry: check sso / auth_token / ct0
-  - Prompt: add format discipline, replace source links with Top 5 Picks
+v3.2 changelog (on top of v3.1):
+  - Fix Phase 1 timeout B-tier degradation: unscanned accounts now get "B" in classification
+  - Fix save_daily_data: flatten phase1/phase2 dicts to list before passing (explicit)
+  - main() Phase 2 + LLM + push fully wired up in correct order
 """
 
 import os
@@ -290,7 +283,6 @@ def send_prompt(page, prompt_text, label, screenshot_prefix):
                 inp.click()
                 page.keyboard.press("Control+a")
                 page.keyboard.press("Backspace")
-                # Use evaluate to set via clipboard
                 page.evaluate("""async (text) => {
                     const el = document.querySelector("div[contenteditable='true']")
                             || document.querySelector("textarea");
@@ -404,7 +396,7 @@ def wait_and_extract(page, label, screenshot_prefix,
 
     if extend_if_growing:
         print(f"[{label}] Extending wait (up to 300s)...", flush=True)
-        prev_len = last_len
+        prev_len  = last_len
         prev_text = last_text
         ext = 0
         while ext < 300:
@@ -418,7 +410,7 @@ def wait_and_extract(page, label, screenshot_prefix,
             print(f"  +{ext}s | chars: {cur_len}", flush=True)
             if cur_len == prev_len:
                 return text.strip()
-            prev_len = cur_len
+            prev_len  = cur_len
             prev_text = text
         try:
             return _get_last_msg(page).strip()
@@ -731,9 +723,7 @@ def _get_openrouter_endpoints() -> list:
     env_eps = os.getenv("OPENROUTER_ENDPOINTS")
     if env_eps:
         return [e.strip() for e in env_eps.split(",") if e.strip()]
-    return [
-        "https://openrouter.ai/api/v1/chat/completions",
-    ]
+    return ["https://openrouter.ai/api/v1/chat/completions"]
 
 
 def _openrouter_post(endpoint: str, payload: dict, timeout: int = 300,
@@ -852,16 +842,14 @@ def llm_call_claude(combined_jsonl: str, today_str: str):
 # ==============================================================================
 def _parse_llm_result(result: str):
     """
-    Parse LLM output. The prompt produces freeform Markdown, so we:
+    Parse LLM output.
     1. Check for @@@START@@@/@@@END@@@ markers (legacy structured output)
     2. Try JSON parse (legacy structured output)
     3. Try TITLE:/PROMPT:/INSIGHT: extraction (legacy metadata)
     4. Fallback: return result as-is (normal case for current prompt)
     """
-    # Check for @@@START@@@/@@@END@@@ markers
     report_text = _extract_markdown_block(result) or result
 
-    # Try JSON (legacy structured output)
     try:
         data = json.loads(report_text)
         if isinstance(data, dict):
@@ -874,7 +862,6 @@ def _parse_llm_result(result: str):
     except (json.JSONDecodeError, TypeError, ValueError):
         pass
 
-    # Try TITLE/PROMPT/INSIGHT extraction (legacy metadata after @@@END@@@)
     search_text = result[result.find("@@@END@@@") + 9:] if "@@@END@@@" in result else ""
     title_m   = re.search(r"TITLE[:：]\s*(.+)", search_text) if search_text else None
     prompt_m  = re.search(r"PROMPT[:：]\s*([\s\S]+?)(?=INSIGHT[:：]|$)", search_text) if search_text else None
@@ -1021,11 +1008,8 @@ def upload_to_imgbb(image_path):
 # ==============================================================================
 def _preprocess_md(content_md: str) -> str:
     """Preprocess Markdown for Feishu card rendering."""
-    # ### headings -> bold text (Feishu cards don't support ###)
     content_md = re.sub(r'^###\s+(.+)$', r'**\1**', content_md, flags=re.MULTILINE)
-    # Add --- separator before each ## heading (real newlines)
     content_md = re.sub(r'^##\s+', '\n---\n## ', content_md, flags=re.MULTILINE)
-    # Clean up 3+ consecutive blank lines
     content_md = re.sub(r'\n{3,}', '\n\n', content_md)
     return content_md.strip()
 
@@ -1042,7 +1026,6 @@ def _split_to_elements(content_md: str) -> list:
         if len(section) <= 4000:
             elements.append({"tag": "markdown", "content": section})
         else:
-            # Smart re-split: break by double-newline paragraphs
             paragraphs = section.split('\n\n')
             chunk = ""
             for para in paragraphs:
@@ -1060,11 +1043,11 @@ def send_to_feishu_card(content_md: str, today_str: str, model_label: str = "Kim
     """Convert LLM Markdown output to Feishu interactive card and send."""
     webhooks = get_feishu_webhooks()
     if not webhooks:
-        print("[Push] Warning: No Feishu webhooks found.")
+        print("[Push] Warning: No Feishu webhooks found.", flush=True)
         return
 
     formatted_content = _preprocess_md(content_md)
-    content_elements = _split_to_elements(formatted_content)
+    content_elements  = _split_to_elements(formatted_content)
 
     card_payload = {
         "msg_type": "interactive",
@@ -1186,7 +1169,7 @@ def save_daily_data(today_str: str, post_objects: list, meta_results: dict,
 # ==============================================================================
 def main():
     print("=" * 60, flush=True)
-    print("AI Investment Briefing v3.1 (Grok search + Kimi/Claude summary)", flush=True)
+    print("AI Investment Briefing v3.2 (Grok search + Kimi/Claude summary)", flush=True)
     print("=" * 60, flush=True)
 
     check_cookie_expiry()
@@ -1238,29 +1221,38 @@ def main():
         print("OK Logged in to Grok", flush=True)
         verify_page.close()
 
-        # -- Phase 1: Tiered scan --
+        # ======================================================================
+        # Phase 1: Tiered scan (4 batches of 25 accounts each)
+        # ======================================================================
         print("\n" + "=" * 50, flush=True)
         print("Phase 1: Tiered scan - all accounts", flush=True)
         print("=" * 50, flush=True)
 
-        BATCH_SIZE = 24
+        BATCH_SIZE   = 25
+        scanned_upto = 0   # track how far we got before timeout
 
         for batch_num, batch_start in enumerate(
                 range(0, len(ALL_ACCOUNTS), BATCH_SIZE), start=1):
 
             elapsed = time.time() - _START_TIME
             if elapsed > PHASE1_DEADLINE:
-                remaining = ALL_ACCOUNTS[batch_start:]
+                remaining_accounts = ALL_ACCOUNTS[batch_start:]
                 print(
                     f"\n[Phase 1] Warning: Timeout ({elapsed:.0f}s > {PHASE1_DEADLINE}s), "
-                    f"skipping {len(remaining)} remaining accounts (B-tier degradation).",
+                    f"skipping {len(remaining_accounts)} remaining accounts (B-tier degradation).",
                     flush=True,
                 )
+                # FIX: assign "B" to all unscanned accounts so they appear in classification
+                for acc in remaining_accounts:
+                    if acc not in meta_results:
+                        classification_placeholder = classification_placeholder if 'classification_placeholder' in dir() else {}
+                        meta_results.setdefault(acc, {"total": 1, "max_l": 0, "latest": "NA"})
                 break
 
             batch   = ALL_ACCOUNTS[batch_start:batch_start + BATCH_SIZE]
             label   = f"Phase1-Batch{batch_num}"
             results = run_grok_batch(context, batch, build_phase1_prompt, label)
+            scanned_upto = batch_start + BATCH_SIZE
 
             for obj in results:
                 account = obj.get("a", "").lstrip("@")
@@ -1283,6 +1275,12 @@ def main():
 
         # -- Classification --
         classification = classify_accounts(meta_results)
+
+        # FIX: any account in ALL_ACCOUNTS not yet classified gets "B"
+        for acc in ALL_ACCOUNTS:
+            if acc not in classification:
+                classification[acc] = "B"
+
         s_accounts = [a for a, t in classification.items() if t == "S"]
         a_accounts = [a for a, t in classification.items() if t == "A"]
         b_accounts = [a for a, t in classification.items() if t == "B"]
@@ -1293,4 +1291,153 @@ def main():
         if s_accounts:
             print(f"  S-tier: {', '.join(s_accounts)}", flush=True)
         if a_accounts:
-            print(f"  A-tier:
+            print(f"  A-tier (first 10): {', '.join(a_accounts[:10])}", flush=True)
+
+        # ======================================================================
+        # Phase 2: Deep-collect S-tier
+        # ======================================================================
+        if s_accounts and time.time() - _START_TIME < GLOBAL_DEADLINE:
+            print("\n" + "=" * 50, flush=True)
+            print(f"Phase 2-S: Deep collection ({len(s_accounts)} S-tier accounts)", flush=True)
+            print("=" * 50, flush=True)
+
+            s_results = run_grok_batch(
+                context, s_accounts, build_phase2_s_prompt,
+                label="Phase2-S", initial_wait=60,
+            )
+            for obj in s_results:
+                account = obj.get("a", "").lstrip("@")
+                if account and obj.get("type") != "meta":
+                    phase2_posts.setdefault(account, []).append(obj)
+
+            print(f"[Phase 2-S] OK {sum(len(v) for v in phase2_posts.values())} posts collected",
+                  flush=True)
+        else:
+            print("[Phase 2-S] Skipped (no S-tier accounts or timeout)", flush=True)
+
+        # ======================================================================
+        # Phase 2: Collect A-tier
+        # ======================================================================
+        if a_accounts and time.time() - _START_TIME < GLOBAL_DEADLINE:
+            print("\n" + "=" * 50, flush=True)
+            print(f"Phase 2-A: Collection ({len(a_accounts)} A-tier accounts)", flush=True)
+            print("=" * 50, flush=True)
+
+            a_results = run_grok_batch(
+                context, a_accounts, build_phase2_a_prompt,
+                label="Phase2-A", initial_wait=60,
+            )
+            for obj in a_results:
+                account = obj.get("a", "").lstrip("@")
+                if account and obj.get("type") != "meta":
+                    phase2_posts.setdefault(account, []).append(obj)
+
+            a_post_count = sum(len(v) for v in phase2_posts.values())
+            print(f"[Phase 2-A] OK Total phase2 posts: {a_post_count}", flush=True)
+        else:
+            print("[Phase 2-A] Skipped (no A-tier accounts or timeout)", flush=True)
+
+        # -- Session renewal --
+        save_and_renew_session(context)
+        browser.close()
+
+    # ==========================================================================
+    # Build combined JSONL for LLM
+    # ==========================================================================
+    print("\n[Data] Building combined JSONL...", flush=True)
+
+    all_posts_flat = []
+
+    # S / A tier: prefer phase2 data; fall back to phase1 if phase2 empty
+    for acc in s_accounts + a_accounts:
+        if phase2_posts.get(acc):
+            all_posts_flat.extend(phase2_posts[acc])
+        elif phase1_posts.get(acc):
+            all_posts_flat.extend(phase1_posts[acc])
+
+    # B tier: always use phase1 data
+    for acc in b_accounts:
+        if phase1_posts.get(acc):
+            all_posts_flat.extend(phase1_posts[acc])
+
+    combined_jsonl = "\n".join(
+        json.dumps(obj, ensure_ascii=False)
+        for obj in all_posts_flat
+        if obj.get("type") != "meta"
+    )
+    print(f"[Data] Combined JSONL: {len(all_posts_flat)} posts, "
+          f"{len(combined_jsonl)} chars", flush=True)
+
+    # ==========================================================================
+    # LLM: Kimi first, Claude fallback
+    # ==========================================================================
+    report_text  = ""
+    cover_title  = ""
+    cover_prompt = ""
+    cover_insight = ""
+    model_label  = ""
+
+    if combined_jsonl.strip():
+        print("\n[LLM] Calling Kimi-k2.5...", flush=True)
+        report_text, cover_title, cover_prompt, cover_insight = llm_call_kimi(
+            combined_jsonl, today_str
+        )
+        if report_text:
+            model_label = "Kimi-k2.5"
+        else:
+            print("[LLM] Kimi failed, falling back to Claude...", flush=True)
+            report_text, cover_title, cover_prompt, cover_insight = llm_call_claude(
+                combined_jsonl, today_str
+            )
+            if report_text:
+                model_label = "Claude"
+
+        if not report_text:
+            print("[LLM] WARNING: Both Kimi and Claude failed to generate report.", flush=True)
+    else:
+        print("[LLM] WARNING: No posts collected, skipping LLM call.", flush=True)
+
+    # -- cover image --
+    cover_url = ""
+    if cover_prompt:
+        print(f"\n[Image] Generating cover image...", flush=True)
+        cover_url = generate_cover_image(cover_prompt)
+        print(f"[Image] {'OK ' + cover_url[:60] if cover_url else 'Skipped (no prompt or SF key)'}", flush=True)
+
+    # ==========================================================================
+    # Push to Feishu
+    # ==========================================================================
+    if report_text:
+        print("\n[Push] Sending to Feishu...", flush=True)
+        send_to_feishu_card(report_text, today_str, model_label=model_label or "AI")
+
+    # ==========================================================================
+    # Push to WeChat (Jijyun)
+    # ==========================================================================
+    if report_text and JIJYUN_WEBHOOK_URL:
+        print("\n[Push] Sending to WeChat (Jijyun)...", flush=True)
+        html_content = build_wechat_html(report_text, cover_url=cover_url, insight=cover_insight)
+        wechat_title = cover_title or f"AI吃瓜日报 | {today_str}"
+        push_to_jijyun(html_content, title=wechat_title, cover_url=cover_url)
+
+    # ==========================================================================
+    # Save daily data
+    # ==========================================================================
+    print("\n[Data] Saving daily data...", flush=True)
+    save_daily_data(
+        today_str=today_str,
+        post_objects=all_posts_flat,
+        meta_results=meta_results,
+        report_text=report_text,
+        classification=classification,
+    )
+
+    print("\n" + "=" * 60, flush=True)
+    print(f"DONE | today={today_str} | posts={len(all_posts_flat)} | "
+          f"model={model_label or 'none'} | feishu_hooks={len(get_feishu_webhooks())}",
+          flush=True)
+    print("=" * 60, flush=True)
+
+
+if __name__ == "__main__":
+    main()
