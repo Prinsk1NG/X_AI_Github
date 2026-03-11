@@ -48,8 +48,8 @@ GITHUB_REPOSITORY   = os.getenv("GITHUB_REPOSITORY", "")
 
 # -- Global timeout tracking ---------------------------------------------------
 _START_TIME      = time.time()
-PHASE1_DEADLINE  = 30 * 60   # v3.3: 30 min (was 20)
-GLOBAL_DEADLINE  = 65 * 60   # v3.3: 65 min total (was 45), gives Phase2 ~35 min
+PHASE1_DEADLINE  = 40 * 60   # v3.4: 40 min (was 30)
+GLOBAL_DEADLINE  = 85 * 60   # v3.4: 85 min total (was 65), gives Phase2 ~45 min
 
 # -- 100 accounts --------------------------------------------------------------
 ALL_ACCOUNTS = [
@@ -635,7 +635,7 @@ def run_grok_batch(context, accounts: list, prompt_builder, label: str,
 
         raw_text = wait_and_extract(
             page, label, label.lower().replace(" ", "_"),
-            interval=5, stable_rounds=5, max_wait=360,
+            interval=5, stable_rounds=5, max_wait=420,
             extend_if_growing=True, min_len=50,
         )
         results = parse_jsonlines(raw_text)
@@ -674,10 +674,18 @@ Filter out trivial technical parameters and social noise; distill insights with 
 ---
 
 ## 🧠 深度叙事追踪 (Thematic Narratives)
-将零散的推文按"主题/赛道"进行聚合（如：计算成本、具身智能、Agent 商业化、SaaS 演进等）。
-每个主题下需要：
-1. **提炼：** 描述该赛道目前正在发生的叙事转向（Narrative Shift）。
-2. **关键证据：** 引用具体的账号（如 @sama, @natfriedman）及其核心观点，解释其对行业格局的影响。
+将零散的推文按「主题/赛道」进行聚合（如：模型军备竞赛、具身智能、Agent 商业化、算力基础设施等）。
+每个主题输出格式严格如下（3-5个主题）：
+
+**🔁 主题标题：副标题**
+
+> 💡 叙事转向：[一句话核心判断，说清楚"什么在变化、为什么重要"]
+
+- **@账号名** 具体行为 + 投资视角解读（不超过 60 字）
+- **@账号名** 具体行为 + 投资视角解读（不超过 60 字）
+- **@账号名** 具体行为 + 投资视角解读（不超过 60 字）
+
+（每个主题之间空一行，emoji 可根据主题选择：🔁🤖⚔️🏭🦾💡🔥📊）
 
 ---
 
@@ -713,7 +721,7 @@ Filter out trivial technical parameters and social noise; distill insights with 
   - 禁止出现超过 3 行的连续正文段落，超长内容必须拆成多条 bullet
   - 每个 ## 段落之间不加多余空行
 - **禁止技术堆砌：** 不要解释算法原理，只需说该技术如何影响商业竞争或降低成本。
-- **投资视角：** 重点关注"钱的流向"和"估值逻辑的变化"。
+- **投资视角：** 重点关注「钱的流向」和「估值逻辑的变化」。
 - **语言风格：** 专业、干脆、利落，适合在飞书移动端快速扫读。
 
 # Input Data (JSONL)
@@ -721,6 +729,12 @@ Filter out trivial technical parameters and social noise; distill insights with 
 
 # Date
 {today_str}
+
+---
+**输出完正文后，必须在最后附上以下三行（不可省略，紧跟正文末尾）：**
+TITLE: （5-10字中文标题，适合微信公众号，如"GPT震荡日，谁在偷偷布局"）
+PROMPT: （英文封面图生成提示词，100字以内，描述科技感画面，如"futuristic AI neural network glowing blue circuits silicon valley night"）
+INSIGHT: （一句话核心洞察，中文，30字以内）
 """
 
 
@@ -865,16 +879,24 @@ def _parse_llm_result(result: str):
     except (json.JSONDecodeError, TypeError, ValueError):
         pass
 
-    search_text = result[result.find("@@@END@@@") + 9:] if "@@@END@@@" in result else ""
-    title_m   = re.search(r"TITLE[:：]\s*(.+)", search_text) if search_text else None
-    prompt_m  = re.search(r"PROMPT[:：]\s*([\s\S]+?)(?=INSIGHT[:：]|$)", search_text) if search_text else None
-    insight_m = re.search(r"INSIGHT[:：]\s*([\s\S]+)", search_text) if search_text else None
+    # v3.4: search entire result for TITLE/PROMPT/INSIGHT (not just after @@@END@@@)
+    if "@@@END@@@" in result:
+        search_text = result[result.find("@@@END@@@") + 9:]
+    else:
+        search_text = result  # search full result
+
+    title_m   = re.search(r"TITLE[:：]\s*(.+)",                      search_text)
+    prompt_m  = re.search(r"PROMPT[:：]\s*([\s\S]+?)(?=INSIGHT[:：]|$)", search_text)
+    insight_m = re.search(r"INSIGHT[:：]\s*([\s\S]+)",              search_text)
 
     cover_title   = title_m.group(1).strip()   if title_m   else ""
     cover_prompt  = prompt_m.group(1).strip()  if prompt_m  else ""
     cover_insight = insight_m.group(1).strip() if insight_m else ""
 
-    return report_text, cover_title, cover_prompt, cover_insight
+    # Strip TITLE/PROMPT/INSIGHT block from report_text so it doesn't appear in Feishu card
+    clean_report = re.sub(r"\n?TITLE[:：][\s\S]*$", "", report_text).strip()
+
+    return clean_report, cover_title, cover_prompt, cover_insight
 
 
 def _extract_markdown_block(text):
@@ -1015,6 +1037,7 @@ def _preprocess_md(content_md: str) -> str:
     - ### -> **bold**
     - ## Section Title -> \n**▌ Section Title**  (bold with visual indent marker)
     - Standalone --- lines -> removed
+    - Topic emoji lines -> add spacing before each
     """
     # ### -> bold (must run before ## so ## isn't double-processed)
     content_md = re.sub(r'^###\s+(.+)$', r'**\1**', content_md, flags=re.MULTILINE)
@@ -1027,6 +1050,12 @@ def _preprocess_md(content_md: str) -> str:
     )
     # Remove standalone --- lines (not valid in Feishu markdown)
     content_md = re.sub(r'^\s*---\s*$', '', content_md, flags=re.MULTILINE)
+    # v3.4: Add spacing before topic emoji lines so topics don't run together
+    content_md = re.sub(
+        r'\n(\*\*[🔁🤖⚔️🏭🦾💡🔥📊🧠💰🌐])',
+        r'\n\n\n\1',
+        content_md,
+    )
     # Collapse 3+ blank lines to 2
     content_md = re.sub(r'\n{3,}', '\n\n', content_md)
     return content_md.strip()
@@ -1214,7 +1243,7 @@ def save_daily_data(today_str: str, post_objects: list, meta_results: dict,
 # ==============================================================================
 def main():
     print("=" * 60, flush=True)
-    print("昨晚硅谷在聊啥 v3.3 (Grok search + Claude/Kimi summary)", flush=True)
+    print("昨晚硅谷在聊啥 v3.4 (Grok search + Claude/Kimi summary)", flush=True)
     print("=" * 60, flush=True)
 
     check_cookie_expiry()
