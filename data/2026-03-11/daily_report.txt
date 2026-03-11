@@ -1,53 +1,49 @@
 ## ⚡️ 今日看板 (The Pulse)
 
-> GPT-5.4 正式落地 API+Codex，OpenAI 用产品密度重新定义"模型发布节奏"；与此同时，Anthropic 在军方合作争议中摇摆，AI 安全叙事正在被商业现实撕裂。
+> OpenAI 密集迭代（GPT-5.4 系列上线 + 收购 Promptfoo）正在重新定义"AI 基础设施"边界；与此同时，Anthropic 与美国政府的监管摩擦持续升温，AI 安全赛道的政治风险被首次推至台前。
 
 ---
 
 ## 🧠 深度叙事追踪 (Thematic Narratives)
 
-**🔁 模型军备竞赛：发布节奏即护城河**
+**赛道一：大模型迭代提速，产品化竞争白热化**
 
-- **叙事转向：** 模型迭代速度本身成为竞争壁垒——GPT-5.4 在一周内连续覆盖 API、Codex、ChatGPT Pro，"全栈铺货"取代单点突破。
-- **@sama** 连续转发多条 GPT-5.4 实测推文，重点强调 Excel 操作、知识工作、代码生成三大场景——这是在向企业采购方发信号，不是在喂 benchmark。
-- **@OpenAI** 同步宣布收购 Promptfoo（AI 安全测试工具），保持开源承诺——用安全测试能力为企业客户背书，降低大客户合规顾虑。
-- **@GoogleDeepMind** 推出 Gemini 3.1 Flash-Lite，但社区直接质疑"为何不对比 Gemini 3 Flash"——定价反而出现 2.5x 涨价，"越来越便宜"的叙事正在松动。
-- **@Perplexity_AI** 快速跟进，第一时间将 GPT-5.4 接入 Pro/Max 用户，平台层"模型超市"策略持续强化。
+- **叙事转向：** 模型发布节奏从"季度级"压缩至"周级"，GPT-5.3 → 5.4 连续上线，用户对"版本疲劳"的抱怨已成公开声音，但企业端仍在快速采用。
+- **@sama**：亲自为 GPT-5.4 站台，称其"编程能力强、Excel 表格处理出色、读段落时有情绪感"；同时感谢 Jensen 扩容算力，暗示 OpenAI 对英伟达算力依赖持续加深。
+- **@OpenAI**：GPT-5.4 Thinking Pro 分批推送，同步发布 Codex Security 预览版，产品矩阵已从"聊天机器人"全面向"开发者工具链"延伸。
+- **@bindureddy**：实际用户反馈已将主力编程模型切换至 GPT-5.4，印证企业端迁移速度快于预期。
 
----
+**赛道二：AI 工具链并购，OpenAI 卡位安全评测基础设施**
 
-**🤖 自动化科研（AutoResearch）：下一个 Factorio**
+- **叙事转向：** OpenAI 收购 Promptfoo（开源 LLM 评测/红队工具），标志着头部模型厂商开始将"评估基础设施"内化，独立第三方评测市场空间受压。
+- **@OpenAI** 官宣收购，社区反应两极——部分人担忧开源工具被"闭源化"，另一部分认为这是 OpenAI 补全安全合规能力的关键一步。
+- **投资含义：** 独立 AI 评测/红队 SaaS 赛道估值逻辑面临重估，头部模型厂商的并购胃口正在扩大。
 
-- **叙事转向：** AI 自主做 ML 研究从概念走向可玩产品，Karpathy 的背书让这个赛道从学术圈溢出到创投视野。
-- **@karpathy** 密集发推称 autoresearch"上瘾如 Factorio"，并指出 agent 自主发现了 QK Norm 与 RoPE 顺序调换这类非超参数级别的架构改进——这意味着 AI 开始触碰真正的科研创新。
-- **@karpathy** 同时提出"agent 协作应像学术界分工"的框架，暗示未来 AI 研究 infra 是一个值得投资的方向。
-- **@_akhaliq** 同步介绍 AutoResearch-RL 用于神经架构发现——赛道热度正在从概念期进入工具化阶段。
+**赛道三：AI Agent 基础设施，从单点工具到"多人协作"平台**
 
----
+- **叙事转向：** Agent 产品从"单一任务执行"向"多 Agent 协作"演进，平台化特征愈发明显。
+- **@chamath**：其 Software Factory 平台推出"多人 Agent 体验"，每周迭代，定位企业级 AI 软件工厂。
+- **@a16z** 数据：OpenClaw（Claude Code 的别称）GitHub 星数已超越 Linux 和 React，开发者生态粘性极强，是近期最值得关注的 Agent 工具增长信号。
+- **@dotey**：将 Claude Code 定义为"超越编程 Agent 的通用计算代理"，暗示其应用边界正在被快速扩展。
 
-**⚔️ AI 与军事合作：Anthropic 的墙裂了**
+**赛道四：AI 安全与监管，Anthropic 成政治风暴眼**
 
-- **叙事转向：** "安全优先"不再是免费的品牌溢价，Anthropic 在 DoD 合同压力下的前后矛盾，正在让其"道德护城河"快速贬值。
-- **@AnthropicAI** CEO Dario 先发声明拒绝 DoD 大规模监控需求（获 56K 点赞，大量用户为此从 OpenAI 切换），随后又发声明称"与 DoD 有更多共同点"——用户评论称"whiplash is extraordinary"。
-- **@elonmusk** 直接称 Anthropic 为"最虚伪的公司"，舆论战持续升温，但 Grok 自身能力被反将一军。
-- **@AnthropicAI** 同期发布 Claude Opus 4.6 在 Firefox 中发现 22 个漏洞（14 个高危）——技术实力无可置疑，但商业立场的摇摆正在消耗品牌资产。
+- **叙事转向：** AI 安全不再只是技术议题，已演变为政治博弈——Anthropic 公开抵制美国政府（DoW）的监控要求，赢得大量用户支持，但也招致白宫针对。
+- **@AnthropicAI**：CEO Dario Amodei 连续发声，明确反对政府利用 AI 实施监控，相关推文点赞数高达 56K，用户"取消 ChatGPT 换 Claude"的声音在评论区大量涌现。
+- **@WIRED**：报道白宫正在针对 Anthropic，地缘政治压力已实质化。
+- **@elonmusk**：暗指 Anthropic"虚伪"（hypocritical），叠加其 xAI 竞争立场，信息战意味明显。
 
----
+**赛道五：算力基础设施，xAI 重资产扩张**
 
-**🏭 算力基础设施：xAI 下场建电厂**
+- **叙事转向：** xAI 正从"模型公司"向"算力+能源垂直整合"转型，1.2GW 电厂、最大规模 Megapack 部署，资本支出规模向超级数据中心看齐。
+- **@xAI**：Memphis 园区配套 1.2GW 发电、水循环、新变电站，雇佣数千工人；这一重资产模式与 OpenAI 轻资产路线形成鲜明对比。
+- **投资含义：** 电力基础设施、液冷、储能（Megapack 供应链）是 AI 算力扩张的隐性受益赛道。
 
-- **叙事转向：** AI 公司从"租算力"到"自建电力"，xAI 的 Memphis 布局标志着超大模型玩家开始把能源供给内化为核心竞争力。
-- **@xAI** 宣布在 Memphis 建设 1.2GW 自有电厂，同时扩建全球最大 Megapack 储能装置——算力竞争已经下沉到物理基础设施层。
-- **@nvidia** 宣布 Jensen Huang 将出席 GTC 2026 主题演讲，同时有报道称 Nvidia 正在为 OpenAI 疯狂扩容 AWS 算力——供给侧仍是卖方市场。
-- **@SKhynix** 发布 1c LPDDR6 内存（速度提升 33%，能效提升 20%），AI 推理端的内存瓶颈正在被硬件侧逐步解决。
+**赛道六：自动化科研（AutoResearch），奇点叙事再燃**
 
----
-
-**🦾 具身智能：Elonverse 的隐性布局**
-
-- **@elonmusk** 发推称"人们不理解人形机器人经济"，并表示 FSD+Starlink 让逆城镇化成为可能——这两句话合在一起，是在为 Optimus 的长期叙事铺垫。
-- **@ycombinator** 投资 HLabs（美国制造的机器人执行器+电子元件）——YC 开始在具身智能供应链层布局，不只押注整机厂。
-- **@eladgil** 指出 AI 生产力红利最先冲击的是"周转型企业和并购整合"，而非头部科技公司——这是一个值得关注的二阶效应。
+- **叙事转向：** AI 自动优化神经网络架构（AutoResearch-RL）的早期成果出现，Karpathy 本人转发并获 Elon Musk 回复"In Singularity"——奇点叙事被顶流背书。
+- **@karpathy**：展示 AutoResearch 自动改进 nanochat 的实验，称其"像 Factorio 一样上瘾"，暗示 AI 自动科研的可玩性和潜力正在被验证。
+- **投资含义：** AI for Science / AutoML 赛道短期内获得顶级背书，相关标的值得关注。
 
 ---
 
@@ -55,17 +51,18 @@
 
 **投融资快讯**
 
-- **Lightspeed** 参与 Nexthop AI **5亿美元 B 轮**——AI 数据中心网络基础设施，单轮体量罕见，网络层 infra 估值逻辑重构。
-- **Lightspeed** 领投 Axiom Trust Company **1180万美元**——AI 信托管理，资产管理+AI 的细分赛道开始获得顶级机构关注。
-- **Scale AI** 推出 SWE-Atlas（代码 agent 评测基准），顶级模型得分仅约 30%——既是产品，也是为自身数据标注业务构建壁垒的战略动作。
-- **Brett Adcock**（Figure AI 创始人）自掏 **1亿美元** 创立新 AI 实验室 Hark，专注"以人为中心的递归式 AI"——创始人连续创业+自我融资，是当前市场信心的风向标。
+- **Nexthop AI**：完成 5 亿美元 B 轮融资，Lightspeed Venture Partners 领投，专注 AI 时代数据中心网络重构，是近期最大单笔 AI 基础设施融资之一。
+- **xAI**：持续重资产投入，Memphis 园区 1.2GW 电力+最大规模 Megapack，隐含资本支出规模数十亿美元级别。
+- **OpenAI 收购 Promptfoo**：具体金额未披露，但战略意义重大——卡位 LLM 安全评测基础设施。
+- **AMD × Meta AI**：多年期 Instinct GPU 供应协议落地，AMD 在 AI 训练芯片市场持续蚕食英伟达份额。
 
 **VC 偏好信号**
 
-- **@a16z** 数据显示：OpenClaw（Claude Code 的命令行工具）在 2026 年 1 月发布后 GitHub Stars 超越 Linux 和 React——开发者工具的病毒式传播速度已成为 a16z 重点跟踪指标。
-- **@a16z** 同时指出：ChatGPT 在消费者 AI 使用时长中仍遥遥领先其他 chatbot——流量护城河短期内难以撼动。
-- **@eladgil** 警示：大量即将到来的"AI 裁员 PR"本质是纠正 2020 年过度招聘，不是 AI 取代人力的真实信号——估值模型中"AI 降本"的逻辑需要更谨慎地拆分。
-- **@TheInformation** 报道：OpenAI IPO 面临投资者对盈利能力和成本的质疑——高估值叙事正在接受公开市场的压力测试。
+- **@lightspeedvp**：明确押注 AI 网络基础设施（Nexthop AI），核心逻辑是"AI 正在重写数据中心规则"，传统网络设备厂商面临颠覆。
+- **@sequoia**：Konstantine Buhler 将 2026 年定义为"专业化智能之年"，暗示 Sequoia 下一阶段重点在垂直行业 AI，而非通用大模型。
+- **@pmarca**：转发关于"信息消费策略"的讨论，Bill Ackman 在评论区求推荐书单——顶级 VC 对"认知质量"的焦虑折射出对 AI 信息过载时代的深层担忧。
+- **@ycombinator**：批次内出现月球工厂（GRU Space）、美国本土机器人执行器（HLabs）等硬科技项目，YC 硬件/太空赛道布局持续深化。
+- **估值警示**：@TheInformation 指出 OpenAI IPO 面临市场质疑，核心矛盾是持续高企的算力成本与盈利路径不清晰之间的张力。
 
 ---
 
@@ -73,33 +70,33 @@
 
 **中国 AI 评价**
 
-- 本期数据中海外大佬对 DeepSeek、Kimi、智谱等中国模型**无直接点评**，但有若干间接信号值得关注。
-- **@karpathy** 推荐的"开源 infra 训练大 MoE 模型"论文，与国内主流大模型训练路线高度重叠——开源社区正在快速缩短与闭源模型的差距，中国团队是重要参与者。
-- **@vllm_project** 发布 v0.17.0，新增 Qwen3.5 支持——阿里 Qwen 系列已深度嵌入全球推理 infra，生态渗透持续推进。
-- **@mranti** 观察到国内改版的 Claude Code 工具（"龙虾"）比原版更易用，正在形成类似"盗版 Windows"的生态扩散效应——中国市场的本地化适配能力不容低估。
+- 本期数据中，海外大佬对 DeepSeek、智谱、Kimi 等中国模型**无直接点名评价**，但有若干间接信号值得关注。
+- **@karpathy** 点赞"open weights ≠ open source"的论述，暗指以 DeepSeek 为代表的"开放权重"模式存在透明度争议，对依赖其构建商业产品的团队有潜在风险。
+- **@swyx** 评论"Meta learning AlphaGo recipe"，暗示中美 AI 研究路线之争（强化学习自博弈路线）仍在持续，中国团队在该方向的投入值得关注。
+- **SK Hynix** 发布 1c LPDDR6（速度提升 33%、能效提升 20%），高带宽存储竞争加剧，对依赖 HBM 供应链的中国 AI 芯片厂商构成间接压力。
 
 **地缘与监管风险**
 
-- **@AnthropicAI vs DoD 争议**持续发酵：AI 模型被用于军事目标识别的边界问题，未来可能触发更严格的出口管制或使用限制，波及在美运营的中国 AI 产品。
-- **@verge** 提示：伊朗冲突可能推高数据中心电力成本——能源价格波动将直接压缩中小 AI 推理服务商的利润空间。
-- **@WIRED** 报道白宫正针对某 AI 初创公司采取行动——监管不确定性仍是估值折扣的主要来源之一，中美两侧均需关注。
-- **OpenAI 收购 Promptfoo** 并强调"保持开源"——这一表态背后是对企业客户合规审计压力的正面回应，也预示着 AI 安全测试将成为 To-B 采购的标配门槛。
+- **Anthropic vs. 白宫**：@WIRED 报道白宫针对 Anthropic，@AnthropicAI CEO 公开抵制政府监控要求，AI 安全合规已成美国政治博弈的直接战场，对在美运营的 AI 企业构成不确定性。
+- **伊朗冲突 × 数据中心成本**：@verge 提示伊朗局势可能推高数据中心运营成本，中东地缘风险向算力基础设施传导的路径需持续关注。
+- **芯片出口管制**：本期无新增直接信号，但 AMD × Meta 多年期 GPU 协议、英伟达 GTC 临近（Jensen 皮夹克回归预热），下周 GTC 可能释放新的算力供给信号，需密切跟踪。
+- **版权/合规**：OpenAI 收购 Promptfoo 后，开源社区对其"将开源工具闭源化"的担忧升温，潜在的开源许可证纠纷风险不可忽视。
 
 ---
 
 ## 📣 今日精选推文 (Top 5 Picks)
 
-- **@OpenAI** · OpenAI · AI 研究公司
-  > 「GPT-5.4 Thinking 正式上线 ChatGPT、API 和 Codex，支持中途打断并调整推理方向——AI 第一次可以被"插嘴"了。」
-
 - **@sama** · Sam Altman · OpenAI CEO
-  > 「GPT-5.4 让金融圈真的震了——它在 Excel 操作上"出奇地好"，Plus/Pro/企业用户现已可用。」
+  > 「GPT-5.4 编程能力强，是我目前最爱的聊天对象；同时感谢 Jensen 继续为我们扩容算力。」
+
+- **@karpathy** · Andrej Karpathy · AI 研究员/前 Tesla AI 总监
+  > 「AutoResearch 已经能自动改进 nanochat 架构了——这东西像 Factorio 一样让人上瘾，AI 自动做科研的时代来了。」
 
 - **@AnthropicAI** · Anthropic · AI 安全公司
-  > 「Claude Opus 4.6 在 Firefox 中找出 22 个漏洞，14 个高危。Anthropic 警告：模型发现漏洞的能力已超过利用漏洞的能力，但这不会持续太久。」
+  > 「CEO Dario Amodei 公开声明：我们反对任何利用 AI 实施政府监控的行为，这条线我们不会越。」
 
-- **@karpathy** · Andrej Karpathy · 前 Tesla AI 总监
-  > 「AutoResearch 上瘾程度堪比 Factorio——AI agent 自主发现了 QK Norm 与 RoPE 顺序调换这类真正的架构创新，不只是调超参。」
+- **@a16z** · Andreessen Horowitz · 顶级 VC 机构
+  > 「OpenClaw（Claude Code）GitHub 星数已超越 Linux 和 React——开发者用脚投票，这是本周最强的产品增长信号。」
 
-- **@lightspeedvp** · Lightspeed Venture Partners · 顶级 VC
-  > 「参与 Nexthop AI 5 亿美元 B 轮——AI 数据中心网络基础设施，这笔钱在押的是：算力战争的下一个瓶颈是网络，不是 GPU。」
+- **@lightspeedvp** · Lightspeed Venture Partners · 顶级 VC 机构
+  > 「AI 正在重写数据中心的底层规则，我们领投了 Nexthop AI 的 5 亿美元 B 轮——网络基础设施是这波算力军备竞赛里被低估的赛道。」

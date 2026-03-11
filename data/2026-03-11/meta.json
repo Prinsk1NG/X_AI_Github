@@ -1,32 +1,32 @@
 {
   "elonmusk": {
     "total": 10,
-    "max_l": 79123,
-    "latest": "0310"
+    "max_l": 99451,
+    "latest": "0311"
   },
   "sama": {
     "total": 10,
-    "max_l": 12955,
+    "max_l": 12954,
     "latest": "0307"
   },
   "karpathy": {
     "total": 10,
-    "max_l": 16618,
+    "max_l": 16753,
     "latest": "0310"
   },
   "demishassabis": {
     "total": 10,
-    "max_l": 2456,
+    "max_l": 2575,
     "latest": "0310"
   },
   "darioamodei": {
-    "total": 8,
-    "max_l": 15260,
+    "total": 7,
+    "max_l": 15259,
     "latest": "0126"
   },
   "OpenAI": {
     "total": 10,
-    "max_l": 29201,
+    "max_l": 29200,
     "latest": "0309"
   },
   "AnthropicAI": {
@@ -41,7 +41,7 @@
   },
   "xAI": {
     "total": 10,
-    "max_l": 26949,
+    "max_l": 6460,
     "latest": "0304"
   },
   "AIatMeta": {
@@ -51,7 +51,7 @@
   },
   "GoogleAI": {
     "total": 10,
-    "max_l": 758,
+    "max_l": 2345,
     "latest": "0310"
   },
   "MSFTResearch": {
@@ -65,18 +65,18 @@
     "latest": "NA"
   },
   "gregbrockman": {
-    "total": 8,
-    "max_l": 0,
+    "total": 10,
+    "max_l": 1,
     "latest": "0308"
   },
   "GaryMarcus": {
     "total": 10,
-    "max_l": 82,
+    "max_l": 83,
     "latest": "0310"
   },
   "rowancheung": {
     "total": 10,
-    "max_l": 1137,
+    "max_l": 1138,
     "latest": "0310"
   },
   "clmcleod": {
@@ -87,22 +87,22 @@
   "bindureddy": {
     "total": 10,
     "max_l": 673,
-    "latest": "0310"
+    "latest": "0311"
   },
   "dotey": {
     "total": 10,
-    "max_l": 805,
+    "max_l": 826,
     "latest": "0311"
   },
   "oran_ge": {
     "total": 10,
-    "max_l": 218,
+    "max_l": 90,
     "latest": "0311"
   },
   "vista8": {
     "total": 10,
-    "max_l": 893,
-    "latest": "0309"
+    "max_l": 726,
+    "latest": "0311"
   },
   "imxiaohu": {
     "total": 0,
@@ -121,7 +121,7 @@
   },
   "tualatrix": {
     "total": 10,
-    "max_l": 93,
+    "max_l": 51,
     "latest": "0311"
   },
   "linyunqiu": {
@@ -161,22 +161,22 @@
   },
   "mranti": {
     "total": 10,
-    "max_l": 16,
+    "max_l": 45,
     "latest": "0311"
   },
   "nishuang": {
     "total": 10,
-    "max_l": 182,
+    "max_l": 34,
     "latest": "0409"
   },
   "a16z": {
     "total": 10,
-    "max_l": 747,
+    "max_l": 774,
     "latest": "0311"
   },
   "ycombinator": {
     "total": 10,
-    "max_l": 283,
+    "max_l": 291,
     "latest": "0310"
   },
   "lightspeedvp": {
@@ -201,48 +201,48 @@
   },
   "pmarca": {
     "total": 10,
-    "max_l": 33199,
+    "max_l": 33390,
     "latest": "0309"
   },
   "bchesky": {
     "total": 10,
-    "max_l": 243,
+    "max_l": 1187,
     "latest": "0212"
   },
   "chamath": {
     "total": 10,
-    "max_l": 401,
-    "latest": "0310"
+    "max_l": 426,
+    "latest": "0311"
   },
   "paulg": {
     "total": 10,
-    "max_l": 1412,
-    "latest": "0310"
+    "max_l": 1660,
+    "latest": "0311"
   },
   "TheInformation": {
     "total": 10,
-    "max_l": 9,
+    "max_l": 11,
     "latest": "0310"
   },
   "TechCrunch": {
     "total": 10,
-    "max_l": 177,
-    "latest": "0310"
+    "max_l": 196,
+    "latest": "0311"
   },
   "verge": {
     "total": 10,
-    "max_l": 41,
+    "max_l": 47,
     "latest": "0310"
   },
   "WIRED": {
     "total": 10,
-    "max_l": 1348,
-    "latest": "0310"
+    "max_l": 1418,
+    "latest": "0311"
   },
   "Scobleizer": {
     "total": 10,
-    "max_l": 10,
-    "latest": "0310"
+    "max_l": 19,
+    "latest": "0311"
   },
   "bentossell": {
     "total": 10,
@@ -256,12 +256,12 @@
   },
   "MistralAI": {
     "total": 10,
-    "max_l": 3889,
+    "max_l": 3888,
     "latest": "0210"
   },
   "Perplexity_AI": {
     "total": 10,
-    "max_l": 4472,
+    "max_l": 4470,
     "latest": "0305"
   },
   "GroqInc": {
@@ -281,7 +281,7 @@
   },
   "runwayml": {
     "total": 10,
-    "max_l": 391,
+    "max_l": 393,
     "latest": "0310"
   },
   "Midjourney": {
@@ -290,7 +290,7 @@
     "latest": "0302"
   },
   "StabilityAI": {
-    "total": 9,
+    "total": 10,
     "max_l": 1346,
     "latest": "0210"
   },
@@ -321,17 +321,17 @@
   },
   "llama_index": {
     "total": 10,
-    "max_l": 136,
+    "max_l": 168,
     "latest": "0310"
   },
   "supabase": {
     "total": 10,
-    "max_l": 69,
+    "max_l": 70,
     "latest": "0310"
   },
   "vllm_project": {
     "total": 10,
-    "max_l": 952,
+    "max_l": 953,
     "latest": "0309"
   },
   "huggingface_hub": {
@@ -341,17 +341,17 @@
   },
   "nvidia": {
     "total": 10,
-    "max_l": 3388,
+    "max_l": 3557,
     "latest": "0310"
   },
   "AMD": {
-    "total": 9,
+    "total": 10,
     "max_l": 195,
     "latest": "0311"
   },
   "Intel": {
     "total": 10,
-    "max_l": 34,
+    "max_l": 36,
     "latest": "0310"
   },
   "SKhynix": {
@@ -371,12 +371,12 @@
   },
   "NathieVR": {
     "total": 10,
-    "max_l": 41,
+    "max_l": 44,
     "latest": "0310"
   },
   "PalmerLuckey": {
     "total": 10,
-    "max_l": 7178,
+    "max_l": 7180,
     "latest": "0308"
   },
   "ID_AA_Carmack": {
@@ -421,7 +421,7 @@
   },
   "jeffdean": {
     "total": 10,
-    "max_l": 1650,
+    "max_l": 1653,
     "latest": "0310"
   },
   "chrmanning": {
@@ -430,8 +430,8 @@
     "latest": "0306"
   },
   "hardmaru": {
-    "total": 10,
-    "max_l": 6808,
+    "total": 7,
+    "max_l": 6852,
     "latest": "0308"
   },
   "goodfellow_ian": {
@@ -445,8 +445,8 @@
     "latest": "1130"
   },
   "_akhaliq": {
-    "total": 10,
-    "max_l": 104,
+    "total": 9,
+    "max_l": 128,
     "latest": "0310"
   },
   "promptengineer": {
@@ -486,17 +486,17 @@
   },
   "lexfridman": {
     "total": 10,
-    "max_l": 4921,
+    "max_l": 4922,
     "latest": "0304"
   },
   "hubermanlab": {
-    "total": 10,
-    "max_l": 545,
-    "latest": "0310"
+    "total": 9,
+    "max_l": 572,
+    "latest": "0311"
   },
   "swyx": {
     "total": 10,
-    "max_l": 3050,
+    "max_l": 3074,
     "latest": "0311"
   }
 }
