@@ -1080,7 +1080,7 @@ def send_to_feishu_card(content_md: str, today_str: str, model_label: str = "Cla
             },
             "header": {
                 "title": {
-                    "content": f"AI Investment Briefing | {today_str}",
+                    "content": f"昨晚硅谷在聊啥 | {today_str}",
                     "tag": "plain_text",
                 },
                 "template": "blue",
@@ -1214,7 +1214,7 @@ def save_daily_data(today_str: str, post_objects: list, meta_results: dict,
 # ==============================================================================
 def main():
     print("=" * 60, flush=True)
-    print("AI Investment Briefing v3.3 (Grok search + Claude/Kimi summary)", flush=True)
+    print("昨晚硅谷在聊啥 v3.3 (Grok search + Claude/Kimi summary)", flush=True)
     print("=" * 60, flush=True)
 
     check_cookie_expiry()
