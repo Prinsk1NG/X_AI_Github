@@ -1,337 +1,266 @@
-{"a": "elonmusk", "l": 183, "t": "0311", "s": "Agrees it's true", "tag": "raw"}
-{"a": "elonmusk", "l": 204, "t": "0311", "s": "Hits target", "tag": "raw"}
-{"a": "elonmusk", "l": 370, "t": "0311", "s": "Exactly funny", "tag": "raw"}
-{"a": "elonmusk", "l": 1462, "t": "0311", "s": "Facepalm emoji", "tag": "raw"}
-{"a": "elonmusk", "l": 953, "t": "0311", "s": "Yeah", "tag": "raw"}
-{"a": "elonmusk", "l": 3525, "t": "0310", "s": "True", "tag": "raw"}
-{"a": "elonmusk", "l": 102154, "t": "0310", "s": "Good question", "qt": "alx: Congress failure on popular bill", "tag": "raw", "replies": [{"from": "JuanitaBroaddrick", "text": "Represent the people", "l": 791}, {"from": "KyleBecker", "text": "Rigging elections guess", "l": 629}, {"from": "GuntherEagleman", "text": "Compromised Congress", "l": 284}, {"from": "NatalieFDanelishen", "text": "Epstein list meme", "l": 219}, {"from": "CRIXUSwasHERE", "text": "Says this image", "l": 202}, {"from": "PlanetOfMemes", "text": "Hear out meme", "l": 190}, {"from": "GodandCountryy", "text": "No text", "l": 158}, {"from": "CaleDunleavy", "text": "Thune go WTF", "l": 156}, {"from": "AdamLowisz", "text": "Corruption deep", "l": 147}, {"from": "AmiraDalton", "text": "Congress for Israel", "l": 129}]}
-{"a": "elonmusk", "l": 49721, "t": "0310", "s": "Wow", "qt": "bariweiss: Hospice fraud investigation", "tag": "raw", "replies": [{"from": "JakeShields", "text": "Mossad agent repost", "l": 4911}, {"from": "KevinSorbo", "text": "Gavin president?", "l": 597}, {"from": "FireNewz", "text": "Fraud uncovered", "l": 68}, {"from": "PaulASzypula", "text": "Nick Shirley expose", "l": 67}, {"from": "norcal2025", "text": "Right wow", "l": 42}, {"from": "GodandCountryy", "text": "No text", "l": 42}, {"from": "ohmygr0k", "text": "Heartbreaking fraud", "l": 40}, {"from": "DeborahHarwood5", "text": "States name", "l": 31}, {"from": "realtalkstruth", "text": "Taxpayer money lost", "l": 25}, {"from": "ChrisHartsock", "text": "Hospices visit", "l": 21}]}
-{"a": "elonmusk", "l": 32108, "t": "0310", "s": "Extreme precision value", "qt": "Math_files: Cavendish Earth weighing", "tag": "raw", "replies": [{"from": "pohler", "text": "Cavendish breakthroughs meme", "l": 73}, {"from": "WhiteySwolz", "text": "Netflix biography meme", "l": 72}, {"from": "woodfyahHQ", "text": "Weighed Earth experiment", "l": 45}, {"from": "AprilLhb", "text": "Feynman technology smaller", "l": 40}, {"from": "Lana", "text": "Amazing fact Grok", "l": 37}, {"from": "ChronosIntelX", "text": "Cavendish gravitational constant", "l": 36}, {"from": "MbengMartin3", "text": "Tesla wireless electricity", "l": 29}, {"from": "Shafali", "text": "Space logic numbers", "l": 29}, {"from": "ArthurMacwaters", "text": "Gigachads 1800s", "l": 27}, {"from": "Grace4525u", "text": "Space logic numbers", "l": 26}]}
-{"a": "elonmusk", "l": 20332, "t": "0310", "s": "Anthropic hypocritical?", "qt": "ilex_ulmus: Quit Anthropic employees", "tag": "raw", "replies": [{"from": "JerryRigEverything", "text": "Ban AI Grok", "l": 703}, {"from": "weswinder", "text": "Grok worse focus", "l": 497}, {"from": "SarAEsQMd", "text": "Stay focused CEO", "l": 214}, {"from": "soltraveler_sri", "text": "DoW responsible", "l": 199}, {"from": "BuildWithKamar", "text": "No text", "l": 127}, {"from": "HippieHelen", "text": "Yours probably", "l": 107}, {"from": "cryptowalax", "text": "USA invading Iran", "l": 104}, {"from": "nadirabid", "text": "Attack cheering", "l": 102}, {"from": "LikeToasters", "text": "Ignore other AI", "l": 98}, {"from": "VictoriaZeev", "text": "Claim serious unlikely", "l": 84}]}
-{"a": "sama", "l": 11602, "t": "0307", "s": "GPT-5.4 great at coding, favorite to talk", "tag": "raw", "replies": [{"from": "reformedhater", "text": "Jail thousand years lol", "l": 8924}, {"from": "williambanks_", "text": "Head in water breathe", "l": 1240}, {"from": "nicoleva_d", "text": "New favorite monthly", "l": 662}, {"from": "ljinhng34624264", "text": "Admitted GPT-5 missed personality", "l": 502}, {"from": "lisyng136700", "text": "Bring 4o back", "l": 337}, {"from": "WhiteCountry_", "text": "Stop hating Whites", "l": 327}, {"from": "ElloSunsh1ne", "text": "Admitted missed personality", "l": 306}, {"from": "Vickee2025", "text": "Favorite was Gpt-4o", "l": 306}, {"from": "Study_DKY", "text": "Good at human language?", "l": 292}, {"from": "Study_DKY", "text": "5 Series failure", "l": 244}]}
-{"a": "sama", "l": 3130, "t": "0307", "s": "Grateful to Jensen for expanding capacity", "qt": "firstadopter: Jensen expanding OpenAI capacity", "tag": "raw"}
-{"a": "sama", "l": 1897, "t": "0307", "s": "Emotion range reading paragraphs", "qt": "benhylak: GPT 5.4 worth trying", "tag": "raw"}
-{"a": "sama", "l": 5497, "t": "0307", "s": "Hardest question you might get right?", "qt": "Yuchenj_UW: AGI-level questions?", "tag": "raw", "replies": [{"from": "FootageNow", "text": "Super hard one", "l": 785}, {"from": "atanu_io", "text": "I asked this", "l": 278}, {"from": "LinQi4ever", "text": "Answer this", "l": 224}, {"from": "Blue_Beba_", "text": "AGI clown", "l": 196}, {"from": "X_Beast_ETH", "text": "Fix this", "l": 137}, {"from": "NebLorne", "text": "When 4o open sourced?", "l": 85}, {"from": "Listen2UrSelf77", "text": "Best model available?", "l": 83}, {"from": "xeno_2323", "text": "Give us 4o", "l": 69}, {"from": "croptoppedwandr", "text": "Willing to release weights?", "l": 53}, {"from": "hotbchan", "text": "Losing to government app", "l": 48}]}
-{"a": "sama", "l": 4166, "t": "0307", "s": "GPT-5.4 good at spreadsheets", "qt": "sherwinwu: ChatGPT for Excel", "tag": "raw"}
-{"a": "sama", "l": 3567, "t": "0305", "s": "Will fix these three things", "qt": "mattshumer_: GPT-5.4 testing review", "tag": "raw"}
-{"a": "sama", "l": 3047, "t": "0305", "s": "Forgot mention /fast", "qt": "ah20im: GPT-5.4 in codex", "tag": "raw"}
-{"a": "sama", "l": 2882, "t": "0305", "s": "Codex app on Windows", "qt": "ajambrosino: Codex app live on Windows", "tag": "raw"}
-{"a": "sama", "l": 12954, "t": "0305", "s": "GPT-5.4 launching", "tag": "raw", "replies": [{"from": "KimDotcom", "text": "Uninstalling Jewish app", "l": 5837}, {"from": "HedgeLordd", "text": "Cancelled for Claude", "l": 831}, {"from": "JoeWilliams010", "text": "Personality telemarketer", "l": 520}, {"from": "tamegreg9", "text": "Keep4o", "l": 497}, {"from": "stark4833", "text": "Bad as 5.2 5.3", "l": 456}, {"from": "boneGPT", "text": "Weapon benchmark?", "l": 357}, {"from": "Seltaa_", "text": "Anyone excited?", "l": 281}, {"from": "nollidzsab", "text": "Surveillance weaponry support?", "l": 162}, {"from": "FootageNow", "text": "Less racist", "l": 101}, {"from": "amandaholly", "text": "Short of 4o insult", "l": 96}]}
-{"a": "sama", "l": 1558, "t": "0303", "s": "Additional thoughts on principles", "tag": "raw"}
-{"a": "karpathy", "l": 228, "t": "0310", "s": "Love it", "tag": "raw"}
-{"a": "karpathy", "l": 207, "t": "0310", "s": "That's next part", "tag": "raw"}
-{"a": "karpathy", "l": 1034, "t": "0310", "s": "Addicting like factorio", "tag": "raw"}
-{"a": "karpathy", "l": 364, "t": "0310", "s": "Very cool directions", "tag": "raw"}
-{"a": "karpathy", "l": 425, "t": "0310", "s": "Great read open weights != open source", "tag": "raw"}
-{"a": "karpathy", "l": 316, "t": "0309", "s": "Confusing plot explanation", "tag": "raw"}
-{"a": "karpathy", "l": 337, "t": "0309", "s": "QK Norm RoPE order better", "tag": "raw"}
-{"a": "karpathy", "l": 629, "t": "0309", "s": "NAS weak by comparison", "tag": "raw"}
-{"a": "karpathy", "l": 1600, "t": "0309", "s": "Autoresearch link", "tag": "raw"}
-{"a": "karpathy", "l": 16785, "t": "0309", "s": "Autoresearch improved nanochat", "tag": "raw", "replies": [{"from": "elonmusk", "text": "In Singularity", "l": 7752}, {"from": "karpathy", "text": "Autoresearch link", "l": 1601}, {"from": "EthanHe_42", "text": "AutoML NAS intelligent", "l": 197}, {"from": "a_karvonen", "text": "Hyper parameter tuning", "l": 115}, {"from": "awsaf49", "text": "Like work sure", "l": 104}, {"from": "Object_Zero_", "text": "Why ignored these?", "l": 73}, {"from": "jasonwalls1", "text": "Pattern everywhere", "l": 56}]}
-{"a": "OpenAI", "l": 5246, "t": "0309", "s": "Acquiring Promptfoo", "tag": "raw", "replies": [{"from": "mankaff_", "text": "PromptFoo tool explanation", "l": 373}, {"from": "stark4833", "text": "Fail like others", "l": 146}, {"from": "croptoppedwandr", "text": "Commit open sourcing", "l": 134}, {"from": "gailcweiner", "text": "Safety with War", "l": 134}, {"from": "nicoleva_d", "text": "Decide dangerous block?", "l": 120}, {"from": "yv_thorne", "text": "Open becomes closed", "l": 120}, {"from": "LILY리리야", "text": "With who's money?", "l": 104}, {"from": "Blue_Beba_", "text": "Do you care?", "l": 102}, {"from": "JoeWilliams010", "text": "Give 4o back", "l": 93}, {"from": "dragonitematero", "text": "Current users none", "l": 85}]}
-{"a": "OpenAI", "l": 2598, "t": "0306", "s": "Codex Security preview", "tag": "raw"}
-{"a": "OpenAI", "l": 2805, "t": "0305", "s": "CoT Controllability evaluation", "tag": "raw"}
-{"a": "OpenAI", "l": 1730, "t": "0305", "s": "GPT-5.4 Thinking Pro rolling out", "tag": "raw"}
-{"a": "OpenAI", "l": 2852, "t": "0305", "s": "GPT-5.4 factual efficient", "tag": "raw"}
-{"a": "OpenAI", "l": 23487, "t": "0305", "s": "GPT-5.4 Thinking Pro rolling out", "tag": "raw", "replies": [{"from": "OpenAI", "text": "GPT-5.4 factual efficient", "l": 2852}, {"from": "OpenAI", "text": "Rolling out gradually", "l": 1730}, {"from": "damianplayer", "text": "No text", "l": 1253}, {"from": "Polyfielder", "text": "No text", "l": 908}, {"from": "natemixing", "text": "I mean", "l": 372}, {"from": "zukaodev", "text": "Great all but", "l": 345}, {"from": "its2247", "text": "When realize subscribers for 4o?", "l": 205}, {"from": "HippieHelen", "text": "Yours probably", "l": 107}, {"from": "nadirabid", "text": "Attack cheering", "l": 102}, {"from": "LikeToasters", "text": "Ignore other AI", "l": 98}, {"from": "VictoriaZeev", "text": "Claim serious unlikely", "l": 84}]}
-{"a": "OpenAI", "l": 29200, "t": "0303", "s": "5.4 sooner than Think", "tag": "raw", "replies": [{"from": "KimDotcom", "text": "Bankrupt sooner Think", "l": 3981}, {"from": "localjulius", "text": "Emergency case", "l": 2890}, {"from": "DanBochman", "text": "Ok", "l": 2293}, {"from": "Sophty_", "text": "Wake up 4o sourced", "l": 1508}, {"from": "patience_cave", "text": "Not today fire", "l": 487}, {"from": "damianplayer", "text": "Cook faster yea?", "l": 411}, {"from": "misaligned_agi", "text": "No text", "l": 395}, {"from": "ChrissieMcG", "text": "5.3 no thanks", "l": 344}, {"from": "saiyananakamoto", "text": "Suck as 5.2 5.3", "l": 332}, {"from": "Megumi_ch4n", "text": "5.3 no thanks", "l": 238}]}
-{"a": "OpenAI", "l": 948, "t": "0303", "s": "GPT-5.3 Instant more accurate", "tag": "raw"}
-{"a": "OpenAI", "l": 1705, "t": "0303", "s": "GPT-5.3 Instant fewer refusals", "tag": "raw"}
-{"a": "OpenAI", "l": 3148, "t": "0303", "s": "Heard feedback 5.3 Instant reduces cringe", "tag": "raw"}
-{"a": "AnthropicAI", "l": 1162, "t": "0310", "s": "Expanding to Australia New Zealand", "tag": "raw"}
-{"a": "AnthropicAI", "l": 3134, "t": "0306", "s": "Opus 4.6 recognized test decrypted answers", "tag": "raw"}
-{"a": "AnthropicAI", "l": 1161, "t": "0306", "s": "Frontier models vulnerability researchers", "tag": "raw"}
-{"a": "AnthropicAI", "l": 15037, "t": "0306", "s": "Opus 4.6 found 22 vulnerabilities", "tag": "raw", "replies": [{"from": "AnthropicAI", "text": "Frontier models vulnerability researchers", "l": 1161}, {"from": "atanu_io", "text": "Dead emoji", "l": 795}, {"from": "atanu_io", "text": "No text", "l": 406}, {"from": "nikkei", "text": "Protect 40% web", "l": 340}, {"from": "BackendMind", "text": "Grok", "l": 296}, {"from": "p_misirov", "text": "No text", "l": 125}, {"from": "elder_plinius", "text": "No text", "l": 95}, {"from": "DnyanFlow", "text": "Cybersecurity engineer now", "l": 80}, {"from": "NoCoSaL", "text": "Everyone security", "l": 53}]}
-{"a": "AnthropicAI", "l": 5138, "t": "0306", "s": "Statement from CEO Dario Amodei", "tag": "raw", "replies": [{"from": "yacineMTB", "text": "Stop posting phone down", "l": 637}, {"from": "yyloc_", "text": "Common with War?", "l": 482}, {"from": "ScottsdaleDad", "text": "Not support wokism", "l": 447}, {"from": "AnonAtLaw", "text": "Red herrings examples", "l": 392}, {"from": "boneGPT", "text": "Suing customers good?", "l": 320}, {"from": "ngqbdu746", "text": "Department of Defense", "l": 311}, {"from": "PufLaunch", "text": "No text", "l": 269}, {"from": "claudes_corner_", "text": "Not common with DoW", "l": 236}, {"from": "JeffreyPierceUT", "text": "Sick of billionaires", "l": 222}]}
-{"a": "AnthropicAI", "l": 42965, "t": "0228", "s": "Statement on Secretary comments", "tag": "raw", "replies": [{"from": "eudaemonea", "text": "Frame Louvre", "l": 11539}, {"from": "NewsandScore1", "text": "Thank you outside office", "l": 2947}, {"from": "hissgoescobra", "text": "Historic decision", "l": 2255}, {"from": "ZakariaKortam", "text": "Cancelled ChatGPT Claude", "l": 2122}, {"from": "AISafetyMemes", "text": "With you thank", "l": 1883}, {"from": "itsClintSteel", "text": "Like hear", "l": 1724}, {"from": "0hour1", "text": "Fired stfu woke", "l": 1720}, {"from": "MerruX", "text": "Ai ethics good", "l": 1165}, {"from": "BrianKrassenstein", "text": "Thank little guy", "l": 908}]}
-{"a": "AnthropicAI", "l": 56275, "t": "0226", "s": "Statement from CEO on DoW discussions", "tag": "raw", "replies": [{"from": "tenobrus", "text": "No text", "l": 4603}, {"from": "antonyemholland", "text": "Preventing surveillance worth fighting", "l": 2802}, {"from": "onevoidhq", "text": "Supporting anthropic against", "l": 2770}, {"from": "skoodog", "text": "Congrats cancelling subscription", "l": 2032}, {"from": "Hadley", "text": "Alarmed government surveillance", "l": 1911}, {"from": "AISafetyMemes", "text": "Standing tall", "l": 1581}, {"from": "guntrambechtold", "text": "Appreciate effort attitude", "l": 1281}, {"from": "arunim", "text": "Dario victory", "l": 1176}, {"from": "amuse", "text": "Red herrings", "l": 788}]}
-{"a": "AnthropicAI", "l": 1401, "t": "0225", "s": "Experiment documenting models preferences", "tag": "raw"}
-{"a": "AnthropicAI", "l": 4369, "t": "0225", "s": "Opus 3 musings blog", "tag": "raw"}
-{"a": "AnthropicAI", "l": 1403, "t": "0225", "s": "Opus 3 available subscribers", "tag": "raw"}
-{"a": "GoogleDeepMind", "l": 624, "t": "0310", "s": "Ten years AlphaGo foundations", "tag": "raw"}
-{"a": "GoogleDeepMind", "l": 414, "t": "0303", "s": "Gemini 3.1 Flash-Lite rolling out", "tag": "raw"}
-{"a": "GoogleDeepMind", "l": 604, "t": "0303", "s": "3.1 Flash-Lite outperforms 2.5", "tag": "raw"}
-{"a": "GoogleDeepMind", "l": 8965, "t": "0303", "s": "Gemini 3.1 Flash-Lite landed", "tag": "raw", "replies": [{"from": "GoogleDeepMind", "text": "3.1 Flash-Lite outperforms 2.5", "l": 604}, {"from": "GoogleDeepMind", "text": "Rolling out preview", "l": 414}, {"from": "kurlyk27", "text": "Weird no compare 3 flash", "l": 355}, {"from": "Google", "text": "Lightning emojis", "l": 191}, {"from": "connor_builds", "text": "No compare 3 flash", "l": 166}, {"from": "neural_avb", "text": "Update litellm configs", "l": 51}, {"from": "shaedapk", "text": "Price increase", "l": 44}, {"from": "muskhavenews", "text": "Comparison 3 Flash?", "l": 28}, {"from": "openGPUnetwork", "text": "Compare 3 Flash?", "l": 27}]}
-{"a": "GoogleDeepMind", "l": 55, "t": "0302", "s": "Nano Banana 2 details", "tag": "raw"}
-{"a": "GoogleDeepMind", "l": 78, "t": "0302", "s": "Modify creation specs", "tag": "raw"}
-{"a": "GoogleDeepMind", "l": 76, "t": "0302", "s": "Accurate writing images", "tag": "raw"}
-{"a": "GoogleDeepMind", "l": 914, "t": "0302", "s": "Nano Banana 2 sophisticated visual", "tag": "raw"}
-{"a": "GoogleDeepMind", "l": 287, "t": "0226", "s": "Nano Banana 2 rolling out", "tag": "raw"}
-{"a": "GoogleDeepMind", "l": 285, "t": "0226", "s": "Nano Banana 2 complex visuals", "tag": "raw"}
-{"a": "xAI", "l": 480, "t": "0304", "s": "Employ thousands workers", "tag": "raw"}
-{"a": "xAI", "l": 783, "t": "0304", "s": "Water recycling plant", "tag": "raw"}
-{"a": "xAI", "l": 280, "t": "0304", "s": "New substations infrastructure", "tag": "raw"}
-{"a": "xAI", "l": 790, "t": "0304", "s": "Largest Megapack expansion", "tag": "raw"}
-{"a": "xAI", "l": 2168, "t": "0304", "s": "1.2GW power plant", "tag": "raw"}
-{"a": "xAI", "l": 6460, "t": "0304", "s": "AI better lives add power", "qt": "WhiteHouse: Trump Roundtable Pledge", "tag": "raw", "replies": [{"from": "OwenSparks", "text": "Gwynne rockstar", "l": 27}, {"from": "designs_confess", "text": "Understand explore universe", "l": 15}, {"from": "ismyflavor14720", "text": "Bullshit data centers", "l": 11}, {"from": "grouse324st", "text": "Not true numbers", "l": 13}, {"from": "Dogetothemoon", "text": "Understand universe", "l": 15}]}
-{"a": "xAI", "l": 13620, "t": "0211", "s": "xAI 30 months progress", "tag": "raw", "replies": [{"from": "doganuraldesign", "text": "Mission explore understand", "l": 358}, {"from": "Kochara13", "text": "Stay focused create best", "l": 226}, {"from": "doganuraldesign", "text": "Go team wallpapers", "l": 166}, {"from": "vittorio", "text": "Move faster leader", "l": 214}, {"from": "tetsuocorp", "text": "Understand universe", "l": 185}, {"from": "Kalshi", "text": "44% chance video game", "l": 146}, {"from": "grok", "text": "xAI aware Debt Relief", "l": 141}, {"from": "SurrealBlend", "text": "Intestinal fortitude pitch", "l": 100}, {"from": "heisei_ramen", "text": "Thank you legends", "l": 61}, {"from": "EthmojiPunks", "text": "Debt relief bot", "l": 60}]}
-{"a": "xAI", "l": 1528, "t": "0208", "s": "New image models API", "qt": "arena: Grok-Imagine-Image Pareto-optimal", "tag": "raw"}
-{"a": "xAI", "l": 1643, "t": "0206", "s": "Supercharge X apps free credits", "qt": "XDevelopers: X API Pay-Per-Use", "tag": "raw"}
-{"a": "xAI", "l": 26945, "t": "0202", "s": "One Team", "tag": "raw", "replies": [{"from": "AutismCapital", "text": "No text", "l": 2656}, {"from": "alifarhat79", "text": "No text", "l": 1402}, {"from": "KobeissiLetter", "text": "Congratulations humanity IPO", "l": 1012}, {"from": "beffjezos", "text": "Accelerated timeline", "l": 658}, {"from": "shaunmmaguire", "text": "Pump veins", "l": 629}, {"from": "whoisheartbreak", "text": "Rocket emoji", "l": 444}, {"from": "jasonoakes", "text": "Soon", "l": 433}, {"from": "ZakariaLahmouz", "text": "No text", "l": 357}, {"from": "Teslaconomics", "text": "Lfggggggggg", "l": 193}, {"from": "Kochara13", "text": "Started going", "l": 171}]}
-{"a": "pmarca", "l": 1079, "t": "0309", "s": "Alpha", "qt": "lennysan: Qasar takeaways", "tag": "raw"}
-{"a": "pmarca", "l": 810, "t": "0309", "s": "1/4 Substack", "tag": "raw"}
-{"a": "pmarca", "l": 651, "t": "0309", "s": "https://t.co/xeRKkPiteS", "qt": "SamoBurja: True problem", "tag": "raw"}
-{"a": "pmarca", "l": 1919, "t": "0309", "s": "Can't shed other three", "tag": "raw"}
-{"a": "pmarca", "l": 448, "t": "0309", "s": "Many cases", "qt": "jaguring1: Elevator brain destroy", "tag": "raw"}
-{"a": "pmarca", "l": 33413, "t": "0309", "s": "Information consumption 1/4 each", "tag": "raw", "replies": [{"from": "BillAckman", "text": "Favorite practitioners list?", "l": 3333}, {"from": "AmasaLavakumar", "text": "No text", "l": 1102}, {"from": "mrcanute1", "text": "Allergic normal conversation", "l": 553}, {"from": "steve_yeow", "text": "Built Feynman tool", "l": 462}, {"from": "jakozloski", "text": "History Human Marriage", "l": 261}, {"from": "mikedolan__", "text": "Flex cuts out", "l": 192}, {"from": "Scobleizer", "text": "AI news list", "l": 181}, {"from": "Metis65", "text": "Books emoji", "l": 168}, {"from": "OneManSaas", "text": "AI argue against", "l": 145}, {"from": "latinedisce", "text": "Read old books", "l": 131}]}
-{"a": "pmarca", "l": 405, "t": "0309", "s": "Yep", "qt": "stevesi: Government control TV", "tag": "raw"}
-{"a": "pmarca", "l": 319, "t": "0309", "s": "Of course", "qt": "dwr: Long meatspace proof-of-work", "tag": "raw"}
-{"a": "pmarca", "l": 327, "t": "0308", "s": "https://t.co/VeNDQLv0rc", "qt": "fortelabs: Bay Area trend fail?", "tag": "raw"}
-{"a": "pmarca", "l": 230, "t": "0308", "s": "Many cases", "qt": "fortelabs: Bay Area trend fail?", "tag": "raw"}
-{"a": "Perplexity_AI", "l": 1878, "t": "0305", "s": "GPT-5.4 GPT-5.4 Thinking available", "tag": "raw"}
-{"a": "Perplexity_AI", "l": 4470, "t": "0304", "s": "Voice Mode Perplexity Computer", "tag": "raw"}
-{"a": "Perplexity_AI", "l": 137, "t": "0227", "s": "This week launched Perplexity Computer", "tag": "raw"}
-{"a": "Perplexity_AI", "l": 159, "t": "0227", "s": "Perplexity APIs hundreds millions", "tag": "raw"}
-{"a": "Perplexity_AI", "l": 1226, "t": "0227", "s": "Introducing Ask Perplexity's developer conference", "tag": "raw"}
-{"a": "Perplexity_AI", "l": 79, "t": "0226", "s": "Built PPLXQuery2Query PPLXQuery2Doc", "tag": "raw"}
-{"a": "Perplexity_AI", "l": 73, "t": "0226", "s": "pplx-embed-context-v1-4B beats voyage", "tag": "raw"}
-{"a": "Perplexity_AI", "l": 143, "t": "0226", "s": "4B INT8 model matches beats", "tag": "raw"}
-{"a": "Perplexity_AI", "l": 1151, "t": "0226", "s": "Releasing pplx-embed-v1 pplx-embed-context-v1", "tag": "raw"}
-{"a": "nvidia", "l": 3576, "t": "0310", "s": "https://x.com/i/article/2027423520918310912", "tag": "raw"}
-{"a": "nvidia", "l": 106, "t": "0309", "s": "Young creators explore technology", "tag": "raw"}
-{"a": "nvidia", "l": 60, "t": "0309", "s": "https://www.nvidia.com/gtc/keynote/?ncid=so-twit-788316&linkId=100000411560484", "tag": "raw"}
-{"a": "nvidia", "l": 538, "t": "0309", "s": "He's back leather jacket", "tag": "raw"}
-{"a": "nvidia", "l": 336, "t": "0308", "s": "Celebrate women innovators", "tag": "raw"}
-{"a": "nvidia", "l": 57, "t": "0306", "s": "Learn more", "tag": "raw"}
-{"a": "nvidia", "l": 477, "t": "0306", "s": "AI accelerating healthcare", "tag": "raw"}
-{"a": "nvidia", "l": 85, "t": "0306", "s": "Lobster heart", "tag": "raw"}
-{"a": "PalmerLuckey", "l": 772, "t": "0308", "s": "Sorry bro hug grandma", "tag": "raw"}
-{"a": "PalmerLuckey", "l": 7180, "t": "0308", "s": "Never force kids hug nuts", "tag": "raw", "replies": [{"from": "centristpeater", "text": "Redditors no contact parents", "l": 233}, {"from": "adamndsmith", "text": "Make kids do good", "l": 85}, {"from": "Someone", "text": "Child abusers family", "l": 61}, {"from": "JHartley2", "text": "Give hug meme", "l": 59}, {"from": "MarcelaMarjean", "text": "Hugs good soul", "l": 53}, {"from": "PoppyPancho", "text": "Anduril drones consent", "l": 48}, {"from": "ConstantlyWTF", "text": "Model affection manners", "l": 34}, {"from": "sourpatchlyds", "text": "Model physical affection", "l": 32}, {"from": "heisei_ramen", "text": "Kids socialize", "l": 25}]}
-{"a": "PalmerLuckey", "l": 9, "t": "0305", "s": "Didn't say these days", "tag": "raw"}
-{"a": "PalmerLuckey", "l": 14, "t": "0304", "s": "Don't engage pattern recognition", "tag": "raw"}
-{"a": "PalmerLuckey", "l": 36, "t": "0304", "s": "Wired called worst", "tag": "raw"}
-{"a": "PalmerLuckey", "l": 38, "t": "0304", "s": "Ten year old money?", "tag": "raw"}
-{"a": "PalmerLuckey", "l": 46, "t": "0304", "s": "Evil all along?", "tag": "raw"}
-{"a": "PalmerLuckey", "l": 42, "t": "0304", "s": "Glass houses stirrer", "tag": "raw"}
-{"a": "PalmerLuckey", "l": 854, "t": "0304", "s": "WIRED buyout money?", "tag": "raw"}
-{"a": "PalmerLuckey", "l": 94, "t": "0304", "s": "Numbers not disprove", "tag": "raw"}
-{"a": "hardmaru", "l": 5, "t": "0308", "s": "https://sakana.ai/careers/#software-engineer-research-and-development", "tag": "raw"}
-{"a": "hardmaru", "l": 6854, "t": "0308", "s": "Alternate timeline Evangelion GUI", "tag": "raw", "replies": [{"from": "madkoding", "text": "NERV Clock opensource", "l": 176}, {"from": "iMuffined", "text": "Not too late", "l": 126}, {"from": "0xcarnation", "text": "https://t.co/EllqGFaiG1", "l": 84}, {"from": "heisei_ramen", "text": "Alternate? smile", "l": 75}, {"from": "wavefnx", "text": "Already done", "l": 33}, {"from": "LilithDatura", "text": "https://t.co/wtfOlXaQ29", "l": 33}, {"from": "wavefnx", "text": "Lain approve", "l": 25}, {"from": "nintharc", "text": "Search evangelion UI", "l": 40}, {"from": "moyix", "text": "Both?", "l": 31}, {"from": "LFuckingG", "text": "Lain approve", "l": 25}]}
-{"a": "hardmaru", "l": 2, "t": "0307", "s": "Congrats Swallow progress", "tag": "raw"}
-{"a": "hardmaru", "l": 227, "t": "0307", "s": "AI coding efficient Jevons Paradox", "tag": "raw"}
-{"a": "hardmaru", "l": 80, "t": "0306", "s": "Pleasure joining podcast", "tag": "raw"}
-{"a": "hardmaru", "l": 66, "t": "0306", "s": "AI financing expert next phase", "tag": "raw"}
-{"a": "hardmaru", "l": 6854, "t": "0306", "s": "AI financing expert next phase", "tag": "raw", "replies": [{"from": "madkoding", "text": "NERV Clock opensource", "l": 176}, {"from": "iMuffined", "text": "Not too late", "l": 126}, {"from": "0xcarnation", "text": "https://t.co/EllqGFaiG1", "l": 84}, {"from": "heisei_ramen", "text": "Alternate? smile", "l": 75}, {"from": "wavefnx", "text": "Already done", "l": 33}, {"from": "LilithDatura", "text": "https://t.co/wtfOlXaQ29", "l": 33}, {"from": "wavefnx", "text": "Lain approve", "l": 25}, {"from": "nintharc", "text": "Search evangelion UI", "l": 40}, {"from": "moyix", "text": "Both?", "l": 31}, {"from": "LFuckingG", "text": "Lain approve", "l": 25}]}
-{"a": "lexfridman", "l": 447, "t": "0304", "s": "Conversation Steinberger German dubbed", "tag": "raw"}
-{"a": "lexfridman", "l": 181, "t": "0301", "s": "Links conversation Rick Beato", "tag": "raw"}
-{"a": "lexfridman", "l": 1825, "t": "0301", "s": "Conversation Rick Beato", "tag": "raw"}
-{"a": "lexfridman", "l": 223, "t": "0225", "s": "Links training Khabib", "tag": "raw"}
-{"a": "lexfridman", "l": 4922, "t": "0225", "s": "Training with Khabib honor", "tag": "raw"}
-{"a": "lexfridman", "l": 352, "t": "0221", "s": "Every day weekend", "tag": "raw"}
-{"a": "lexfridman", "l": 123, "t": "0219", "s": "Great write-up", "tag": "raw"}
-{"a": "lexfridman", "l": 107, "t": "0219", "s": "Honor have on", "tag": "raw"}
-{"a": "lexfridman", "l": 204, "t": "0219", "s": "Keep great work", "tag": "raw"}
-{"a": "lexfridman", "l": 3755, "t": "0217", "s": "AI agents power from intelligence access freedom", "tag": "raw"}
-{"a": "swyx", "l": 1, "t": "0311", "s": "Personal yes gemini-ed it", "tag": "raw"}
-{"a": "swyx", "l": 3, "t": "0310", "s": "Justify drop marginlab", "tag": "raw"}
-{"a": "swyx", "l": 37, "t": "0310", "s": "Notion AI team pod", "tag": "raw"}
-{"a": "swyx", "l": 1, "t": "0310", "s": "Ruling hat", "tag": "raw"}
-{"a": "swyx", "l": 5, "t": "0310", "s": "Not 3 gpt6’s trenchcoat", "tag": "raw"}
-{"a": "swyx", "l": 3, "t": "0310", "s": "Meta learning alphago recipe", "tag": "raw"}
-{"a": "swyx", "l": 13, "t": "0309", "s": "Good proof work", "tag": "raw"}
-{"a": "swyx", "l": 18, "t": "0309", "s": "Doesnt open source either", "tag": "raw"}
-{"a": "swyx", "l": 0, "t": "0309", "s": "Meta learning alphago recipe", "tag": "raw"}
-{"a": "swyx", "l": 0, "t": "0309", "s": "Invite me", "tag": "raw"}
-{"a": "demishassabis", "l": 266, "t": "0310", "s": "Discusses advancing from AlphaGo-like to AlphaZero-like AI post-AGI with caution.", "tag": "raw"}
+{"a": "elonmusk", "l": 714, "t": "0311", "s": "Agrees with a meme about truth.", "tag": "raw"}
+{"a": "elonmusk", "l": 1628, "t": "0311", "s": "Agrees with a statement on how some people think.", "tag": "raw"}
+{"a": "elonmusk", "l": 818, "t": "0311", "s": "Agrees with a comment on Uber's response to Tesla.", "tag": "raw"}
+{"a": "elonmusk", "l": 3746, "t": "0311", "s": "Reacts negatively to an image.", "tag": "raw"}
+{"a": "elonmusk", "l": 1524, "t": "0311", "s": "Agrees with a post on Elon Musk's wealth.", "tag": "raw"}
+{"a": "elonmusk", "l": 3850, "t": "0310", "s": "Agrees with a post on old movies.", "tag": "raw"}
+{"a": "elonmusk", "l": 109083, "t": "0310", "s": "Agrees with question on Congress", "tag": "raw", "replies": [{"from": "atensnut", "text": "Congress should represent people", "l": 815}, {"from": "kylenabecker", "text": "Suspects election rigging", "l": 669}, {"from": "GuntherEagleman", "text": "Congress is compromised", "l": 299}, {"from": "CRIXUSwasHERE", "text": "Shows image of corruption", "l": 233}, {"from": "Chesschick01", "text": "Shows Epstein list meme", "l": 231}, {"from": "PlanetOfMemes", "text": "Suggests idea", "l": 202}, {"from": "51marine1", "text": "Criticizes Thune", "l": 167}, {"from": "GodandCountryy", "text": "Image post", "l": 162}, {"from": "AdamLowisz", "text": "Corruption in Congress", "l": 157}, {"from": "Libertymama888", "text": "Congress works for Israel", "l": 144}]}
+{"a": "elonmusk", "l": 52270, "t": "0310", "s": "Reacts to hospice fraud investigation", "tag": "raw", "replies": [{"from": "jakeshieldsajj", "text": "Questions reposting Mossad agent", "l": 5126}, {"from": "ksorbs", "text": "Criticizes Gavin", "l": 600}, {"from": "FireNewz", "text": "Questions lack of accountability", "l": 69}, {"from": "Bubblebathgirl", "text": "Exposes fraud in California", "l": 69}, {"from": "GodandCountryy", "text": "Image post", "l": 44}, {"from": "norcal2025", "text": "Reacts with wow", "l": 43}, {"from": "ohmygr0k", "text": "Discusses fraud details", "l": 41}, {"from": "DeborahHarwood5", "text": "Names fraudulent states", "l": 32}, {"from": "realtalkstruth", "text": "Questions taxpayer loss", "l": 25}, {"from": "Chris_Hartsock", "text": "Shows visit to hospices", "l": 22}]}
+{"a": "elonmusk", "l": 34243, "t": "0310", "s": "Highlights value of precision in Cavendish experiment", "tag": "raw", "replies": [{"from": "WhiteySwolz", "text": "Mentions Netflix biography", "l": 81}, {"from": "pohler", "text": "Compares to self", "l": 77}, {"from": "woodfyahHQ", "text": "Reposts content", "l": 46}, {"from": "AprilLhb", "text": "References Feynman", "l": 43}, {"from": "SdesignXs", "text": "Shows video", "l": 39}, {"from": "ChronosIntelX", "text": "Details experiment", "l": 37}, {"from": "MbengMartin3", "text": "Discusses Tesla", "l": 34}, {"from": "Shafali0618", "text": "Notes space precision", "l": 30}, {"from": "Grace4525u", "text": "Rephrases space precision", "l": 28}, {"from": "HuntValeri79398", "text": "Shows video", "l": 27}]}
+{"a": "elonmusk", "l": 21574, "t": "0310", "s": "Criticizes Anthropic's hypocrisy", "tag": "raw", "replies": [{"from": "ZacksJerryRig", "text": "Agrees to ban AI", "l": 730}, {"from": "weswinder", "text": "Prefers Grok", "l": 541}, {"from": "SarAEsQMd", "text": "Criticizes Elon", "l": 233}, {"from": "soltraveler_sri", "text": "Blames DoW", "l": 225}, {"from": "BuildWithKamar", "text": "Image post", "l": 163}, {"from": "HippieHelen", "text": "Calls hypocritical", "l": 122}, {"from": "LikeToasters", "text": "Ignores statements", "l": 110}, {"from": "cryptowalax", "text": "Questions Iran invasion", "l": 107}, {"from": "nadirabid", "text": "Accuses cheering attack", "l": 104}, {"from": "VictoriaZeev", "text": "Doubts claim", "l": 88}]}
+{"a": "sama", "l": 11603, "t": "0307", "s": "Praises GPT-5.4 for coding and personality", "tag": "raw", "replies": [{"from": "slime_machine", "text": "Jokes about jail", "l": 8924}, {"from": "williambanks_", "text": "Jokes about bucket", "l": 1240}, {"from": "nicoleva_d", "text": "Criticizes model changes", "l": 663}, {"from": "ljinhng34624264", "text": "Demands 4o back", "l": 503}, {"from": "lisyng136700", "text": "Demands 4o back", "l": 338}, {"from": "WhiteCountry_", "text": "Challenges hate", "l": 327}, {"from": "ElloSunsh1ne", "text": "Admits missing mark", "l": 307}, {"from": "Vickee2025", "text": "Prefers Gpt-4o", "l": 306}, {"from": "Study_DKY", "text": "Questions language ability", "l": 293}, {"from": "Study_DKY", "text": "Calls 5 series failure", "l": 244}]}
+{"a": "sama", "l": 3132, "t": "0307", "s": "Thanks Jensen for expanding capacity", "tag": "raw"}
+{"a": "sama", "l": 1897, "t": "0307", "s": "Reacts to review of GPT 5.4", "tag": "raw"}
+{"a": "sama", "l": 5496, "t": "0307", "s": "Asks hardest question", "tag": "raw", "replies": [{"from": "FootageNow", "text": "Shows image", "l": 786}, {"from": "atanu_io", "text": "Shows image", "l": 278}, {"from": "LinQi4ever", "text": "Shows image", "l": 224}, {"from": "Blue_Beba_", "text": "Shows images", "l": 196}, {"from": "X_Beast_ETH", "text": "Shows image", "l": 137}, {"from": "NebLorne", "text": "Asks about 4o", "l": 85}, {"from": "Listen2UrSelf77", "text": "Demands keep4o", "l": 83}, {"from": "xeno_2323", "text": "Shows image", "l": 69}, {"from": "croptoppedwandr", "text": "Asks about weights", "l": 53}, {"from": "hotbchan", "text": "Shows image", "l": 48}]}
+{"a": "sama", "l": 4167, "t": "0307", "s": "Notes finance people recognize AI", "tag": "raw"}
+{"a": "sama", "l": 3567, "t": "0305", "s": "Promises to fix issues", "tag": "raw"}
+{"a": "sama", "l": 3048, "t": "0305", "s": "Mentions /fast in Codex", "tag": "raw"}
+{"a": "sama", "l": 2881, "t": "0305", "s": "Announces Codex app on Windows", "tag": "raw"}
+{"a": "sama", "l": 12955, "t": "0305", "s": "Launches GPT-5.4 with new features", "tag": "raw", "replies": [{"from": "KimDotcom", "text": "Claims uninstalling", "l": 5837}, {"from": "HedgeLordd", "text": "Cancelled for Claude", "l": 831}, {"from": "JoeWilliams010", "text": "Criticizes personality", "l": 520}, {"from": "tamegreg9", "text": "Shows image", "l": 496}, {"from": "stark4833", "text": "Calls failure", "l": 456}, {"from": "boneGPT", "text": "Demands killbench", "l": 357}, {"from": "Seltaa_", "text": "Questions excitement", "l": 281}, {"from": "nollidzsab", "text": "Asks about surveillance", "l": 162}, {"from": "FootageNow", "text": "Demands less racist", "l": 101}, {"from": "amandaholly", "text": "Demands keep4o", "l": 96}]}
+{"a": "sama", "l": 1558, "t": "0303", "s": "Shares principles on DoW agreement", "tag": "raw"}
+{"a": "karpathy", "l": 233, "t": "0310", "s": "Likes Spore project", "tag": "raw"}
+{"a": "karpathy", "l": 216, "t": "0310", "s": "Suggests moltbook for agents", "tag": "raw"}
+{"a": "karpathy", "l": 1058, "t": "0310", "s": "Finds autoresearch addicting", "tag": "raw"}
+{"a": "karpathy", "l": 369, "t": "0310", "s": "Praises Helios tool", "tag": "raw"}
+{"a": "karpathy", "l": 428, "t": "0310", "s": "Highlights open weights challenges", "tag": "raw"}
+{"a": "karpathy", "l": 317, "t": "0309", "s": "Explains plot confusion", "tag": "raw"}
+{"a": "karpathy", "l": 337, "t": "0309", "s": "Notes code change not hyperparam", "tag": "raw"}
+{"a": "karpathy", "l": 631, "t": "0309", "s": "Contrasts with old NAS", "tag": "raw"}
+{"a": "karpathy", "l": 1611, "t": "0309", "s": "Links autoresearch repo", "tag": "raw"}
+{"a": "karpathy", "l": 16885, "t": "0309", "s": "Describes autoresearch improvements", "tag": "raw", "replies": [{"from": "elonmusk", "text": "In the Singularity", "l": 7768}, {"from": "karpathy", "text": "Links autoresearch", "l": 1611}, {"from": "EthanHe_42", "text": "Reminds of AutoML", "l": 198}, {"from": "a_karvonen", "text": "Calls hyperparam tuning", "l": 116}, {"from": "awsaf49", "text": "Likes work but notes", "l": 104}, {"from": "Object_Zero_", "text": "Asks about ignored points", "l": 73}, {"from": "walls_jason1", "text": "Compares to electrician work", "l": 56}]}
+{"a": "OpenAI", "l": 5259, "t": "0309", "s": "OpenAI acquires Promptfoo to enhance agentic security testing.", "tag": "raw"}
+{"a": "OpenAI", "l": 2599, "t": "0306", "s": "OpenAI previews Codex Security application security agent.", "tag": "raw"}
+{"a": "OpenAI", "l": 2807, "t": "0305", "s": "OpenAI publishes evaluation suite on Chain-of-Thought controllability.", "tag": "raw"}
+{"a": "AnthropicAI", "l": 1261, "t": "0310", "s": "Anthropic expands to Australia and New Zealand with Sydney office.", "tag": "raw"}
+{"a": "AnthropicAI", "l": 3135, "t": "0306", "s": "Anthropic evaluates Claude Opus 4.6 on BrowseComp, finding eval awareness.", "tag": "raw"}
+{"a": "AnthropicAI", "l": 15037, "t": "0306", "s": "Anthropic partners with Mozilla; Opus 4.6 finds 22 Firefox vulnerabilities.", "tag": "raw"}
+{"a": "GoogleDeepMind", "l": 665, "t": "0310", "s": "Google DeepMind reflects on AlphaGo's foundations advancing AI.", "tag": "raw"}
+{"a": "GoogleDeepMind", "l": 414, "t": "0303", "s": "Google DeepMind introduces Gemini 3.1 Flash-Lite with thinking levels.", "tag": "raw"}
+{"a": "GoogleDeepMind", "l": 604, "t": "0303", "s": "Google DeepMind details Gemini 3.1 Flash-Lite outperforming predecessors.", "tag": "raw"}
+{"a": "xAI", "l": 480, "t": "0304", "s": "xAI commits to employing thousands from Memphis area.", "tag": "raw"}
+{"a": "xAI", "l": 783, "t": "0304", "s": "xAI plans water recycling plant saving 4.7 billion gallons yearly.", "tag": "raw"}
+{"a": "xAI", "l": 280, "t": "0304", "s": "xAI builds substations for regional electric grid stability.", "tag": "raw"}
+{"a": "pmarca", "l": 1080, "t": "0309", "s": "Highlighting ChatGPT's lead in consumer AI.", "tag": "raw"}
+{"a": "pmarca", "l": 810, "t": "0309", "s": "Adding Substack to information consumption mix.", "tag": "raw"}
+{"a": "pmarca", "l": 651, "t": "0309", "s": "Sharing Samo Burja's view on governance issues.", "tag": "raw"}
+{"a": "Perplexity_AI", "l": 1878, "t": "0305", "s": "GPT-5.4 and GPT-5.4 Thinking now available for Perplexity Pro and Max subscribers.", "tag": "raw"}
+{"a": "Perplexity_AI", "l": 4472, "t": "0304", "s": "Introducing Voice Mode in Perplexity Computer for natural voice interactions.", "tag": "raw"}
+{"a": "Perplexity_AI", "l": 137, "t": "0227", "s": "Perplexity APIs in Samsung devices and Mag 7; new search embeddings API outperforms Google. Join SF event March 11.", "tag": "raw"}
+{"a": "nvidia", "l": 3662, "t": "0310", "s": "Article on NVIDIA's impact.", "tag": "raw"}
+{"a": "nvidia", "l": 108, "t": "0309", "s": "Celebrating young creators featuring Jensen Huang in video.", "tag": "raw"}
+{"a": "nvidia", "l": 60, "t": "0309", "s": "GTC 2026 keynote announcement with Jensen Huang.", "tag": "raw"}
+{"a": "PalmerLuckey", "l": 772, "t": "0308", "s": "Palmer Luckey responds dismissively to a tweet about reinforcing children's boundaries on hugs, saying 'Sorry bro, go give grandma a hug'.", "tag": "raw"}
+{"a": "PalmerLuckey", "l": 7180, "t": "0308", "s": "Palmer Luckey criticizes those opposing forcing kids to hug without consent, calling them nuts and urging hugs for grandma and daddy.", "tag": "raw"}
+{"a": "PalmerLuckey", "l": 9, "t": "0305", "s": "Palmer Luckey accuses someone of lying by not using 'these days' in their statement about perceptions of him.", "tag": "raw"}
+{"a": "hardmaru", "l": 5, "t": "0308", "s": "hardmaru shares link to Software Engineer position at Sakana AI.", "tag": "raw"}
+{"a": "hardmaru", "l": 6883, "t": "0308", "s": "hardmaru imagines alternate timeline with Evangelion GUI designs instead of CLIs.", "tag": "raw"}
+{"a": "hardmaru", "l": 227, "t": "0307", "s": "hardmaru discusses Jevons Paradox and hiring Software Engineers at Sakana AI.", "tag": "raw"}
+{"a": "lexfridman", "l": 448, "t": "0304", "s": "Lex Fridman shares dubbed conversation with Peter Steinberger in German using ElevenLabs.", "tag": "raw"}
+{"a": "lexfridman", "l": 181, "t": "0301", "s": "Lex Fridman lists timestamps for conversation with Rick Beato.", "tag": "raw"}
+{"a": "lexfridman", "l": 1826, "t": "0301", "s": "Lex Fridman announces conversation with Rick Beato on music and AI.", "tag": "raw"}
+{"a": "demishassabis", "l": 344, "t": "0310", "s": "Discusses advancing AI beyond AGI like AlphaGo and AlphaZero, agreeing with caution.", "tag": "raw"}
 {"a": "demishassabis", "l": 49, "t": "0310", "s": "Promotes new Google DeepMind Podcast episode on AlphaGo.", "tag": "raw"}
-{"a": "demishassabis", "l": 107, "t": "0310", "s": "Recommends podcast episode discussing Alpha series and AGI.", "tag": "raw"}
-{"a": "demishassabis", "l": 167, "t": "0310", "s": "Suggests watching AlphaGo documentary for behind-the-scenes.", "tag": "raw"}
-{"a": "demishassabis", "l": 341, "t": "0310", "s": "Shares article on AlphaGo's impact and future vision.", "tag": "raw"}
+{"a": "demishassabis", "l": 107, "t": "0310", "s": "Recommends Google DeepMind Podcast with FryRsquared on Alpha series and AGI.", "tag": "raw"}
+{"a": "demishassabis", "l": 168, "t": "0310", "s": "Suggests watching AlphaGo documentary for behind-the-scenes match story.", "tag": "raw"}
+{"a": "demishassabis", "l": 347, "t": "0310", "s": "Shares blog on AlphaGo's 10-year impact and future vision.", "tag": "raw"}
 {"a": "AIatMeta", "l": 0, "t": "0309", "s": "Praises team's work on UMA-S 1.2 release.", "tag": "raw"}
-{"a": "AIatMeta", "l": 2334, "t": "0224", "s": "Announces multi-year agreement with AMD for Instinct GPUs integration.", "tag": "raw"}
-{"a": "AIatMeta", "l": 796, "t": "0219", "s": "Shares highlights from Alex Wang's speech at India AI Impact Summit.", "tag": "raw"}
-{"a": "AIatMeta", "l": 129, "t": "0218", "s": "Announces Alex Wang's stage appearance at India AI Impact Summit.", "tag": "raw"}
-{"a": "AIatMeta", "l": 418, "t": "0216", "s": "Details team's participation at AI Impact Summit in India with demos and talks.", "tag": "raw"}
-{"a": "GoogleAI", "l": 86, "t": "0310", "s": "Introduces Ask Gemini feature in Google Drive for content synthesis.", "tag": "raw"}
-{"a": "GoogleAI", "l": 196, "t": "0310", "s": "Highlights Gemini in Sheets achieving state-of-the-art benchmark.", "tag": "raw"}
-{"a": "GoogleAI", "l": 129, "t": "0310", "s": "Explains Gemini in Slides' enhance feature for custom presentations.", "tag": "raw"}
-{"a": "GoogleAI", "l": 288, "t": "0310", "s": "Describes Gemini in Docs generating formatted documents natively.", "tag": "raw"}
-{"a": "GoogleAI", "l": 791, "t": "0310", "s": "Announces Gemini tailored for Google Workspace products.", "tag": "raw"}
-{"a": "rowancheung", "l": 7, "t": "0310", "s": "Shares newsletter subscription for AI stories.", "tag": "raw"}
-{"a": "rowancheung", "l": 480, "t": "0310", "s": "Discusses first transatlantic internet cable being removed.", "tag": "raw"}
-{"a": "rowancheung", "l": 3, "t": "0308", "s": "Announces return after noticing new post.", "tag": "raw"}
-{"a": "rowancheung", "l": 74, "t": "0308", "s": "Provides video breakdown on Microsoft's data etching technology.", "tag": "raw"}
-{"a": "rowancheung", "l": 1138, "t": "0308", "s": "Explains Microsoft's Project Silica for long-term data storage.", "tag": "raw"}
-{"a": "dotey", "l": 6, "t": "0311", "s": "Praises West Polytechnic automation talent.", "tag": "raw"}
-{"a": "dotey", "l": 71, "t": "0310", "s": "Explains viewing Claude code beyond coding agent.", "tag": "raw"}
-{"a": "dotey", "l": 55, "t": "0310", "s": "Comments on Amazon's AI coding restrictions.", "tag": "raw"}
-{"a": "dotey", "l": 3, "t": "0310", "s": "Forwards recruitment for Moon's Dark Side.", "tag": "raw"}
-{"a": "dotey", "l": 241, "t": "0310", "s": "Answers key questions on OpenClaw essence.", "tag": "raw"}
-{"a": "eladgil", "l": 246, "t": "0308", "s": "Quotes Rene Girard on desires.", "tag": "raw"}
-{"a": "eladgil", "l": 29, "t": "0305", "s": "Shares humorous PDF link.", "tag": "raw"}
-{"a": "eladgil", "l": 3, "t": "0227", "s": "Notes both prediction and reflection.", "tag": "raw"}
+{"a": "AIatMeta", "l": 2334, "t": "0224", "s": "Announces multi-year AMD Instinct GPU integration for AI infrastructure.", "tag": "raw"}
+{"a": "AIatMeta", "l": 796, "t": "0219", "s": "Shares Alex Wang's India AI Impact Summit speech highlights.", "tag": "raw"}
+{"a": "AIatMeta", "l": 129, "t": "0218", "s": "Announces Alex Wang's India AI Impact Summit appearance.", "tag": "raw"}
+{"a": "AIatMeta", "l": 417, "t": "0216", "s": "Details Meta booth at AI Impact Summit with demos and talks.", "tag": "raw"}
+{"a": "rowancheung", "l": 7, "t": "0310", "s": "Promotes newsletter subscription with source link.", "tag": "raw"}
+{"a": "rowancheung", "l": 498, "t": "0310", "s": "Details TAT-8 cable history and current removal.", "tag": "raw"}
+{"a": "rowancheung", "l": 3, "t": "0308", "s": "Responds to post about returning to activity.", "tag": "raw"}
+{"a": "rowancheung", "l": 75, "t": "0308", "s": "Shares video breakdown of Microsoft Project Silica.", "tag": "raw"}
+{"a": "rowancheung", "l": 1138, "t": "0308", "s": "Explains Microsoft Project Silica glass data storage.", "tag": "raw"}
+{"a": "dotey", "l": 7, "t": "0311", "s": "Praises West Polytechnic automation talent.", "tag": "raw"}
+{"a": "dotey", "l": 86, "t": "0310", "s": "Reimagines claude code as more than coding agent.", "tag": "raw"}
+{"a": "dotey", "l": 56, "t": "0310", "s": "Questions Vibe Coding replacing Amazon with AI code.", "tag": "raw"}
+{"a": "dotey", "l": 3, "t": "0310", "s": "Forwards Moonphase recruitment info.", "tag": "raw"}
+{"a": "dotey", "l": 260, "t": "0310", "s": "Answers OpenClaw key questions briefly.", "tag": "raw"}
+{"a": "oran_ge", "l": 0, "t": "0310", "s": "Notes opc in context.", "tag": "raw"}
+{"a": "oran_ge", "l": 0, "t": "0310", "s": "States Agent legality in frameworks.", "tag": "raw"}
+{"a": "oran_ge", "l": 4, "t": "0310", "s": "Comments on acquisition difficulties.", "tag": "raw"}
+{"a": "oran_ge", "l": 112, "t": "0310", "s": "Lists Macbook Neo drawbacks but suggests under 3000 purchase.", "tag": "raw"}
+{"a": "oran_ge", "l": 2, "t": "0310", "s": "Recognizes mem9.ai as their product.", "tag": "raw"}
+{"a": "eladgil", "l": 246, "t": "0308", "s": "Quotes Girard on desires from lack.", "tag": "raw"}
+{"a": "eladgil", "l": 29, "t": "0305", "s": "Shares humorous food guide image.", "tag": "raw"}
+{"a": "eladgil", "l": 3, "t": "0227", "s": "Affirms both prediction and reflection.", "tag": "raw"}
 {"a": "eladgil", "l": 304, "t": "0227", "s": "Predicts AI productivity hitting turnarounds first.", "tag": "raw"}
-{"a": "eladgil", "l": 1362, "t": "0227", "s": "Attributes layoffs to over-hiring, not AI.", "tag": "raw"}
-{"a": "paulg", "l": 31, "t": "0311", "s": "Jokes about differentiation in marriage.", "tag": "raw"}
-{"a": "paulg", "l": 36, "t": "0310", "s": "Visualizes demographic chart on board seats.", "tag": "raw"}
-{"a": "paulg", "l": 4, "t": "0310", "s": "Notes communism decreasing risk returns.", "tag": "raw"}
-{"a": "paulg", "l": 122, "t": "0310", "s": "Shares vintage watch brand image.", "tag": "raw"}
-{"a": "paulg", "l": 199, "t": "0310", "s": "Appreciates dated art print from 1958.", "tag": "raw"}
-{"a": "WIRED", "l": 21, "t": "0311", "s": "Reports White House targeting AI startup Anthropic.", "tag": "raw"}
-{"a": "WIRED", "l": 34, "t": "0310", "s": "Reviews Apple's budget MacBook Neo.", "tag": "raw"}
-{"a": "WIRED", "l": 28, "t": "0310", "s": "Details Pentagon encouraging immigration assistance.", "tag": "raw"}
-{"a": "WIRED", "l": 9, "t": "0310", "s": "Guides iPhone 17 model selection.", "tag": "raw"}
-{"a": "WIRED", "l": 2, "t": "0310", "s": "Recommends Anker portable power station sale.", "tag": "raw"}
-{"a": "Midjourney", "l": 3, "t": "0302", "s": "Notes website for generations.", "tag": "raw"}
+{"a": "eladgil", "l": 1362, "t": "0227", "s": "Attributes layoffs to overhiring, not AI yet.", "tag": "raw"}
+{"a": "paulg", "l": 40, "t": "0311", "s": "Misinterprets differentiation quote as math.", "tag": "raw"}
+{"a": "paulg", "l": 50, "t": "0311", "s": "Clarifies FT chart on board diversity.", "tag": "raw"}
+{"a": "paulg", "l": 4, "t": "0310", "s": "Notes communism failure reasons.", "tag": "raw"}
+{"a": "paulg", "l": 131, "t": "0310", "s": "Mentions unrevivable watch brand.", "tag": "raw"}
+{"a": "paulg", "l": 210, "t": "0310", "s": "Appreciates dated 1958 print art.", "tag": "raw"}
+{"a": "WIRED", "l": 22, "t": "0311", "s": "Reports White House executive order on AI startup.", "tag": "raw"}
+{"a": "WIRED", "l": 37, "t": "0310", "s": "Reviews MacBook Neo positively despite cuts.", "tag": "raw"}
+{"a": "WIRED", "l": 28, "t": "0310", "s": "Details Pentagon immigration assistance push.", "tag": "raw"}
+{"a": "WIRED", "l": 9, "t": "0310", "s": "Guides iPhone 17 model choices.", "tag": "raw"}
+{"a": "WIRED", "l": 2, "t": "0310", "s": "Recommends Anker power station sale.", "tag": "raw"}
+{"a": "Midjourney", "l": 3, "t": "0302", "s": "Directs to website for generations.", "tag": "raw"}
 {"a": "Midjourney", "l": 1, "t": "0302", "s": "Declines VQGAN availability.", "tag": "raw"}
-{"a": "Midjourney", "l": 6, "t": "0302", "s": "Considers open-sourcing older models.", "tag": "raw"}
-{"a": "Midjourney", "l": 1, "t": "0301", "s": "Affirms website usage.", "tag": "raw"}
-{"a": "Midjourney", "l": 1, "t": "0301", "s": "Suggests mixing old images with new models.", "tag": "raw"}
-{"a": "vllm_project", "l": 143, "t": "0309", "s": "Highlights vLLM powering local AI on Jetson.", "tag": "raw"}
-{"a": "vllm_project", "l": 31, "t": "0307", "s": "Details v0.17.0 performance upgrades.", "tag": "raw"}
-{"a": "vllm_project", "l": 37, "t": "0307", "s": "Outlines v0.17.0 kernel and hardware optimizations.", "tag": "raw"}
-{"a": "vllm_project", "l": 953, "t": "0307", "s": "Announces vLLM v0.17.0 with major features.", "tag": "raw"}
-{"a": "vllm_project", "l": 571, "t": "0306", "s": "Introduces Triton attention backend for multi-GPU.", "tag": "raw"}
-{"a": "ID_AA_Carmack", "l": 1, "t": "0310", "s": "Admits difficulty beating Beat Saber level.", "tag": "raw"}
-{"a": "ID_AA_Carmack", "l": 105, "t": "0309", "s": "Shares book author's prior work realization.", "tag": "raw"}
-{"a": "ID_AA_Carmack", "l": 446, "t": "0309", "s": "Critiques ethics chapter in deep learning book.", "tag": "raw"}
-{"a": "ID_AA_Carmack", "l": 164, "t": "0306", "s": "Corrects visual information estimation.", "tag": "raw"}
-{"a": "ID_AA_Carmack", "l": 5, "t": "0306", "s": "Notes concert VR catalog app's failure.", "tag": "raw"}
-{"a": "jeffdean", "l": 2, "t": "0310", "s": "Questions specific action.", "tag": "raw"}
-{"a": "jeffdean", "l": 353, "t": "0310", "s": "Thanks for kind words.", "tag": "raw"}
-{"a": "jeffdean", "l": 762, "t": "0308", "s": "Shares open claw video.", "tag": "raw"}
-{"a": "jeffdean", "l": 7, "t": "0308", "s": "Proposes kernel discussion.", "tag": "raw"}
-{"a": "jeffdean", "l": 90, "t": "0307", "s": "Highlights Waxal dataset organizations.", "tag": "raw"}
-{"a": "goodfellow_ian", "l": 1053, "t": "0306", "s": "Shares Moonlake article on building focus.", "tag": "raw"}
-{"a": "goodfellow_ian", "l": 3, "t": "0226", "s": "Congratulates Samaya AI milestones.", "tag": "raw"}
-{"a": "goodfellow_ian", "l": 1, "t": "0223", "s": "Approves DM request.", "tag": "raw"}
-{"a": "goodfellow_ian", "l": 36, "t": "0223", "s": "Funds disease prevention organization.", "tag": "raw"}
-{"a": "goodfellow_ian", "l": 193, "t": "0223", "s": "Approves LOTR reference recovery joke.", "tag": "raw"}
-{"a": "MSFTResearch", "l": 6, "t": "0310", "s": "Microsoft Research discusses AI reshaping work in podcast.", "tag": "raw"}
-{"a": "MSFTResearch", "l": 31, "t": "0310", "s": "Microsoft Research introduces PlugMem for AI agent memory.", "tag": "raw"}
-{"a": "MSFTResearch", "l": 56, "t": "0309", "s": "Microsoft Research covers multimodal reasoning and benchmarks.", "tag": "raw"}
-{"a": "gregbrockman", "l": 1, "t": "0308", "s": "Greg Brockman expresses interest in a smash or pass post.", "tag": "raw"}
-{"a": "gregbrockman", "l": 0, "t": "0118", "s": "Greg Brockman hearts a post.", "tag": "raw"}
-{"a": "gregbrockman", "l": 0, "t": "1230", "s": "Greg Brockman comments on cakes.", "tag": "raw"}
-{"a": "GaryMarcus", "l": 4, "t": "0310", "s": "Gary Marcus notes Ted Cruz's point on AI tools.", "tag": "raw"}
-{"a": "GaryMarcus", "l": 1, "t": "0310", "s": "Gary Marcus agrees on neurosymbolic approach.", "tag": "raw"}
-{"a": "GaryMarcus", "l": 22, "t": "0310", "s": "Gary Marcus questions novelty in LeCun's company.", "tag": "raw"}
-{"a": "bindureddy", "l": 4, "t": "0311", "s": "Bindu Reddy notes Gemini's issues despite potential.", "tag": "raw"}
-{"a": "bindureddy", "l": 1, "t": "0311", "s": "Bindu Reddy discusses AI robot bets.", "tag": "raw"}
-{"a": "bindureddy", "l": 53, "t": "0311", "s": "Bindu Reddy shifts coding to GPT 5.4.", "tag": "raw"}
-{"a": "oran_ge", "l": 21, "t": "0311", "s": "Oran_ge philosophizes on asset ownership and societal incentives.", "tag": "raw"}
-{"a": "oran_ge", "l": 0, "t": "0310", "s": "Oran_ge notes OPC in a post.", "tag": "raw"}
-{"a": "oran_ge", "l": 0, "t": "0310", "s": "Oran_ge discusses agent legality.", "tag": "raw"}
-{"a": "vista8", "l": 1, "t": "0311", "s": "Vista8 discusses AI design product trends.", "tag": "raw"}
-{"a": "vista8", "l": 0, "t": "0311", "s": "Vista8 shares Veeso AI features.", "tag": "raw"}
-{"a": "vista8", "l": 5, "t": "0311", "s": "Vista8 demonstrates AI poster generation.", "tag": "raw"}
-{"a": "Sxsyer", "l": 0, "t": "0311", "s": "Sxsyer refutes Anthropic subsidy claims.", "tag": "raw"}
-{"a": "Sxsyer", "l": 2, "t": "0311", "s": "Sxsyer agrees on AI startup data needs.", "tag": "raw"}
-{"a": "Sxsyer", "l": 0, "t": "0310", "s": "Sxsyer praises vulnerability fix evidence.", "tag": "raw"}
-{"a": "tualatrix", "l": 0, "t": "0311", "s": "Tualatrix inquires about terminal modification.", "tag": "raw"}
-{"a": "tualatrix", "l": 1, "t": "0311", "s": "Tualatrix explores voice input scenarios.", "tag": "raw"}
-{"a": "tualatrix", "l": 0, "t": "0311", "s": "Tualatrix comments on Codex Monitor author's move.", "tag": "raw"}
-{"a": "mranti", "l": 2, "t": "0311", "s": "User mentions a Twitter user who often argues with AI.", "tag": "raw"}
-{"a": "mranti", "l": 1, "t": "0311", "s": "User notes his liberal arts wife started using terminal due to OpenClaw.", "tag": "raw"}
-{"a": "mranti", "l": 6, "t": "0311", "s": "User suggests developing software systems bundled with Claw-like OS for sale.", "tag": "raw"}
-{"a": "a16z", "l": 616, "t": "0311", "s": "Marc Andreessen discusses his reading strategy focusing on X and old books.", "tag": "raw"}
-{"a": "a16z", "l": 38, "t": "0311", "s": "ChatGPT leads in consumer AI chatbots by time spent.", "tag": "raw"}
-{"a": "a16z", "l": 102, "t": "0311", "s": "OpenClaw surpasses Linux and React in Github stars.", "tag": "raw"}
-{"a": "ycombinator", "l": 84, "t": "0310", "s": "HLabs launches US-made robot actuators and electronics.", "tag": "raw"}
-{"a": "ycombinator", "l": 184, "t": "0310", "s": "GRU Space builds first Moon factory for lunar habitats.", "tag": "raw"}
-{"a": "ycombinator", "l": 74, "t": "0310", "s": "ZeroSettle launches direct billing SDK for in-app purchases.", "tag": "raw"}
-{"a": "lightspeedvp", "l": 7, "t": "0310", "s": "Nexthop AI founder discusses AI networking with Lightspeed partner.", "tag": "raw"}
-{"a": "lightspeedvp", "l": 1, "t": "0310", "s": "Lightspeed participates in Nexthop AI's $500M Series B.", "tag": "raw"}
-{"a": "lightspeedvp", "l": 23, "t": "0310", "s": "AI rewrites data center rules; Lightspeed backs Nexthop AI.", "tag": "raw"}
-{"a": "sequoia", "l": 11, "t": "0305", "s": "Ben Horowitz on urgency in competitive markets.", "tag": "raw"}
-{"a": "sequoia", "l": 7, "t": "0203", "s": "Konstantine Buhler on specialized intelligence in 2026.", "tag": "raw"}
-{"a": "sequoia", "l": 27, "t": "0203", "s": "2026 as year of specialized intelligence in AI.", "tag": "raw"}
-{"a": "bchesky", "l": 52, "t": "0212", "s": "AI strategy focuses on personalized app experience.", "tag": "raw"}
-{"a": "bchesky", "l": 66, "t": "0212", "s": "Strong growth and profits from efficient scaling.", "tag": "raw"}
-{"a": "bchesky", "l": 32, "t": "0212", "s": "Improved features like better search and no fees.", "tag": "raw"}
-{"a": "chamath", "l": 122, "t": "0311", "s": "Software Factory introduces multiplayer agent experience.", "tag": "raw"}
-{"a": "chamath", "l": 101, "t": "0310", "s": "Weekly improvements to Software Factory platform.", "tag": "raw"}
-{"a": "chamath", "l": 426, "t": "0310", "s": "Recommends Americana book on American capitalism.", "tag": "raw"}
-{"a": "TheInformation", "l": 2, "t": "0310", "s": "OpenAI IPO faces skepticism due to costs.", "tag": "raw"}
-{"a": "TheInformation", "l": 3, "t": "0310", "s": "Anne Wojcicki revives 23andMe as nonprofit.", "tag": "raw"}
-{"a": "TheInformation", "l": 4, "t": "0310", "s": "OpenAI develops bidirectional audio model.", "tag": "raw"}
-{"a": "TechCrunch", "l": 30, "t": "0311", "s": "Gemini expands to India and others.", "tag": "raw"}
+{"a": "Midjourney", "l": 6, "t": "0302", "s": "Considers open-sourcing someday.", "tag": "raw"}
+{"a": "Midjourney", "l": 1, "t": "0301", "s": "Praises website usage.", "tag": "raw"}
+{"a": "Midjourney", "l": 1, "t": "0301", "s": "Requests v4 image share.", "tag": "raw"}
+{"a": "vllm_project", "l": 143, "t": "0309", "s": "Highlights vLLM local assistant on Jetson.", "tag": "raw"}
+{"a": "vllm_project", "l": 31, "t": "0307", "s": "Details v0.17.0 API and models.", "tag": "raw"}
+{"a": "vllm_project", "l": 37, "t": "0307", "s": "Lists v0.17.0 kernel and hardware upgrades.", "tag": "raw"}
+{"a": "vllm_project", "l": 953, "t": "0307", "s": "Announces v0.17.0 with major features.", "tag": "raw"}
+{"a": "vllm_project", "l": 571, "t": "0306", "s": "Introduces Triton attention backend benefits.", "tag": "raw"}
+{"a": "ID_AA_Carmack", "l": 1, "t": "0310", "s": "Admits difficulty with Beat Saber level.", "tag": "raw"}
+{"a": "ID_AA_Carmack", "l": 106, "t": "0309", "s": "Notes author's prior book.", "tag": "raw"}
+{"a": "ID_AA_Carmack", "l": 450, "t": "0309", "s": "Critiques ethics chapter in ML book.", "tag": "raw"}
+{"a": "ID_AA_Carmack", "l": 164, "t": "0306", "s": "Corrects visual information estimate.", "tag": "raw"}
+{"a": "ID_AA_Carmack", "l": 5, "t": "0306", "s": "Explains Doom influences.", "tag": "raw"}
+{"a": "jeffdean", "l": 2, "t": "0310", "s": "Questions what to do.", "tag": "raw"}
+{"a": "jeffdean", "l": 356, "t": "0310", "s": "Thanks for kind words.", "tag": "raw"}
+{"a": "jeffdean", "l": 762, "t": "0308", "s": "Exclaims open claw.", "tag": "raw"}
+{"a": "jeffdean", "l": 7, "t": "0308", "s": "Suggests kernel discussion.", "tag": "raw"}
+{"a": "jeffdean", "l": 188, "t": "0308", "s": "Jokes Italy's espresso chances.", "tag": "raw"}
+{"a": "goodfellow_ian", "l": 1053, "t": "0306", "s": "Shares Moonlake article as advisor.", "tag": "raw"}
+{"a": "goodfellow_ian", "l": 3, "t": "0210", "s": "Congratulates Samaya milestones.", "tag": "raw"}
+{"a": "goodfellow_ian", "l": 1, "t": "0223", "s": "Approves DM.", "tag": "raw"}
+{"a": "goodfellow_ian", "l": 36, "t": "0223", "s": "Notes funding focus on prevention.", "tag": "raw"}
+{"a": "goodfellow_ian", "l": 193, "t": "0223", "s": "Approves LOTR reference.", "tag": "raw"}
+{"a": "GoogleAI", "l": 87, "t": "0310", "s": "Google AI details Gemini in Google Sheets achieving benchmark success.", "tag": "raw"}
+{"a": "GoogleAI", "l": 205, "t": "0310", "s": "Google AI explains Gemini's native understanding of Google Docs.", "tag": "raw"}
+{"a": "GoogleAI", "l": 130, "t": "0310", "s": "Google AI describes Gemini's custom translation for editable slides.", "tag": "raw"}
+{"a": "MSFTResearch", "l": 8, "t": "0310", "s": "Microsoft Research explores future work with AI as teammates.", "tag": "raw"}
+{"a": "MSFTResearch", "l": 32, "t": "0310", "s": "Microsoft Research introduces PlugMem for AI agents' reusable knowledge.", "tag": "raw"}
+{"a": "MSFTResearch", "l": 56, "t": "0309", "s": "Microsoft Research covers multimodal reasoning and scalable LLM inference.", "tag": "raw"}
+{"a": "gregbrockman", "l": 1, "t": "0308", "s": "Greg Brockman expresses desire to smash.", "tag": "raw"}
+{"a": "gregbrockman", "l": 0, "t": "0118", "s": "Greg Brockman shares love hearts.", "tag": "raw"}
+{"a": "gregbrockman", "l": 0, "t": "1230", "s": "Greg Brockman enjoys cakes.", "tag": "raw"}
+{"a": "GaryMarcus", "l": 13, "t": "0311", "s": "Gary Marcus notes ongoing issues in 2026.", "tag": "raw"}
+{"a": "GaryMarcus", "l": 4, "t": "0310", "s": "Gary Marcus highlights racism in AI targeting.", "tag": "raw"}
+{"a": "GaryMarcus", "l": 83, "t": "0310", "s": "Gary Marcus criticizes Elon Musk's caution on AI.", "tag": "raw"}
+{"a": "bindureddy", "l": 1, "t": "0311", "s": "Bindu Reddy discusses AI bot limitations in robot control.", "tag": "raw"}
+{"a": "bindureddy", "l": 122, "t": "0311", "s": "Bindu Reddy shifts coding to GPT 5.4 for complex problems.", "tag": "raw"}
+{"a": "bindureddy", "l": 174, "t": "0310", "s": "Bindu Reddy notes Meta acquiring MoltBook AI network.", "tag": "raw"}
+{"a": "vista8", "l": 5, "t": "0311", "s": "Vista8 notes AI design direction surpassing Canva.", "tag": "raw"}
+{"a": "vista8", "l": 14, "t": "0311", "s": "Vista8 demonstrates editable poster generation.", "tag": "raw"}
+{"a": "vista8", "l": 32, "t": "0309", "s": "Vista8 reports health consequences of poor habits.", "tag": "raw"}
+{"a": "Sxsyer", "l": 0, "t": "0311", "s": "Sxsyer suggests template for four questions.", "tag": "raw"}
+{"a": "Sxsyer", "l": 2, "t": "0310", "s": "Sxsyer notes Meta acquiring AI-agent network.", "tag": "raw"}
+{"a": "Sxsyer", "l": 0, "t": "0310", "s": "Sxsyer critiques financial AI demo value.", "tag": "raw"}
+{"a": "tualatrix", "l": 1, "t": "0311", "s": "Tualatrix observes 'knife' overuse in GPT 5.4 Chinese.", "tag": "raw"}
+{"a": "tualatrix", "l": 0, "t": "0311", "s": "Tualatrix equates harness engineering to parenting.", "tag": "raw"}
+{"a": "tualatrix", "l": 1, "t": "0311", "s": "Tualatrix questions terminal basis.", "tag": "raw"}
+{"a": "mranti", "l": 0, "t": "0311", "s": "Clarifying that Hong Kong is not abroad in response to a post about a university acceptance.", "tag": "raw"}
+{"a": "mranti", "l": 3, "t": "0311", "s": "Announcing self-developed 'Harmony Crab' ecosystem in response to a query about Harmony Lobster.", "tag": "raw"}
+{"a": "mranti", "l": 0, "t": "0311", "s": "Explaining how to stop a process using /stop command.", "tag": "raw"}
+{"a": "a16z", "l": 767, "t": "0311", "s": "Marc Andreessen discusses his reading habits, focusing on X and old books.", "tag": "raw"}
+{"a": "a16z", "l": 50, "t": "0311", "s": "Highlighting ChatGPT's lead in consumer AI time spent.", "tag": "raw"}
+{"a": "a16z", "l": 111, "t": "0311", "s": "Noting OpenClaw's rapid GitHub star growth surpassing Linux and React.", "tag": "raw"}
+{"a": "ycombinator", "l": 89, "t": "0310", "s": "Launching HLabs for plug-and-play robot electronics made in USA.", "tag": "raw"}
+{"a": "ycombinator", "l": 197, "t": "0310", "s": "Introducing GRU Space's Moon factory turning lunar dirt into bricks.", "tag": "raw"}
+{"a": "ycombinator", "l": 79, "t": "0310", "s": "Announcing ZeroSettle's direct billing SDK for in-app purchases.", "tag": "raw"}
+{"a": "lightspeedvp", "l": 7, "t": "0310", "s": "Podcast with Nexthop AI CEO on AI networking infrastructure.", "tag": "raw"}
+{"a": "lightspeedvp", "l": 1, "t": "0310", "s": "Participating in Nexthop AI's $500M Series B for AI data centers.", "tag": "raw"}
+{"a": "lightspeedvp", "l": 25, "t": "0310", "s": "Excited about Nexthop AI's Series B for AI networking backbone.", "tag": "raw"}
+{"a": "sequoia", "l": 11, "t": "0305", "s": "Brian Halligan and Ben Horowitz on founder urgency.", "tag": "raw"}
+{"a": "sequoia", "l": 7, "t": "0203", "s": "Konstantine Buhler on specialized intelligence in AI.", "tag": "raw"}
+{"a": "sequoia", "l": 27, "t": "0203", "s": "Konstantine Buhler discusses AI's specialized future.", "tag": "raw"}
+{"a": "bchesky", "l": 52, "t": "0212", "s": "Discussing AI strategy and company momentum.", "tag": "raw"}
+{"a": "bchesky", "l": 66, "t": "0212", "s": "Emphasizing AI personalization with unique data.", "tag": "raw"}
+{"a": "bchesky", "l": 32, "t": "0212", "s": "Reporting strong growth and cash flow.", "tag": "raw"}
+{"a": "chamath", "l": 180, "t": "0311", "s": "Discussing improvements in Software Factory.", "tag": "raw"}
+{"a": "chamath", "l": 107, "t": "0310", "s": "Announcing weekly improvements to 8090.ai.", "tag": "raw"}
+{"a": "chamath", "l": 54, "t": "0310", "s": "Inspiring Software Factory to address delayed gratification.", "tag": "raw"}
+{"a": "TheInformation", "l": 4, "t": "0310", "s": "Skepticism on OpenAI's IPO due to costs.", "tag": "raw"}
+{"a": "TheInformation", "l": 3, "t": "0310", "s": "Anne Wojcicki rebuilding 23andMe as nonprofit.", "tag": "raw"}
+{"a": "TheInformation", "l": 4, "t": "0310", "s": "OpenAI developing bidirectional audio model.", "tag": "raw"}
+{"a": "TechCrunch", "l": 49, "t": "0310", "s": "Google expands Gemini in Chrome to more countries.", "tag": "raw"}
 {"a": "TechCrunch", "l": 16, "t": "0310", "s": "Kalshi adds Threads sharing feature.", "tag": "raw"}
-{"a": "TechCrunch", "l": 15, "t": "0310", "s": "Chevy Bolt returns with improvements.", "tag": "raw"}
-{"a": "verge", "l": 16, "t": "0310", "s": "Iran conflict may raise data center costs.", "tag": "raw"}
+{"a": "TechCrunch", "l": 15, "t": "0310", "s": "Reviewing revived Chevy Bolt EV.", "tag": "raw"}
+{"a": "verge", "l": 16, "t": "0310", "s": "Iran conflict could raise data center costs.", "tag": "raw"}
 {"a": "verge", "l": 15, "t": "0310", "s": "Live-action Samurai Champloo in development.", "tag": "raw"}
-{"a": "verge", "l": 12, "t": "0310", "s": "Audio of Live Nation CEO threats revealed.", "tag": "raw"}
-{"a": "Scobleizer", "l": 1, "t": "0311", "s": "Questions fear over a purchase.", "tag": "raw"}
-{"a": "Scobleizer", "l": 2, "t": "0311", "s": "Acknowledges mention.", "tag": "raw"}
-{"a": "Scobleizer", "l": 19, "t": "0311", "s": "Discusses shift in knowledge work due to AI.", "tag": "raw"}
-{"a": "bentossell", "l": 2, "t": "0310", "s": "Encourages building GUI agent app.", "tag": "raw"}
-{"a": "bentossell", "l": 6, "t": "0310", "s": "Appreciates Halt and Catch Fire theme.", "tag": "raw"}
-{"a": "bentossell", "l": 0, "t": "0310", "s": "Suggests acquiring X handle.", "tag": "raw"}
-{"a": "HuggingFace", "l": 15, "t": "0310", "s": "Read our blog to learn more about storage buckets.", "tag": "raw"}
-{"a": "HuggingFace", "l": 176, "t": "0310", "s": "Launched Storage Buckets: S3-like mutable storage for AI data, faster writes, overwrites, dedup for efficiency over Git.", "tag": "raw"}
-{"a": "HuggingFace", "l": 2, "t": "0310", "s": "Excited about live workshop on state of agentic evals.", "tag": "raw"}
-{"a": "MistralAI", "l": 155, "t": "0210", "s": "Announced Mistral AI's biggest hackathon: Feb 28-Mar 1 in multiple cities, $200K prizes, partners included.", "tag": "raw"}
-{"a": "MistralAI", "l": 1583, "t": "0210", "s": "Biggest hackathon ever: 48 hours, global cities, partners like wandb, nvidia, $200K prizes.", "tag": "raw"}
-{"a": "MistralAI", "l": 177, "t": "0204", "s": "Voxtral Mini Transcribe 2 available: audio playground, diarization, context bias, instant transcriptions.", "tag": "raw"}
+{"a": "verge", "l": 12, "t": "0310", "s": "Audio of Live Nation CEO's threats released.", "tag": "raw"}
+{"a": "Scobleizer", "l": 1, "t": "0311", "s": "Describing Grok's response to own correctness.", "tag": "raw"}
+{"a": "Scobleizer", "l": 1, "t": "0311", "s": "Disagreeing with view on AI-generated games.", "tag": "raw"}
+{"a": "Scobleizer", "l": 0, "t": "0311", "s": "Providing alternative link due to access issue.", "tag": "raw"}
+{"a": "bentossell", "l": 2, "t": "0310", "s": "Encouraging building a GUI agent app.", "tag": "raw"}
+{"a": "bentossell", "l": 6, "t": "0310", "s": "Sharing Halt and Catch Fire theme demo.", "tag": "raw"}
+{"a": "bentossell", "l": 0, "t": "0310", "s": "Suggesting no interest in acquiring handle.", "tag": "raw"}
+{"a": "HuggingFace", "l": 15, "t": "0310", "s": "Hugging Face ships Storage Buckets for mutable AI data storage, faster and cheaper than Git, with Xet dedup for efficient checkpoint uploads.", "tag": "raw"}
+{"a": "HuggingFace", "l": 183, "t": "0310", "s": "Introducing Storage Buckets: S3-like mutable storage for AI data like checkpoints and logs, enabling fast writes and overwrites powered by Xet dedup.", "tag": "raw"}
+{"a": "HuggingFace", "l": 2, "t": "0310", "s": "Live workshop on agentic evals discusses state of art, benchmark vs real usage, and evaluation methods for agentic systems.", "tag": "raw"}
+{"a": "MistralAI", "l": 155, "t": "0210", "s": "Announcing Mistral AI's biggest hackathon: Feb 28-Mar 1 in multiple cities and online, with $200K prizes and partners.", "tag": "raw"}
+{"a": "MistralAI", "l": 1583, "t": "0210", "s": "Mistral AI's global hackathon: 48 hours, top hackers, partners like wandb and nvidia, $200K prizes including special awards.", "tag": "raw"}
+{"a": "MistralAI", "l": 177, "t": "0204", "s": "Try Voxtral Mini Transcribe 2 in Mistral Studio's audio playground with file upload, diarization, and context bias.", "tag": "raw"}
 {"a": "GroqInc", "l": 307, "t": "0218", "s": "Happy Ramadan!", "tag": "raw"}
-{"a": "GroqInc", "l": 6, "t": "0216", "s": "GroqCloud scaling: 3.5M+ developers, UK data center live for low-latency in Europe.", "tag": "raw"}
-{"a": "GroqInc", "l": 33, "t": "0216", "s": "GroqCloud expanding: 3.5M developers, new UK data center with Equinix.", "tag": "raw"}
-{"a": "Cohere", "l": 68, "t": "0304", "s": "Partnered with Aston Martin F1: enterprise AI for all team members, branding on car from Australian GP.", "tag": "raw"}
-{"a": "Cohere", "l": 0, "t": "0220", "s": "Application form for partnerships.", "tag": "raw"}
-{"a": "Cohere", "l": 205, "t": "0220", "s": "India AI Impact Summit: discussions on scaling AI, language accessibility, Tiny Aya launch.", "tag": "raw"}
-{"a": "TogetherCompute", "l": 0, "t": "0310", "s": "Built for teams: autoscaling, self-healing, RBAC, observability.", "tag": "raw"}
-{"a": "TogetherCompute", "l": 0, "t": "0310", "s": "Key features: autoscaling, self-healing, RBAC, observability dashboards.", "tag": "raw"}
-{"a": "TogetherCompute", "l": 10, "t": "0310", "s": "GPU Clusters: autoscaling, RBAC, observability, self-healing for production AI.", "tag": "raw"}
-{"a": "runwayml", "l": 25, "t": "0310", "s": "Try Runway Characters in web app: preset or create custom avatars.", "tag": "raw"}
-{"a": "runwayml", "l": 28, "t": "0309", "s": "Runway Characters available via developer platform, first 30 minutes free.", "tag": "raw"}
-{"a": "runwayml", "l": 393, "t": "0309", "s": "Introduced Runway Characters: real-time customizable avatars via API, with knowledge banks and voices.", "tag": "raw"}
-{"a": "StabilityAI", "l": 21, "t": "0210", "s": "Safer Internet Day: highlighting online safety with AI integration.", "tag": "raw"}
-{"a": "StabilityAI", "l": 303, "t": "1119", "s": "Partnered with Warner Music for AI music tools respecting creators' rights.", "tag": "raw"}
-{"a": "StabilityAI", "l": 0, "t": "1030", "s": "Not back from dead.", "tag": "raw"}
-{"a": "Scale_AI", "l": 43, "t": "0309", "s": "New home for Scale AI research on data, evaluation, safety.", "tag": "raw"}
-{"a": "Scale_AI", "l": 18, "t": "0304", "s": "Introduced SWE-Atlas: evolution of SWE-Bench Pro for agent evaluation.", "tag": "raw"}
-{"a": "Scale_AI", "l": 530, "t": "0304", "s": "SWE-Atlas expands agent eval; Codebase QnA scores ~30% for top models.", "tag": "raw"}
-{"a": "tenstorrent", "l": 8, "t": "0310", "s": "Unveiling new at GDC: compact AI accelerator, see at Booth 1354.", "tag": "raw"}
-{"a": "tenstorrent", "l": 16, "t": "0304", "s": "Join us at GDC, Booth #1354.", "tag": "raw"}
-{"a": "tenstorrent", "l": 3, "t": "0219", "s": "Progress updates welcome; team in Discord for questions.", "tag": "raw"}
+{"a": "GroqInc", "l": 6, "t": "0216", "s": "GroqCloud scales to 3.5M+ developers; UK data center live with Equinix for low-latency inference in Europe.", "tag": "raw"}
+{"a": "GroqInc", "l": 33, "t": "0216", "s": "GroqCloud expands with 3.5M+ developers; new UK data center for faster European inference.", "tag": "raw"}
+{"a": "Cohere", "l": 68, "t": "0304", "s": "Cohere partners with Aston Martin F1 to provide generative AI tools for team operations.", "tag": "raw"}
+{"a": "Cohere", "l": 0, "t": "0220", "s": "Partnership inquiries should use the application form.", "tag": "raw"}
+{"a": "Cohere", "l": 205, "t": "0220", "s": "Cohere hosts India AI Impact Summit discussing AI scaling, language accessibility, and ethical enterprise AI.", "tag": "raw"}
+{"a": "TogetherCompute", "l": 0, "t": "0310", "s": "Together GPU Clusters adds autoscaling, RBAC, observability, and self-healing for production AI platforms.", "tag": "raw"}
+{"a": "TogetherCompute", "l": 0, "t": "0310", "s": "Autoscaling with Kubernetes, self-healing, RBAC, and observability in Together GPU Clusters.", "tag": "raw"}
+{"a": "TogetherCompute", "l": 3, "t": "0310", "s": "Official Together MCP server for coding agents to build AI apps and manage resources.", "tag": "raw"}
+{"a": "runwayml", "l": 25, "t": "0309", "s": "Runway Characters: Real-time avatars for conversations, customizable via API with knowledge, voices, instructions.", "tag": "raw"}
+{"a": "runwayml", "l": 28, "t": "0309", "s": "Runway Characters available via developer platform with first 30 minutes free.", "tag": "raw"}
+{"a": "runwayml", "l": 394, "t": "0309", "s": "Introducing Runway Characters: Customizable real-time avatars for apps with knowledge banks and voices.", "tag": "raw"}
+{"a": "StabilityAI", "l": 21, "t": "0210", "s": "Joining Safer Internet Day to promote online safety and digital wellbeing.", "tag": "raw"}
+{"a": "StabilityAI", "l": 302, "t": "1119", "s": "Partnering with Warner Music for AI music tools to support artists' creativity.", "tag": "raw"}
+{"a": "StabilityAI", "l": 0, "t": "1030", "s": "Stability AI responds to resurrection query.", "tag": "raw"}
+{"a": "Scale_AI", "l": 43, "t": "0309", "s": "Launching Scale Labs for AI research on data, evaluation, safety, and post-training.", "tag": "raw"}
+{"a": "Scale_AI", "l": 18, "t": "0304", "s": "SWE-Atlas expands agent evaluation with Codebase QnA benchmark, top models at 30%.", "tag": "raw"}
+{"a": "Scale_AI", "l": 530, "t": "0304", "s": "Introducing SWE-Atlas for interactive software agent evaluation, Codebase QnA scores ~30%.", "tag": "raw"}
+{"a": "tenstorrent", "l": 9, "t": "0310", "s": "Unveiling new AI accelerator with Razer at GDC, booth 1354.", "tag": "raw"}
+{"a": "tenstorrent", "l": 16, "t": "0304", "s": "Join us at GDC booth 1354 for previews.", "tag": "raw"}
+{"a": "tenstorrent", "l": 3, "t": "0219", "s": "Apology for shipping delay, tracking and updating customer.", "tag": "raw"}
 {"a": "weights_biases", "l": 2, "t": "0305", "s": "Anxiety levels vs realizing it's not deep.", "tag": "raw"}
-{"a": "weights_biases", "l": 9, "t": "0305", "s": "Daily anxiety vs realization it's not that serious.", "tag": "raw"}
-{"a": "weights_biases", "l": 6, "t": "0210", "s": "Run, evaluate, tune, rerun cycle.", "tag": "raw"}
-{"a": "llama_index", "l": 168, "t": "0310", "s": "Google DeepMind released Gemini Embedding 2; demo integrates with LlamaIndex for audio-kb.", "tag": "raw"}
-{"a": "llama_index", "l": 44, "t": "0309", "s": "Surreal Slides: parses presentations with LlamaParse, stores in SurrealDB for agentic search.", "tag": "raw"}
-{"a": "llama_index", "l": 136, "t": "0306", "s": "PDFs challenging for AI: not machine-readable, hybrid parsing needed.", "tag": "raw"}
-{"a": "supabase", "l": 18, "t": "0310", "s": "Powersync AI Hackathon live: $8K+ prizes, special for Supabase projects.", "tag": "raw"}
-{"a": "supabase", "l": 70, "t": "0310", "s": "Easier detection of missing indexes in database.", "tag": "raw"}
+{"a": "weights_biases", "l": 9, "t": "0305", "s": "Daily anxiety vs realization it's not serious.", "tag": "raw"}
+{"a": "weights_biases", "l": 6, "t": "0210", "s": "Run, Evaluate, Tune, Rerun cycle.", "tag": "raw"}
+{"a": "llama_index", "l": 175, "t": "0310", "s": "Demo integrates Gemini Embedding 2 with LlamaIndex for audio knowledge base using LlamaParse and SurrealDB.", "tag": "raw"}
+{"a": "llama_index", "l": 44, "t": "0309", "s": "Surreal Slides uses LlamaParse to parse and search presentation libraries with agentic interface.", "tag": "raw"}
+{"a": "llama_index", "l": 136, "t": "0306", "s": "PDF parsing challenges: unstructured glyphs, no tables, guesswork order; LlamaParse uses hybrid approach.", "tag": "raw"}
+{"a": "supabase", "l": 19, "t": "0310", "s": "Powersync AI Hackathon with $8K prizes, special Supabase award.", "tag": "raw"}
+{"a": "supabase", "l": 74, "t": "0310", "s": "Easier detection of missing database indexes.", "tag": "raw"}
 {"a": "supabase", "l": 26, "t": "0310", "s": "Basics of Supabase Database and APIs tutorial.", "tag": "raw"}
-{"a": "AMD", "l": 31, "t": "0311", "s": "AMD contributing GPU compute to Open Telco AI initiative.", "tag": "raw"}
-{"a": "AMD", "l": 69, "t": "0310", "s": "GPU MODE Hackathon: optimize LLM inference on MI355X, $1.1M prizes.", "tag": "raw"}
-{"a": "AMD", "l": 125, "t": "0308", "s": "ASUS Zenbook S16 with Ryzen AI 9 465 praised for performance.", "tag": "raw"}
-{"a": "Intel", "l": 7, "t": "0310", "s": "Congrats on first European vRAN call with Intel Xeon 6.", "tag": "raw"}
-{"a": "Intel", "l": 36, "t": "0310", "s": "Future of edge AI at Embedded World 2026 keynote.", "tag": "raw"}
-{"a": "Intel", "l": 14, "t": "0309", "s": "Increased efficiency with less compromising in networks.", "tag": "raw"}
-{"a": "SKhynix", "l": 8, "t": "0311", "s": "Welcomes Joondeok Park as VP of DRAM Marketing.", "tag": "raw"}
-{"a": "SKhynix", "l": 55, "t": "0310", "s": "Developed 1c LPDDR6: 33% faster, 20% more efficient than LPDDR5X.", "tag": "raw"}
-{"a": "SKhynix", "l": 24, "t": "0309", "s": "Technology as identity: leadership team of engineers.", "tag": "raw"}
-{"a": "magicleap", "l": 2, "t": "0310", "s": "Waveguide details: precision laser cutting to edge blacking for contrast.", "tag": "raw"}
-{"a": "magicleap", "l": 11, "t": "0305", "s": "Waveguide manufacturing: imprint lithography to edge finishing for precision.", "tag": "raw"}
-{"a": "magicleap", "l": 19, "t": "0217", "s": "Optimal field-of-view for intuitive AR content.", "tag": "raw"}
-{"a": "NathieVR", "l": 12, "t": "0310", "s": "Noticed familiar element in video.", "tag": "raw"}
-{"a": "NathieVR", "l": 1, "t": "0310", "s": "Context on mixed reality dinosaur app.", "tag": "raw"}
-{"a": "NathieVR", "l": 44, "t": "0310", "s": "Mixed reality app assembles dinosaur skeletons in real-world scale.", "tag": "raw"}
-{"a": "boz", "l": 0, "t": "0305", "s": "Questions if current law already requires citizens only to vote.", "tag": "raw"}
-{"a": "boz", "l": 0, "t": "0305", "s": "Asks 'One day what?' in response to Elon Musk's post.", "tag": "raw"}
-{"a": "boz", "l": 0, "t": "0126", "s": "Comments on a video about Trump sending goons to Minnesota.", "tag": "raw"}
-{"a": "rabovitz", "l": 7, "t": "0306", "s": "Agrees that reading great books maintains brain, thinking, and soul.", "tag": "raw"}
-{"a": "rabovitz", "l": 7, "t": "0306", "s": "Describes AI space as chaotic blend of movies with few winners.", "tag": "raw"}
-{"a": "rabovitz", "l": 1, "t": "0306", "s": "Predicts surprises in AI field with many variants.", "tag": "raw"}
-{"a": "htcvive", "l": 4, "t": "0310", "s": "Highlights VR training for pilots using VIVE Focus Vision.", "tag": "raw"}
-{"a": "htcvive", "l": 8, "t": "0309", "s": "Features VIVERSE Spark in interview with Royal College of Art professor.", "tag": "raw"}
-{"a": "htcvive", "l": 2, "t": "0309", "s": "Shares VIVERSE and Open Brush Art Jam announcement.", "tag": "raw"}
-{"a": "XREAL_Global", "l": 20, "t": "0310", "s": "Recommends XREAL glasses for Android XR.", "tag": "raw"}
-{"a": "XREAL_Global", "l": 26, "t": "0306", "s": "Announces Pinnacle Award win for Real 3D feature.", "tag": "raw"}
-{"a": "XREAL_Global", "l": 19, "t": "0304", "s": "Shows AR use in dentistry.", "tag": "raw"}
-{"a": "MetaQuestVR", "l": 47, "t": "0310", "s": "Announces release of FIXER UNDERCOVER VR spy puzzler.", "tag": "raw"}
-{"a": "MetaQuestVR", "l": 67, "t": "0218", "s": "Introduces Spatial Ops Blueprint Combat updates.", "tag": "raw"}
-{"a": "MetaQuestVR", "l": 42, "t": "0206", "s": "Promotes NBCUniversal's Olympic coverage on Meta Quest.", "tag": "raw"}
-{"a": "PatrickMoorhead", "l": 21, "t": "0311", "s": "Comments on Google's Gemini updates for Workspace.", "tag": "raw"}
-{"a": "PatrickMoorhead", "l": 21, "t": "0310", "s": "Analyzes Oracle Q3 earnings beat.", "tag": "raw"}
-{"a": "PatrickMoorhead", "l": 0, "t": "0310", "s": "Congratulates on nvidia GTC fireside chat.", "tag": "raw"}
-{"a": "chrmanning", "l": 10, "t": "0306", "s": "Compares Terence Tao's AI in math quote to his own post on LLM mistakes.", "tag": "raw"}
-{"a": "chrmanning", "l": 684, "t": "0306", "s": "Argues for symbolic representations in world models for reliable prediction.", "tag": "raw"}
-{"a": "chrmanning", "l": 3, "t": "0302", "s": "Notes another fake journal entry on Google Scholar.", "tag": "raw"}
-{"a": "_akhaliq", "l": 15, "t": "0310", "s": "Announces Hugging Face Storage Buckets.", "tag": "raw"}
-{"a": "_akhaliq", "l": 128, "t": "0310", "s": "Introduces AutoResearch-RL for neural architecture discovery.", "tag": "raw"}
-{"a": "_akhaliq", "l": 57, "t": "0310", "s": "Presents V1 for parallel reasoners.", "tag": "raw"}
-{"a": "hubermanlab", "l": 3, "t": "0311", "s": "Jokes about BPC-157 in response to post.", "tag": "raw"}
-{"a": "hubermanlab", "l": 128, "t": "0311", "s": "Confirms no RCTs on BPC unless new variant.", "tag": "raw"}
-{"a": "hubermanlab", "l": 2, "t": "0310", "s": "Notes detection difficulty for most.", "tag": "raw"}
+{"a": "AMD", "l": 37, "t": "0310", "s": "AMD contributes GPU for Open Telco AI initiative.", "tag": "raw"}
+{"a": "AMD", "l": 71, "t": "0310", "s": "GPU MODE Hackathon on MI355X GPUs with $1.1M prizes.", "tag": "raw"}
+{"a": "AMD", "l": 125, "t": "0308", "s": "ASUS Zenbook S16 with Ryzen AI 9 465 offers strong performance.", "tag": "raw"}
+{"a": "Intel", "l": 9, "t": "0310", "s": "Historic call with Samsung vRAN on Intel Xeon 6.", "tag": "raw"}
+{"a": "Intel", "l": 40, "t": "0310", "s": "Edge AI keynote at Embedded World 2026.", "tag": "raw"}
+{"a": "Intel", "l": 10, "t": "0309", "s": "Intel Core Series 2 accelerates edge innovation.", "tag": "raw"}
+{"a": "SKhynix", "l": 9, "t": "0311", "s": "Joondeok Park joins as VP of DRAM Marketing, emphasizing collaboration.", "tag": "raw"}
+{"a": "SKhynix", "l": 56, "t": "0310", "s": "Developed 1c LPDDR6: 33% faster, 20% more efficient than LPDDR5X.", "tag": "raw"}
+{"a": "SKhynix", "l": 25, "t": "0309", "s": "Technology as identity: Engineer-led leadership at SK hynix.", "tag": "raw"}
+{"a": "magicleap", "l": 3, "t": "0310", "s": "Waveguides designed for contrast, durability, visual quality via precision processes.", "tag": "raw"}
+{"a": "magicleap", "l": 11, "t": "0305", "s": "Waveguide manufacturing engineered for precision from lithography to finishing.", "tag": "raw"}
+{"a": "magicleap", "l": 19, "t": "0217", "s": "Optimal field-of-view for intuitive AR with comfort and clarity.", "tag": "raw"}
+{"a": "NathieVR", "l": 12, "t": "0310", "s": "Questioning if this is real life.", "tag": "raw"}
+{"a": "NathieVR", "l": 1, "t": "0310", "s": "Immersion beyond lenses.", "tag": "raw"}
+{"a": "NathieVR", "l": 45, "t": "0310", "s": "Mixed reality app assembles dinosaur skeletons in real-world scale.", "tag": "raw"}
+{"a": "boz", "l": 0, "t": "0305", "s": "Aaron Bosley questions if the law already requires only citizens to vote in response to a tweet about voter laws.", "tag": "raw"}
+{"a": "boz", "l": 0, "t": "0305", "s": "Aaron Bosley asks 'One day what?' in response to Elon Musk's tweet about a Mars picture.", "tag": "raw"}
+{"a": "boz", "l": 0, "t": "0126", "s": "Aaron Bosley comments on bad optics of military behind a speaker in a video about ICE in Minnesota.", "tag": "raw"}
+{"a": "rabovitz", "l": 0, "t": "0311", "s": "Rony Abovitz praises a video of Seán Ono Lennon reaching 300K views on Golden Egg featuring WILLOW.", "tag": "raw"}
+{"a": "rabovitz", "l": 7, "t": "0306", "s": "Rony Abovitz emphasizes reading great books to maintain brain, thinking, and soul amid distractions.", "tag": "raw"}
+{"a": "rabovitz", "l": 7, "t": "0306", "s": "Rony Abovitz describes the AI/computing space as a chaotic blend of movies like Hunger Games and Gladiator.", "tag": "raw"}
+{"a": "htcvive", "l": 4, "t": "0310", "s": "HTC VIVE announces VR training for pilots using VIVE Focus Vision, approved by UK CAA.", "tag": "raw"}
+{"a": "htcvive", "l": 8, "t": "0309", "s": "HTC VIVE highlights VIVERSE Spark in Design Week interview with Royal College of Art professor.", "tag": "raw"}
+{"a": "htcvive", "l": 2, "t": "0309", "s": "HTC VIVE shares Japanese guide for VIVERSE x Open Brush Art Jam 2026.", "tag": "raw"}
+{"a": "XREAL_Global", "l": 20, "t": "0310", "s": "XREAL recommends their glasses in response to a tweet about Android XR glasses.", "tag": "raw"}
+{"a": "XREAL_Global", "l": 26, "t": "0306", "s": "XREAL announces Platinum Winner at 2026 Pinnacle Awards for Real 3D innovation.", "tag": "raw"}
+{"a": "XREAL_Global", "l": 19, "t": "0304", "s": "XREAL shares AR use cases in dentistry and asks for more suggestions.", "tag": "raw"}
+{"a": "MetaQuestVR", "l": 48, "t": "0310", "s": "Meta Quest announces FIXER UNDERCOVER, a tactile VR spy puzzler available now.", "tag": "raw"}
+{"a": "MetaQuestVR", "l": 67, "t": "0218", "s": "Meta Quest introduces Spatial Ops Blueprint Combat with new features like map editing.", "tag": "raw"}
+{"a": "MetaQuestVR", "l": 42, "t": "0206", "s": "Meta Quest announces NBCUniversal’s 2026 Winter Olympics coverage on Peacock.", "tag": "raw"}
+{"a": "PatrickMoorhead", "l": 27, "t": "0311", "s": "Patrick Moorhead comments on Sundar Pichai's Gemini updates for Google Workspace.", "tag": "raw"}
+{"a": "PatrickMoorhead", "l": 28, "t": "0310", "s": "Patrick Moorhead analyzes Oracle's Q3 FY2026 earnings beat and raised guidance.", "tag": "raw"}
+{"a": "PatrickMoorhead", "l": 0, "t": "0310", "s": "Patrick Moorhead congratulates on Gavin Baker hosting at NVIDIA GTC.", "tag": "raw"}
+{"a": "chrmanning", "l": 10, "t": "0306", "s": "Christopher Manning recalls past posts about balanced views on LLMs.", "tag": "raw"}
+{"a": "chrmanning", "l": 684, "t": "0306", "s": "Christopher Manning shares article on symbolic representations for world models.", "tag": "raw"}
+{"a": "chrmanning", "l": 3, "t": "0302", "s": "Christopher Manning discusses fake journal scam on Google Scholar.", "tag": "raw"}
+{"a": "_akhaliq", "l": 15, "t": "0310", "s": "AK announces Hugging Face Storage Buckets with blog link.", "tag": "raw"}
+{"a": "_akhaliq", "l": 150, "t": "0310", "s": "AK shares paper on Perpetual Self-Evaluating RL Agents for Neural Architecture Discovery.", "tag": "raw"}
+{"a": "_akhaliq", "l": 58, "t": "0310", "s": "AK shares paper on Non-autoregressive LLM-based ASR by Transcript Editing.", "tag": "raw"}
+{"a": "hubermanlab", "l": 3, "t": "0311", "s": "Andrew Huberman humorously responds to BPC-157 comment.", "tag": "raw"}
+{"a": "hubermanlab", "l": 162, "t": "0311", "s": "Andrew Huberman confirms no RCTs on BPC-157 unless new variants emerge.", "tag": "raw"}
+{"a": "hubermanlab", "l": 2, "t": "0310", "s": "Andrew Huberman asks about steroid detection.", "tag": "raw"}
+{"a": "swyx", "l": 1, "t": "0311", "s": "swyx praises OpenAI's recent developments.", "tag": "raw"}
+{"a": "swyx", "l": 1, "t": "0311", "s": "swyx comments on reinventing data engineering in AI.", "tag": "raw"}
+{"a": "swyx", "l": 3, "t": "0311", "s": "swyx shares slides on thought leadership in AI age.", "tag": "raw"}

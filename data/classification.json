@@ -11,7 +11,7 @@
     "GoogleDeepMind": "S",
     "xAI": "S",
     "AIatMeta": "A",
-    "GoogleAI": "A",
+    "GoogleAI": "B",
     "MSFTResearch": "B",
     "IlyaSutskever": "inactive",
     "gregbrockman": "B",
@@ -20,7 +20,7 @@
     "clmcleod": "inactive",
     "bindureddy": "B",
     "dotey": "A",
-    "oran_ge": "B",
+    "oran_ge": "A",
     "vista8": "B",
     "imxiaohu": "inactive",
     "Sxsyer": "B",
@@ -82,7 +82,6 @@
     "rabovitz": "B",
     "htcvive": "B",
     "XREAL_Global": "B",
-    "RayBan": "inactive",
     "MetaQuestVR": "B",
     "PatrickMoorhead": "B",
     "jeffdean": "A",
@@ -100,6 +99,7 @@
     "aipubcast": "inactive",
     "lexfridman": "S",
     "hubermanlab": "B",
-    "swyx": "S"
+    "swyx": "B",
+    "RayBan": "B"
   }
 }

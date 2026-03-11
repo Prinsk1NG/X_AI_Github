@@ -1,37 +1,37 @@
 {
   "elonmusk": {
     "total": 10,
-    "max_l": 99451,
+    "max_l": 107950,
     "latest": "0311"
   },
   "sama": {
     "total": 10,
-    "max_l": 12954,
+    "max_l": 12955,
     "latest": "0307"
   },
   "karpathy": {
     "total": 10,
-    "max_l": 16753,
+    "max_l": 16864,
     "latest": "0310"
   },
   "demishassabis": {
     "total": 10,
-    "max_l": 2575,
+    "max_l": 2654,
     "latest": "0310"
   },
   "darioamodei": {
     "total": 7,
-    "max_l": 15259,
+    "max_l": 15260,
     "latest": "0126"
   },
   "OpenAI": {
     "total": 10,
-    "max_l": 29200,
+    "max_l": 29199,
     "latest": "0309"
   },
   "AnthropicAI": {
     "total": 10,
-    "max_l": 56274,
+    "max_l": 56276,
     "latest": "0310"
   },
   "GoogleDeepMind": {
@@ -41,17 +41,17 @@
   },
   "xAI": {
     "total": 10,
-    "max_l": 6460,
+    "max_l": 6459,
     "latest": "0304"
   },
   "AIatMeta": {
     "total": 10,
     "max_l": 2334,
-    "latest": "0309"
+    "latest": "0310"
   },
   "GoogleAI": {
     "total": 10,
-    "max_l": 2345,
+    "max_l": 267,
     "latest": "0310"
   },
   "MSFTResearch": {
@@ -66,13 +66,13 @@
   },
   "gregbrockman": {
     "total": 10,
-    "max_l": 1,
+    "max_l": 0,
     "latest": "0308"
   },
   "GaryMarcus": {
     "total": 10,
-    "max_l": 83,
-    "latest": "0310"
+    "max_l": 72,
+    "latest": "0311"
   },
   "rowancheung": {
     "total": 10,
@@ -91,17 +91,17 @@
   },
   "dotey": {
     "total": 10,
-    "max_l": 826,
-    "latest": "0311"
+    "max_l": 837,
+    "latest": "0310"
   },
   "oran_ge": {
     "total": 10,
-    "max_l": 90,
-    "latest": "0311"
+    "max_l": 877,
+    "latest": "0310"
   },
   "vista8": {
     "total": 10,
-    "max_l": 726,
+    "max_l": 727,
     "latest": "0311"
   },
   "imxiaohu": {
@@ -111,7 +111,7 @@
   },
   "Sxsyer": {
     "total": 10,
-    "max_l": 2,
+    "max_l": 0,
     "latest": "0311"
   },
   "K_O_D_A_D_A": {
@@ -121,7 +121,7 @@
   },
   "tualatrix": {
     "total": 10,
-    "max_l": 51,
+    "max_l": 103,
     "latest": "0311"
   },
   "linyunqiu": {
@@ -161,7 +161,7 @@
   },
   "mranti": {
     "total": 10,
-    "max_l": 45,
+    "max_l": 59,
     "latest": "0311"
   },
   "nishuang": {
@@ -171,12 +171,12 @@
   },
   "a16z": {
     "total": 10,
-    "max_l": 774,
+    "max_l": 797,
     "latest": "0311"
   },
   "ycombinator": {
     "total": 10,
-    "max_l": 291,
+    "max_l": 299,
     "latest": "0310"
   },
   "lightspeedvp": {
@@ -201,7 +201,7 @@
   },
   "pmarca": {
     "total": 10,
-    "max_l": 33390,
+    "max_l": 33491,
     "latest": "0309"
   },
   "bchesky": {
@@ -211,42 +211,42 @@
   },
   "chamath": {
     "total": 10,
-    "max_l": 426,
+    "max_l": 442,
     "latest": "0311"
   },
   "paulg": {
     "total": 10,
-    "max_l": 1660,
+    "max_l": 1815,
     "latest": "0311"
   },
   "TheInformation": {
     "total": 10,
-    "max_l": 11,
+    "max_l": 12,
     "latest": "0310"
   },
   "TechCrunch": {
     "total": 10,
-    "max_l": 196,
-    "latest": "0311"
+    "max_l": 206,
+    "latest": "0310"
   },
   "verge": {
     "total": 10,
-    "max_l": 47,
+    "max_l": 48,
     "latest": "0310"
   },
   "WIRED": {
     "total": 10,
-    "max_l": 1418,
+    "max_l": 1447,
     "latest": "0311"
   },
   "Scobleizer": {
     "total": 10,
-    "max_l": 19,
+    "max_l": 40,
     "latest": "0311"
   },
   "bentossell": {
     "total": 10,
-    "max_l": 24,
+    "max_l": 25,
     "latest": "0310"
   },
   "HuggingFace": {
@@ -261,7 +261,7 @@
   },
   "Perplexity_AI": {
     "total": 10,
-    "max_l": 4470,
+    "max_l": 4472,
     "latest": "0305"
   },
   "GroqInc": {
@@ -281,17 +281,17 @@
   },
   "runwayml": {
     "total": 10,
-    "max_l": 393,
-    "latest": "0310"
+    "max_l": 394,
+    "latest": "0309"
   },
   "Midjourney": {
     "total": 10,
-    "max_l": 1330,
+    "max_l": 1329,
     "latest": "0302"
   },
   "StabilityAI": {
-    "total": 10,
-    "max_l": 1346,
+    "total": 9,
+    "max_l": 1345,
     "latest": "0210"
   },
   "Scale_AI": {
@@ -305,7 +305,7 @@
     "latest": "NA"
   },
   "tenstorrent": {
-    "total": 10,
+    "total": 9,
     "max_l": 62,
     "latest": "0310"
   },
@@ -321,12 +321,12 @@
   },
   "llama_index": {
     "total": 10,
-    "max_l": 168,
+    "max_l": 175,
     "latest": "0310"
   },
   "supabase": {
     "total": 10,
-    "max_l": 70,
+    "max_l": 74,
     "latest": "0310"
   },
   "vllm_project": {
@@ -341,17 +341,17 @@
   },
   "nvidia": {
     "total": 10,
-    "max_l": 3557,
+    "max_l": 3662,
     "latest": "0310"
   },
   "AMD": {
     "total": 10,
     "max_l": 195,
-    "latest": "0311"
+    "latest": "0310"
   },
   "Intel": {
     "total": 10,
-    "max_l": 36,
+    "max_l": 40,
     "latest": "0310"
   },
   "SKhynix": {
@@ -371,7 +371,7 @@
   },
   "NathieVR": {
     "total": 10,
-    "max_l": 44,
+    "max_l": 45,
     "latest": "0310"
   },
   "PalmerLuckey": {
@@ -392,7 +392,7 @@
   "rabovitz": {
     "total": 10,
     "max_l": 7,
-    "latest": "0306"
+    "latest": "0311"
   },
   "htcvive": {
     "total": 10,
@@ -400,14 +400,9 @@
     "latest": "0310"
   },
   "XREAL_Global": {
-    "total": 9,
+    "total": 7,
     "max_l": 55,
     "latest": "0310"
-  },
-  "RayBan": {
-    "total": 0,
-    "max_l": 0,
-    "latest": "NA"
   },
   "MetaQuestVR": {
     "total": 10,
@@ -421,7 +416,7 @@
   },
   "jeffdean": {
     "total": 10,
-    "max_l": 1653,
+    "max_l": 1652,
     "latest": "0310"
   },
   "chrmanning": {
@@ -430,13 +425,13 @@
     "latest": "0306"
   },
   "hardmaru": {
-    "total": 7,
-    "max_l": 6852,
+    "total": 10,
+    "max_l": 6883,
     "latest": "0308"
   },
   "goodfellow_ian": {
     "total": 10,
-    "max_l": 2945,
+    "max_l": 2944,
     "latest": "0306"
   },
   "feifeili": {
@@ -446,7 +441,7 @@
   },
   "_akhaliq": {
     "total": 9,
-    "max_l": 128,
+    "max_l": 150,
     "latest": "0310"
   },
   "promptengineer": {
@@ -490,13 +485,13 @@
     "latest": "0304"
   },
   "hubermanlab": {
-    "total": 9,
-    "max_l": 572,
+    "total": 10,
+    "max_l": 592,
     "latest": "0311"
   },
   "swyx": {
     "total": 10,
-    "max_l": 3074,
+    "max_l": 51,
     "latest": "0311"
   }
 }
