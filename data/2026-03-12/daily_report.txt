@@ -1,0 +1,99 @@
+## ⚡️ 今日看板 (The Pulse)
+
+> GPT-5.4 正式确立"最强模型"地位，OpenAI 同步收购安全公司布局 Agent 护城河；Karpathy 高频讨论"AI 组织操作系统"，预示下一个投资主题从"模型"切换到"Agent 基础设施"。
+
+---
+
+## 🧠 深度叙事追踪 (Thematic Narratives)
+
+**⚔️ 模型军备竞赛：GPT-5.4 宣布终结"选模纠结"时代**
+
+> 💡 叙事转向：GPT-5.4 被多位重量级测试者评为"断层领先"，模型竞争格局正从"群雄割据"向"一超多强"收敛，但前端设计和 Agent 任务完成仍是短板。
+
+- **@sama** 转发多位测试者评测，GPT-5.4 在编码、知识工作、百万 token 上下文全面领先；finance 圈开始大规模用 ChatGPT 跑 Excel，企业渗透率加速。
+- **@sama** 承认 GPT-5.4 三大弱项：前端审美、真实世界上下文理解、Agent 任务完成率；这三点恰好是 Claude 和 Gemini 的反攻口。
+- **@GoogleAI** Gemini 在 Workspace（Docs/Sheets/Slides/Drive）全面集成，Sheets 在 SpreadsheetBench 达 70.48%；办公场景是 Google 对 OpenAI 最直接的阻击战场。
+
+**🤖 Agent 基础设施：Karpathy 描绘"AI 指挥中心"，新品类正在成型**
+
+> 💡 叙事转向：Karpathy 密集发文讨论 Agent 工作流管理，"agentic org"概念浮现——组织架构将被编码化、可 fork，这是继 SaaS 之后最大的企业软件重构机会。
+
+- **@karpathy** 提出"agentic org patterns 如同 IDE 里的代码、可被 fork"，暗示未来企业竞争力将体现在 AI 组织配置文件上，而非人力规模。
+- **@karpathy** 预警"intelligence brownouts"（智能断供），autoresearch labs 将被清洗；算力稳定性成为 Agent 规模化的隐性门槛。
+- **@OpenAI** 收购 Promptfoo 用于 agentic 安全，同步上线 Codex Security 研究预览；Agent 安全审计正在成为独立商业赛道。
+- **@Perplexity_AI** 推出 Sandbox API（代码执行）+ SOTA 嵌入模型，Search API 实时网络访问领跑基准；Perplexity 从搜索工具向 Agent 工具层升级。
+
+**🏭 算力基础设施：xAI 重资产扩张，Meta 自研芯片提速**
+
+> 💡 叙事转向：大模型公司正在从"租算力"转向"建能源"，xAI 孟菲斯基地的 1.2GW 电厂+Megapack 扩建，标志着 AI 算力竞争已延伸至电力基础设施层。
+
+- **@xAI** 承诺建设 1.2GW 自有电厂作为超算主电源，同步扩建全球最大 Megapack 储能装置；能源自主化是下一轮算力成本战的关键变量。
+- **@xAI** 在田纳西-密西西比边境雇佣数千本地员工，建水循环工厂保护孟菲斯含水层；政治合规+本地化是大型 AI 基建落地的必要成本。
+- **@AIatMeta** MTIA 芯片两年内迭代四代，Meta 与 AMD 合作 Instinct GPU，基础设施扩容至 6GW；自研+外采双轨并行，减少对 NVIDIA 单一依赖。
+- **@nvidia** GTC 前夕预热重大 AI 公告，CEO 亲驾 SF 自动驾驶车展示 autonomy；算力+自动驾驶双叙事为 GTC 造势，股价催化剂窗口已开。
+
+**🦾 具身智能：Optimus 争议升温，军用无人机加速落地**
+
+> 💡 叙事转向：Optimus 仍停留在"遥操作"阶段遭业界质疑，但军用具身智能（Anduril Anvil）已实现量产交付，两条路径的商业成熟度差距正在拉大。
+
+- **@elonmusk** 声称"Optimus 将拯救人类"，但顶级硬件 YouTuber JerryRigEverything 直接回怼：至今未见 Optimus 脱离 AI 或遥操作独立运行。
+- **@PalmerLuckey** 确认 Anduril Anvil 无人机自 2019 年起已向美英供货；防务具身智能已进入规模化交付阶段，估值逻辑比消费机器人更清晰。
+- **@rowancheung** 报道 NATO 测试 AI 驱动蟑螂侦察无人机；军用微型具身智能需求爆发，相关供应链值得前瞻布局。
+
+**💡 AI 商业化落地：办公+医疗+教育，垂直 SaaS 第二波正在起跑**
+
+> 💡 叙事转向：AI 已从"通用工具"渗透进具体垂直场景，YC 批次中医疗调度、骨科手术规划、语言教育 AI 密集出现，垂直 AI SaaS 的 PMF 验证周期大幅缩短。
+
+- **@ycombinator** 新批次亮点：Mango Medical（AI 骨科手术规划）、Scheduling Wizard（医疗排班自动化）；医疗 AI 正从辅助诊断向流程自动化延伸。
+- **@jeffdean** 转发 AI 在癌症筛查中多检出 25% 间期癌症的研究；医疗 AI 的临床证据链正在形成，监管准入壁垒将成为护城河。
+- **@a16z** 转发 Replit CEO 观点：AI 已达"中级工程师"水平，产品构建重心从写代码转向产品定义；低代码/无代码赛道估值逻辑需重估。
+- **@runwayml** 推出 Labs 孵化器，专注 AI 视频跨行业应用；AI 视频从创意工具向行业解决方案升级，B 端变现路径清晰化。
+
+---
+
+## 💰 资本与估值雷达 (Investment Radar)
+
+1. **投融资快讯：**
+   - **@demishassabis** 祝贺 Matt Clifford 为 Entrepreneur First（EF）完成 **2 亿美元** 融资，EF 是欧洲最重要的早期 AI 人才孵化器，此轮规模创其历史新高。
+   - **@lightspeedvp** 点评 Google 收购 Wiz 案例，强调云安全赛道的"快速成长溢价"逻辑依然成立；Wiz 路径对 AI 安全公司估值有参考意义。
+   - **@OpenAI** 收购 Promptfoo（agentic 安全），金额未披露，但战略意图明确：在 Agent 规模化前锁定安全基础设施，防止第三方做大。
+
+2. **VC 偏好：**
+   - **@a16z** 密集转发 Replit CEO 内容，强化"AI-native 产品公司"叙事；偏好具备 AI 重构传统软件能力的创始人，而非纯模型公司。
+   - **@eladgil** 早前判断"AI 生产力红利将首先击中周转型企业和并购整合"，当前模型能力跃升印证这一判断，相关 PE/并购基金值得关注。
+   - **@paulg** 为 YC 21 周年发声，同时转发"vibe coding 正在泛化至非传统编程领域"；YC 新一批垂直 AI SaaS 的 Demo Day 是近期一级市场重要观察窗口。
+
+---
+
+## 📊 风险与中国视角 (Risk & China View)
+
+1. **中国 AI 评价：**
+   - **@vista8** 讨论疑似 DeepSeek V4 的测试模型，海外社区对 DeepSeek 新版本高度关注，但官方尚未确认；若属实，将再次冲击"中美模型差距"叙事。
+   - **@bentossell** 主动申请 Moonshot AI（Kimi）的 Agent 访问权限，显示欧美开发者对中国 AI 产品的实际采用意愿正在上升。
+   - 整体来看，本周期数据中海外大佬对中国大模型的直接评价较少，但 DeepSeek 的"幽灵存在感"（被猜测、被测试）持续影响市场情绪。
+
+2. **地缘与监管：**
+   - **@chamath** 专访 SEC 和 CFTC 主席，讨论市场改革与 AI 监管；美国金融监管层对 AI 的态度正在从"观望"转向"主动介入"，合规成本将上升。
+   - **@verge** 报道 Grammarly 因 AI 身份冒用被起诉；AI 产品的用户身份与数据权属诉讼风险正在具体化，ToC AI 产品需重视法律护城河。
+   - **@ID_AA_Carmack** 表态对 AI 学习开源代码无异议，但版权争议仍是行业悬而未决的系统性风险，尤其影响代码生成类产品的商业化路径。
+
+---
+
+## 📣 今日精选推文 (Top 5 Picks)
+
+- **@sama** · Sam Altman · OpenAI CEO
+  > 「GPT-5.4 正式上线：知识工作、网页搜索、计算机操作、百万 token 上下文全面升级——金融圈终于开始认真用 AI 跑 Excel 了。」
+
+- **@karpathy** · Andrej Karpathy · 前 Tesla AI 总监
+  > 「Agentic 组织的运作模式就像 IDE 里的代码，可以被 fork、被复用。未来企业的竞争力，藏在它的 AI 组织配置文件里。」
+
+- **@elonmusk** · Elon Musk · Tesla/xAI CEO
+  > 「Optimus 将拯救人类。」——但 JerryRigEverything 当场回怼：我们至今还没见过它脱离遥操作独立干活。」
+
+- **@xAI** · xAI Official · Elon Musk 旗下 AI 公司
+  > 「承诺为孟菲斯超算建设 1.2GW 自有电厂，同步扩建全球最大 Megapack 储能——AI 军备竞赛已经卷到发电厂这一层了。」
+
+- **@OpenAI** · OpenAI Official · AI 研究公司
+  > 「收购 agentic 安全公司 Promptfoo，同步上线 Codex Security 研究预览——Agent 时代的安全护城河，OpenAI 要自己先占坑。」
+
+---
